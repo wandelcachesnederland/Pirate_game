@@ -636,6 +636,7 @@ export class Engine {
     this.banner = { title: `Wave ${n}`, sub: waveTitle(n), t: 0, dur: 3.2, gold: false };
     this.sfx.horn();
     this.sfx.setTempo(n);
+    this.sfx.insertRandomCassette(n > 1);
     if (n === 1) {
       const k = this.waveQueue.shift();
       if (k) this.spawnEnemy(k, 'ahead');

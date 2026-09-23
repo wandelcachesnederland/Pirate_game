@@ -1,32 +1,10 @@
 // All sound is synthesized at runtime with the Web Audio API — no asset downloads.
+import { INSERTED_CASSETTE, randomCassette, type Cassette, type Deck } from './music';
+
 type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext };
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 const mtof = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
-
-// "What Shall We Do with the Drunken Sailor" (traditional) — [midi, sixteenth-steps]
-const MELODY: [number, number][] = [
-  [69, 2], [69, 1], [69, 1], [69, 2], [69, 1], [69, 1], [69, 2], [62, 2], [65, 2], [69, 2],
-  [67, 2], [67, 1], [67, 1], [67, 2], [67, 1], [67, 1], [67, 2], [60, 2], [64, 2], [67, 2],
-  [69, 2], [69, 1], [69, 1], [69, 2], [69, 1], [69, 1], [69, 2], [71, 2], [72, 2], [74, 2],
-  [72, 2], [69, 2], [67, 2], [64, 2], [62, 4], [62, 4],
-  [69, 4], [69, 4], [69, 2], [62, 2], [65, 2], [69, 2],
-  [67, 4], [67, 4], [67, 2], [60, 2], [64, 2], [67, 2],
-  [69, 4], [69, 4], [69, 2], [71, 2], [72, 2], [74, 2],
-  [72, 2], [69, 2], [67, 2], [64, 2], [62, 4], [62, 4],
-];
-const BASS_ROOTS = [50, 50, 48, 48, 50, 50, 48, 50, 50, 50, 48, 48, 50, 50, 48, 50];
-const LOOP_STEPS = 128;
-
-const MEL_AT: ([number, number] | null)[] = (() => {
-  const arr: ([number, number] | null)[] = new Array(LOOP_STEPS).fill(null);
-  let s = 0;
-  for (const n of MELODY) {
-    if (s < LOOP_STEPS) arr[s] = n;
-    s += n[1];
-  }
-  return arr;
-})();
 
 export class Sfx {
   ctx: AudioContext | null = null;
@@ -41,7 +19,9 @@ export class Sfx {
   private musicTimer = 0;
   private step = 0;
   private nextTime = 0;
-  private stepDur = 0.132;
+  private cassette: Cassette = INSERTED_CASSETTE;
+  private wave = 1;
+  private stepDur = this.cassette.stepDuration(1);
   private ducked = false;
   private ambStarted = false;
 
@@ -378,7 +358,21 @@ export class Sfx {
   }
 
   setTempo(wave: number) {
-    this.stepDur = Math.max(0.098, 0.132 - (wave - 1) * 0.0028);
+    this.wave = wave;
+    this.stepDur = this.cassette.stepDuration(wave);
+  }
+
+  /** Swap the cassette; the new song starts from the beginning. */
+  insertCassette(cassette: Cassette) {
+    this.cassette = cassette;
+    this.stepDur = cassette.stepDuration(this.wave);
+    this.step = 0;
+    console.info(`[music] Now playing: ${cassette.title}`);
+  }
+
+  /** Swap in a random cassette. With `avoidRepeat`, never the song that is already playing. */
+  insertRandomCassette(avoidRepeat = true) {
+    this.insertCassette(randomCassette(avoidRepeat ? this.cassette : undefined));
   }
 
   startMusic() {
@@ -402,7 +396,7 @@ export class Sfx {
     while (this.nextTime < ctx.currentTime + 0.16) {
       if (this.musicOn && ctx.state === 'running') this.playStep(this.step, this.nextTime);
       this.nextTime += this.stepDur;
-      this.step = (this.step + 1) % LOOP_STEPS;
+      this.step = (this.step + 1) % this.cassette.loopSteps;
     }
   };
 
@@ -427,31 +421,15 @@ export class Sfx {
     o.stop(t + dur + 0.03);
   }
 
+  // What the cassette can use to make sound; everything goes to the music bus.
+  private deck: Deck = {
+    note: (type, midi, t, dur, vol, cutoff) => this.musicNote(type, mtof(midi), t, dur, vol, cutoff),
+    drum: (type, f0, f1, t, dur, vol) => this.toneTo(this.musicBus, t, type, f0, f1, dur, vol),
+    noise: (t, dur, vol, freq) => this.noiseTo(this.musicBus, t, dur, vol, freq),
+  };
+
   private playStep(step: number, t: number) {
-    const sd = this.stepDur;
-    const m = MEL_AT[step];
-    if (m) {
-      this.musicNote('square', mtof(m[0]), t, m[1] * sd * 0.92, 0.11, 1500);
-      this.musicNote('triangle', mtof(m[0] + 12), t, m[1] * sd * 0.8, 0.05, 3000);
-    }
-    const bar = Math.floor(step / 8);
-    const inBar = step % 8;
-    const root = BASS_ROOTS[bar % BASS_ROOTS.length];
-    if (inBar === 0) this.musicNote('triangle', mtof(root), t, sd * 3, 0.32, 900);
-    if (inBar === 4) this.musicNote('triangle', mtof(root - 5), t, sd * 3, 0.28, 900);
-    if (inBar === 2 || inBar === 6) {
-      // off-beat chord "pah"
-      const third = root === 50 ? 65 : 64;
-      this.musicNote('square', mtof(root + 12), t, sd * 0.9, 0.035, 1200);
-      this.musicNote('square', mtof(third), t, sd * 0.9, 0.03, 1200);
-    }
-    // percussion
-    if (inBar === 0 || inBar === 4) {
-      this.toneTo(this.musicBus, t, 'sine', 130, 45, 0.12, 0.45);
-    }
-    if (inBar % 2 === 1 || inBar === 2 || inBar === 6) {
-      this.noiseTo(this.musicBus, t, 0.04, inBar % 2 === 1 ? 0.05 : 0.09, 7000);
-    }
+    this.cassette.playStep(this.deck, step, t, this.stepDur);
   }
 
   private toneTo(dest: AudioNode, t: number, type: OscillatorType, f0: number, f1: number, dur: number, vol: number) {
