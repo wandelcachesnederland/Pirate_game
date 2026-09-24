@@ -1,5 +1,6 @@
-import type { GameStats, Island, Screen, Ship, ShipKind, UpgradeId, UpgradeOffer } from './types';
+import type { EraId, GameStats, Island, Screen, Ship, ShipDef, ShipKind, UpgradeId, UpgradeOffer } from './types';
 import { SHIP_DEFS, UPGRADES, waveComposition, waveTitle } from './data';
+import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
 import { Input } from './input';
 import { Sfx } from './audio';
 import {
@@ -143,15 +144,15 @@ interface PlayerStats {
   chain: boolean;
 }
 
-function defaultStats(): PlayerStats {
+function defaultStats(def: ShipDef): PlayerStats {
   return {
-    cannons: SHIP_DEFS.player.cannons,
+    cannons: def.cannons,
     reloadMul: 1,
     damageMul: 1,
     rangeMul: 1,
     speedMul: 1,
     turnMul: 1,
-    maxHp: SHIP_DEFS.player.hp,
+    maxHp: def.hp,
     magnet: 95,
     regen: 0,
     swivel: 0,
@@ -255,8 +256,12 @@ export class Engine {
   private coinChain = 0;
   private coinChainTimer = 0;
   private levels: Partial<Record<UpgradeId, number>> = {};
-  private pstats: PlayerStats = defaultStats();
+  /** Era flagship the player sails; swapped from the hull picker. */
+  private eraId: EraId = DEFAULT_ERA;
+  private playerDef: ShipDef = ERA_FLAGSHIPS[DEFAULT_ERA];
+  private pstats: PlayerStats = defaultStats(ERA_FLAGSHIPS[DEFAULT_ERA]);
   private swivelTimer = 0;
+  private nativeTimer = rand(4, 8);
 
   private waterPattern: CanvasPattern | null = null;
   private wavePatternA: CanvasPattern | null = null;
@@ -323,7 +328,28 @@ export class Engine {
     this.sfx.unlock();
   }
 
+  /** Which flagship the player currently sails. */
+  getEra(): EraId {
+    return this.eraId;
+  }
+
+  /** Pick the player's hull. Rebuilds the ship so the menu shows it at once. */
+  setEra(id: EraId) {
+    const def = ERA_FLAGSHIPS[id] ?? ERA_FLAGSHIPS[DEFAULT_ERA];
+    this.eraId = id;
+    this.playerDef = def;
+    if (this.screen === 'menu' && this.player) {
+      const old = this.player;
+      const fresh = this.makeShip('player', old.x, old.y, old.angle);
+      const i = this.ships.indexOf(old);
+      if (i >= 0) this.ships[i] = fresh;
+      else this.ships.push(fresh);
+      this.player = fresh;
+    }
+  }
+
   startGame() {
+    this.pstats = defaultStats(this.playerDef);
     this.sfx.unlock();
     this.resetWorld();
     this.score = 0;
@@ -333,7 +359,7 @@ export class Engine {
     this.wave = 0;
     this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0 };
     this.levels = {};
-    this.pstats = defaultStats();
+    this.pstats = defaultStats(this.playerDef);
     this.swivelTimer = 0;
     this.goldPopup = 0;
     this.goldPopupTimer = 0;
@@ -554,7 +580,7 @@ export class Engine {
   }
 
   private makeShip(kind: ShipKind, x: number, y: number, angle: number): Ship {
-    const def = SHIP_DEFS[kind];
+    const def = kind === 'player' ? this.playerDef : SHIP_DEFS[kind];
     const w = Math.max(1, this.wave);
     const enemy = kind !== 'player';
     const hp = Math.round(def.hp * (enemy ? 1 + 0.085 * (w - 1) : 1));
@@ -603,6 +629,7 @@ export class Engine {
       bob: rand(0, TAU),
       hitByPlayer: false,
       isBoss: kind === 'manowar',
+      biteTimer: 0,
     };
   }
 
@@ -815,7 +842,10 @@ export class Engine {
     this.updateWind(dt);
     if (playing) this.updatePlayerInput(dt);
     this.updateShips(dt);
-    if (playing) this.updateSwivel(dt);
+    if (playing) {
+      this.updateNatives(dt);
+      this.updateSwivel(dt);
+    }
     this.updateVolleys(dt);
     this.updateBalls(dt);
     this.updatePickups(dt);
@@ -871,7 +901,8 @@ export class Engine {
     this.windY = Math.sin(this.windAngle);
   }
 
-  private windFactor(a: number) {
+  private windFactor(a: number, oared = false) {
+    if (oared) return 1; // paddled craft make their own way
     const c = (1 + Math.cos(angDiff(a, this.windAngle))) * 0.5;
     return 0.46 + 0.54 * Math.pow(c, 0.6);
   }
@@ -1108,7 +1139,7 @@ export class Engine {
   private shipPhysics(s: Ship, dt: number) {
     s.sail += (s.sailTarget - s.sail) * Math.min(1, dt * 2.5);
     const slow = s.slowTimer > 0 ? 0.55 : 1;
-    const target = s.maxSpeed * s.sail * this.windFactor(s.angle) * slow;
+    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared) * slow;
     const c = Math.cos(s.angle);
     const sn = Math.sin(s.angle);
     let fwd = s.vx * c + s.vy * sn;
@@ -1235,6 +1266,29 @@ export class Engine {
         const dy = b.y - a.y;
         const lim = (a.def.length + b.def.length) * 0.5;
         if (dx * dx + dy * dy > lim * lim) continue;
+        // war canoes can't shoot — they close and stab
+        const aCanoe = a.def.kind === 'warCanoe';
+        const bCanoe = b.def.kind === 'warCanoe';
+        if (playing && a.team !== b.team && (aCanoe || bCanoe)) {
+          const canoe = aCanoe ? a : b;
+          const victim = aCanoe ? b : a;
+          const dd = Math.hypot(dx, dy) || 1;
+          if (dd < lim * 0.72 && canoe.biteTimer <= 0) {
+            canoe.biteTimer = 0.6;
+            const bite = 8 * (1 + 0.05 * (this.wave - 1));
+            const nx = dx / dd;
+            const ny = dy / dd;
+            if (victim === this.player) this.hurtPlayer(bite, -nx, -ny, false);
+            else this.damageShip(victim, bite, victim.hitByPlayer || canoe === this.player);
+            canoe.vx -= nx * 18;
+            canoe.vy -= ny * 18;
+            victim.vx += nx * 35;
+            victim.vy += ny * 35;
+            this.fxHit(victim.x, victim.y, Math.atan2(ny, nx), 0.7);
+            this.sfx.hit(this.volAt(victim.x, victim.y) * 0.8, this.panAt(victim.x));
+            this.addTrauma(0.12);
+          }
+        }
         if (playing && a.team !== b.team && (a.def.kind === 'fireship' || b.def.kind === 'fireship')) {
           const fs = a.def.kind === 'fireship' ? a : b;
           if (Math.hypot(dx, dy) < lim * 0.8) {
@@ -1329,9 +1383,17 @@ export class Engine {
         }
         break;
       }
-      case 'fireship': {
+      case 'fireship':
+      case 'warCanoe': {
         const t = Math.min(1.5, dist / Math.max(80, s.fwd));
         desired = Math.atan2(p.y + p.vy * t * 0.8 - s.y, p.x + p.vx * t * 0.8 - s.x);
+        sail = 1;
+        break;
+      }
+      case 'fishingCanoe':
+      case 'rowboat': {
+        // unarmed small craft: put the stern to the enemy and paddle
+        desired = toP + Math.PI + Math.sin(this.time * 0.9 + s.bob) * 0.5;
         sail = 1;
         break;
       }
@@ -1426,6 +1488,41 @@ export class Engine {
       if (d2 < r * r) return is;
     }
     return null;
+  }
+
+  /** Islanders: war parties paddle out from islands the player sails past. */
+  private updateNatives(dt: number) {
+    this.nativeTimer -= dt;
+    if (this.nativeTimer > 0) return;
+    this.nativeTimer = rand(7, 13);
+    if (this.ships.some((s) => s.def.hullStyle === 'canoe' && s.sinking < 0) && Math.random() < 0.75) return;
+    let afloat = this.ships.filter((s) => s.def.hullStyle === 'canoe' && s.sinking < 0).length;
+    if (afloat >= 7) return;
+    for (const is of this.islands) {
+      const d = Math.hypot(is.x - this.player.x, is.y - this.player.y);
+      if (d > 720 || d < is.maxR + 30) continue;
+      const toPlayer = Math.atan2(this.player.y - is.y, this.player.x - is.x);
+      const party = 2 + Math.min(2, Math.floor((this.wave - 1) / 4)) + (Math.random() < 0.3 ? 1 : 0);
+      for (let i = 0; i < party && afloat < 7; i++) {
+        const a = toPlayer + rand(-0.55, 0.55);
+        const x = is.x + Math.cos(a) * (is.maxR + 22);
+        const y = is.y + Math.sin(a) * (is.maxR + 22);
+        if (this.pointInIsland(x, y, 8)) continue;
+        const kind = Math.random() < 0.75 ? 'warCanoe' : 'fishingCanoe';
+        this.ships.push(this.makeShip(kind, x, y, a));
+        afloat++;
+      }
+      break; // one island per beat keeps it readable
+    }
+  }
+
+  /** A big hull going down puts a boat over the side — crew rowing for it. */
+  private launchRowboat(s: Ship) {
+    if (s.def.length < 70 || Math.random() < 0.45) return;
+    const a = rand(0, TAU);
+    const boat = this.makeShip('rowboat', s.x + Math.cos(a) * (s.def.length * 0.4), s.y + Math.sin(a) * (s.def.length * 0.4), a);
+    boat.hp = boat.maxHp;
+    this.ships.push(boat);
   }
 
   // ================================================================ combat
@@ -1557,6 +1654,7 @@ export class Engine {
           this.addText(this.player.x, this.player.y - 60, `STREAK x${this.mult}!`, '#ff8a3a', 30);
         }
         this.streakTimer = STREAK_TIME;
+        this.launchRowboat(s);
         const pts = this.addScore(s.def.value * (1 + 0.1 * (this.wave - 1)));
         this.addText(s.x, s.y - 30, `SUNK! +${pts.toLocaleString('en-US')}`, '#ffd84d', s.isBoss ? 36 : 26);
         this.dropLoot(s);
@@ -1999,8 +2097,9 @@ export class Engine {
     const p = this.player;
     ctx.fillStyle = '#021a2e';
     for (const s of this.ships) if (this.shipVisible(s)) drawShipShadow(ctx, s);
-    for (const s of this.ships) if (s !== p && this.shipVisible(s)) drawShip(ctx, s, this.time, this.windAngle);
-    if (p && !p.dead && this.shipVisible(p)) drawShip(ctx, p, this.time, this.windAngle);
+    for (const s of this.ships)
+      if (s !== p && this.shipVisible(s)) drawShip(ctx, s, this.time, this.windAngle, s.falseFlag ?? s.def.faction);
+    if (p && !p.dead && this.shipVisible(p)) drawShip(ctx, p, this.time, this.windAngle, p.falseFlag ?? p.def.faction);
     if (this.screen !== 'menu') this.drawReloadArcs(ctx);
     this.drawBalls(ctx);
     this.drawParticles(ctx, 1);

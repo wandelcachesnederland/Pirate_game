@@ -290,6 +290,7 @@ export const SHIP_DEFS: Record<ShipKind, ShipDef> = {
     damage: 7,
     range: 460,
     ballSpeed: 520,
+    decks: 2, // two rows of gun ports — she's a ship of the line
     masts: 3,
     value: 1200,
     coins: 26,
@@ -323,6 +324,91 @@ export const SHIP_DEFS: Record<ShipKind, ShipDef> = {
     sail: '#51403a',
     sailShade: '#2a1e18',
     seesThroughDisguise: true,
+  },
+  // ── SMALL CRAFT · kind='warCanoe' · War Canoe ────────────────────────────
+  // Island natives. Paddled, so wind means nothing to them, and unarmed — they
+  // close and stab instead of firing. Comes out of the islands in packs.
+  warCanoe: {
+    kind: 'warCanoe',
+    name: 'War Canoe',
+    faction: 'native',
+    length: 34,
+    width: 11,
+    hp: 26,
+    speed: 172,
+    accel: 150,
+    turn: 2.3,
+    cannons: 0,
+    reload: 99,
+    damage: 0,
+    range: 0,
+    ballSpeed: 0,
+    masts: 0,
+    value: 140,
+    coins: 9,
+    hull: '#6a4a2a',
+    deck: '#8d6a3f',
+    trim: '#c0392b',
+    sail: '#8a6a3a',
+    sailShade: '#5a3f20',
+    hullStyle: 'canoe',
+    oared: true,
+  },
+  // ── SMALL CRAFT · kind='fishingCanoe' · Fishing Canoe ────────────────────
+  // Islanders working the shallows. Unarmed, bolts for cover, worth a few coins.
+  fishingCanoe: {
+    kind: 'fishingCanoe',
+    name: 'Fishing Canoe',
+    faction: 'native',
+    length: 30,
+    width: 12,
+    hp: 18,
+    speed: 118,
+    accel: 110,
+    turn: 2.0,
+    cannons: 0,
+    reload: 99,
+    damage: 0,
+    range: 0,
+    ballSpeed: 0,
+    masts: 0,
+    value: 70,
+    coins: 16,
+    hull: '#7d5c34',
+    deck: '#a37f4c',
+    trim: '#3f7f6a',
+    sail: '#9a7a44',
+    sailShade: '#6b5230',
+    hullStyle: 'canoe',
+    oared: true,
+  },
+  // ── SMALL CRAFT · kind='rowboat' · Ship's Rowboat ────────────────────────
+  // Crew escaping a sinking hull, or a tender running errands. Oared, unarmed,
+  // and it usually carries something worth having.
+  rowboat: {
+    kind: 'rowboat',
+    name: "Ship's Rowboat",
+    faction: 'merchant',
+    length: 26,
+    width: 10,
+    hp: 14,
+    speed: 128,
+    accel: 120,
+    turn: 2.4,
+    cannons: 0,
+    reload: 99,
+    damage: 0,
+    range: 0,
+    ballSpeed: 0,
+    masts: 0,
+    value: 90,
+    coins: 12,
+    hull: '#5c4326',
+    deck: '#9d7a4a',
+    trim: '#c9a227',
+    sail: '#7a5c34',
+    sailShade: '#523c20',
+    oared: true,
   },
 };
 
@@ -402,6 +488,10 @@ export function waveComposition(n: number): ShipKind[] {
   ];
   if (n >= 7) pool.push(['bombketch', 2.8, 1]);
   if (n >= 6) pool.push(['privateer', 3.4, 1]);
+  // small craft are cheap filler — and canoes mostly arrive from the islands
+  if (n >= 4) pool.push(['fishingCanoe', 0.6, 1]);
+  if (n >= 7) pool.push(['rowboat', 0.5, 1]);
+  if (n >= 9) pool.push(['warCanoe', 1.1, 1]);
   // the galleon escorts boss waves already; elsewhere it stays rare and late
   if (n >= 8 && n % 5 !== 0) pool.push(['galleon', 5.5, 1]);
   const totalW = pool.reduce((a, p) => a + p[2], 0);

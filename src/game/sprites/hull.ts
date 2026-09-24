@@ -12,6 +12,11 @@ export interface ShipPaths {
 
 const pathCache = new Map<string, ShipPaths>();
 
+/** Drop cached silhouettes — needed if hull dimensions change at runtime. */
+export function clearPathCache() {
+  pathCache.clear();
+}
+
 /** Sprite cache key — variants of one kind (e.g. era hulls) get their own entry. */
 export function styleId(def: ShipDef): string {
   return def.styleKey ?? def.kind;
@@ -19,6 +24,14 @@ export function styleId(def: ShipDef): string {
 
 /** Boat-shaped outline centred on the origin, bow pointing along +x. */
 export function hullShape(p: Path2D, hl: number, hw: number, style: HullStyle = 'default') {
+  if (style === 'canoe') {
+    // dugout: narrow, pointed at both ends, widest just aft of amidships
+    p.moveTo(hl * 1.06, 0);
+    p.bezierCurveTo(hl * 0.5, -hw * 0.92, -hl * 0.5, -hw * 0.98, -hl * 1.04, 0);
+    p.bezierCurveTo(-hl * 0.5, hw * 0.98, hl * 0.5, hw * 0.92, hl * 1.06, 0);
+    p.closePath();
+    return;
+  }
   if (style === 'longship') {
     // double-ended: symmetric bow and stern, both rising to a point
     p.moveTo(hl * 1.02, 0);
@@ -62,7 +75,8 @@ export function shipPaths(def: ShipDef): ShipPaths {
   const deck = new Path2D();
   hullShape(deck, hl * 0.84, hw * 0.7, style);
   let masts: number[];
-  if (def.masts <= 1) masts = [hl * 0.1];
+  if (def.masts <= 0) masts = []; // oared craft carry no rig
+  else if (def.masts === 1) masts = [hl * 0.1];
   else if (def.masts === 2) masts = [hl * 0.32, -hl * 0.2];
   else masts = [hl * 0.44, hl * 0.03, -hl * 0.4];
   const out = { hull, deck, masts };

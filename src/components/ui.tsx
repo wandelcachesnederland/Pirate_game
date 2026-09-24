@@ -138,3 +138,5 @@ export function HighScoreTable({
     </div>
   );
 }
+
+export { HullPicker } from './HullPicker';

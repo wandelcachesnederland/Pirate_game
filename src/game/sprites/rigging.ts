@@ -41,6 +41,20 @@ export function drawSail(
 }
 
 /** Faction badge painted on the largest sail. */
+/** A single gold fleur-de-lis, drawn about (cx, cy) at scale `s`. */
+function fleurDeLis(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - s);
+  ctx.quadraticCurveTo(cx + s * 0.62, cy - s * 0.1, cx + s * 0.22, cy + s * 0.42);
+  ctx.quadraticCurveTo(cx + s * 0.72, cy + s * 0.5, cx + s * 1.05, cy + s * 0.95);
+  ctx.quadraticCurveTo(cx + s * 0.5, cy + s * 0.62, cx, cy + s * 1.0);
+  ctx.quadraticCurveTo(cx - s * 0.5, cy + s * 0.62, cx - s * 1.05, cy + s * 0.95);
+  ctx.quadraticCurveTo(cx - s * 0.72, cy + s * 0.5, cx - s * 0.22, cy + s * 0.42);
+  ctx.quadraticCurveTo(cx - s * 0.62, cy - s * 0.1, cx, cy - s);
+  ctx.fill();
+  ctx.fillRect(cx - s * 0.62, cy + s * 0.34, s * 1.24, s * 0.24);
+}
+
 export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number, bulge: number, yard: number) {
   if (f === 'fire') return;
   ctx.save();
@@ -86,12 +100,27 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.stroke();
       break;
     case 'france':
-      ctx.fillStyle = '#2c4a9a';
-      ctx.fillRect(cx - 2.4, -5, 1.6, 10);
+      ctx.fillStyle = '#d4af37'; // fleur-de-lis
+      fleurDeLis(ctx, cx, 0, 5.4);
+      break;
+    case 'native':
+      ctx.fillStyle = 'rgba(60,38,16,0.75)';
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.4, -5.5);
+      ctx.lineTo(cx, -2);
+      ctx.lineTo(cx + 2.4, -5.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.4, 5.5);
+      ctx.lineTo(cx, 2);
+      ctx.lineTo(cx + 2.4, 5.5);
+      ctx.closePath();
+      ctx.fill();
       ctx.fillStyle = '#f4f1e6';
-      ctx.fillRect(cx - 0.8, -5, 1.6, 10);
-      ctx.fillStyle = '#c0392b';
-      ctx.fillRect(cx + 0.8, -5, 1.6, 10);
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.9, 0, TAU);
+      ctx.fill();
       break;
     case 'merchant':
       ctx.fillStyle = 'rgba(150,120,70,0.55)';
@@ -138,6 +167,10 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = '#f1c40f';
       ctx.fillRect(0, h * 0.28, w, h * 0.44);
+      ctx.fillStyle = '#c8102e'; // castle badge
+      ctx.fillRect(w * 0.36, h * 0.4, w * 0.1, h * 0.2);
+      ctx.fillRect(w * 0.34, h * 0.36, w * 0.03, h * 0.08);
+      ctx.fillRect(w * 0.45, h * 0.36, w * 0.03, h * 0.08);
       break;
     }
     case 'england': {
@@ -149,13 +182,35 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       break;
     }
     case 'france': {
+      ctx.fillStyle = '#2c4a9a'; // tricolour: blue | white | red
+      ctx.fillRect(0, 0, w / 3, h);
       ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(w / 3, 0, w / 3, h);
+      ctx.fillStyle = '#c0392b';
+      ctx.fillRect((w * 2) / 3, 0, w / 3, h);
+      ctx.fillStyle = '#d4af37'; // fleur-de-lis on the pale
+      fleurDeLis(ctx, w * 0.5, h * 0.45, Math.min(w, h) * 0.26);
+      break;
+    }
+    case 'native': {
+      ctx.fillStyle = '#c98a3c';
       ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#2c4a9a';
-      ctx.fillRect(0, 0, w * 0.2, h);
-      ctx.fillStyle = '#d4af37';
+      ctx.fillStyle = '#7a3f1e'; // chevrons
+      for (let i = 0; i < 3; i++) {
+        const yy = h * (0.2 + i * 0.26);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.08, yy + h * 0.12);
+        ctx.lineTo(w * 0.5, yy);
+        ctx.lineTo(w * 0.92, yy + h * 0.12);
+        ctx.lineTo(w * 0.92, yy + h * 0.2);
+        ctx.lineTo(w * 0.5, yy + h * 0.08);
+        ctx.lineTo(w * 0.08, yy + h * 0.2);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = '#f4f1e6'; // sun disc
       ctx.beginPath();
-      ctx.arc(w * 0.58, h * 0.5, Math.min(w, h) * 0.2, 0, TAU);
+      ctx.arc(w * 0.78, h * 0.5, Math.min(w, h) * 0.16, 0, TAU);
       ctx.fill();
       break;
     }
@@ -213,6 +268,12 @@ export function drawEnsign(
   ctx.save();
   ctx.translate(mx, 0);
   ctx.rotate(rel);
+  ctx.strokeStyle = 'rgba(30,20,10,0.7)'; // halyard
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -H * 0.5);
+  ctx.lineTo(0, H * 0.5);
+  ctx.stroke();
   const tile = flagTile(f);
   const STRIPS = 8;
   const sw = tile.width / STRIPS;
@@ -223,5 +284,73 @@ export function drawEnsign(
     const h0 = H * (1 - t0 * 0.12);
     ctx.drawImage(tile, i * sw, 0, sw + 0.6, tile.height, L * t0, -h0 / 2 + off, L * (t1 - t0) + 0.4, h0);
   }
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 0.4;
+  ctx.strokeRect(0, -H / 2, L, H);
   ctx.restore();
+}
+
+/** Ratlines rigged between the masts and the rails, plus the forestay. */
+export function drawRigging(ctx: CanvasRenderingContext2D, masts: number[], hw: number, hl: number) {
+  if (!masts.length) return;
+  ctx.strokeStyle = 'rgba(40,28,14,0.45)';
+  ctx.lineWidth = 0.35;
+  ctx.beginPath();
+  for (const mx of masts) {
+    for (const sgn of [-1, 1]) {
+      ctx.moveTo(mx, 0);
+      ctx.lineTo(mx - hw * 0.5, sgn * hw * 0.78);
+      ctx.moveTo(mx, 0);
+      ctx.lineTo(mx + hw * 0.5, sgn * hw * 0.78);
+    }
+  }
+  for (let i = 0; i < masts.length - 1; i++) {
+    ctx.moveTo(masts[i], 0);
+    ctx.lineTo(masts[i + 1], 0);
+  }
+  ctx.moveTo(masts[0], 0);
+  ctx.lineTo(hl + 12, 0);
+  ctx.stroke();
+}
+
+/** Oars/paddles along both sides, stroking in time. `drive` 0..1 = effort. */
+export function drawOars(
+  ctx: CanvasRenderingContext2D,
+  hl: number,
+  hw: number,
+  t: number,
+  bob: number,
+  drive: number,
+) {
+  const rows = hl > 16 ? 4 : 3;
+  const rate = 5.5 + drive * 3.5;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < rows; i++) {
+    const px = -hl * 0.7 + (i / (rows - 1)) * hl * 1.35;
+    // alternating banks, so the stroke looks sculled rather than synchronised
+    const phase = t * rate + bob + (i % 2) * 0.5;
+    const swing = Math.sin(phase) * (0.28 + drive * 0.22);
+    for (const sgn of [-1, 1]) {
+      const baseY = sgn * hw * 0.85;
+      const ang = -0.55 + swing;
+      const len = hl * 0.62;
+      const ex = px + Math.cos(ang) * len * 0.55;
+      const ey = baseY + Math.sin(ang) * len * 0.55 * sgn;
+      ctx.strokeStyle = '#4a3018';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px, baseY * 0.6);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+      // blade
+      ctx.fillStyle = '#5c3d1e';
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate(ang + (sgn > 0 ? 0.5 : -0.5));
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 3.1, 1.3, 0, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
 }

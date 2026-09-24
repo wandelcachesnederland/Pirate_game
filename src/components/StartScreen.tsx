@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { Hand, Keyboard, Sailboat, Skull, Wind } from 'lucide-react';
+import type { EraId } from '../game/types';
 import type { ScoreEntry, Settings } from '../game/storage';
-import { HighScoreTable, KeyCap, SoundToggles } from './ui';
+import { HighScoreTable, HullPicker, KeyCap, SoundToggles } from './ui';
 
 interface Props {
   name: string;
@@ -11,6 +12,8 @@ interface Props {
   settings: Settings;
   onSettings: (s: Settings) => void;
   isTouch: boolean;
+  era: EraId;
+  onEra: (id: EraId) => void;
 }
 
 function Row({ keys, label }: { keys: ReactNode; label: string }) {
@@ -22,7 +25,7 @@ function Row({ keys, label }: { keys: ReactNode; label: string }) {
   );
 }
 
-export function StartScreen({ name, onName, onStart, scores, settings, onSettings, isTouch }: Props) {
+export function StartScreen({ name, onName, onStart, scores, settings, onSettings, isTouch, era, onEra }: Props) {
   return (
     <div className="absolute inset-0 overflow-y-auto no-scrollbar anim-fade">
       <div className="flex min-h-full flex-col items-center justify-center gap-3 bg-[radial-gradient(ellipse_at_center,rgba(4,24,44,0.05)_0%,rgba(3,16,32,0.55)_60%,rgba(2,10,22,0.85)_100%)] p-3 sm:gap-5 sm:p-6">
@@ -66,6 +69,8 @@ export function StartScreen({ name, onName, onStart, scores, settings, onSetting
             <p className="mt-1.5 text-center text-sm italic opacity-70">
               {isTouch ? 'Tap to hoist the Jolly Roger' : 'or press Enter to hoist the Jolly Roger'}
             </p>
+
+            <HullPicker era={era} onEra={onEra} />
 
             <div className="mt-3 border-t-2 border-dashed border-ink/30 pt-3">
               <h3 className="mb-1.5 flex items-center gap-2 font-pirate text-xl">
