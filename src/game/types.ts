@@ -1,8 +1,30 @@
 export type Screen = 'menu' | 'playing' | 'paused' | 'upgrade' | 'gameover';
 
-export type ShipKind = 'player' | 'merchant' | 'sloop' | 'brig' | 'frigate' | 'manowar' | 'fireship';
+export type ShipKind =
+  | 'player'
+  | 'merchant'
+  | 'schooner'
+  | 'galleon'
+  | 'sloop'
+  | 'cutter'
+  | 'brig'
+  | 'corvette'
+  | 'bombketch'
+  | 'frigate'
+  | 'privateer'
+  | 'manowar'
+  | 'fireship'
+  // small craft — paddled, unarmed, they live around the islands
+  | 'warCanoe'
+  | 'fishingCanoe'
+  | 'rowboat';
 
-export type Faction = 'pirate' | 'spain' | 'england' | 'merchant' | 'fire';
+export type Faction = 'pirate' | 'spain' | 'england' | 'france' | 'merchant' | 'fire' | 'native';
+
+export type HullStyle = 'default' | 'longship' | 'ironclad' | 'caravel' | 'canoe';
+
+/** Playable hero hulls — each is a `player`-kind ShipDef with its own styleKey. */
+export type EraId = 'golden' | 'exploration' | 'napoleonic' | 'viking' | 'ironclad';
 
 export interface ShipDef {
   kind: ShipKind;
@@ -27,6 +49,18 @@ export interface ShipDef {
   trim: string;
   sail: string;
   sailShade: string;
+  /** Lobs arcing, exploding shells instead of flat broadsides. */
+  mortar?: boolean;
+  /** Reserved: ignores false flags once a disguise system exists. */
+  seesThroughDisguise?: boolean;
+  /** Gun decks drawn as extra rows of gun ports (default 1). */
+  decks?: number;
+  /** Silhouette variant drawn by the hull painter (default 'default'). */
+  hullStyle?: HullStyle;
+  /** Cache key override so variants of one kind get their own sprite. */
+  styleKey?: string;
+  /** Paddled/oared craft: no sails, immune to the wind, draws moving oars. */
+  oared?: boolean;
 }
 
 export interface Ship {
@@ -73,6 +107,13 @@ export interface Ship {
   bob: number;
   hitByPlayer: boolean;
   isBoss: boolean;
+  /** Cooldown for the war canoe's melee bite. */
+  biteTimer: number;
+  /**
+   * Faction flown at the masthead instead of the ship's own — false colours.
+   * Nothing sets this yet; `seesThroughDisguise` hulls would ignore it.
+   */
+  falseFlag?: Faction;
 }
 
 export type UpgradeId =

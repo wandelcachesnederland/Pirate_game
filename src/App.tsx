@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
-import type { GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
+import type { EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
+import { DEFAULT_ERA } from './game/ships/era';
 import {
   addScore,
   loadName,
@@ -42,12 +43,24 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const settingsRef = useRef(settings);
   const [isTouch, setIsTouch] = useState(() => detectTouch());
+  const [era, setEra] = useState<EraId>(DEFAULT_ERA);
+  const eraRef = useRef(era);
   const gameOverAt = useRef(0);
   const upgradeAt = useRef(0);
 
   useEffect(() => {
     nameRef.current = name;
   }, [name]);
+
+  useEffect(() => {
+    eraRef.current = era;
+  }, [era]);
+
+  // swapping hulls in port updates the ship on the menu at once
+  const pickEra = useCallback((id: EraId) => {
+    setEra(id);
+    engineRef.current?.setEra(id);
+  }, []);
 
   // ---- engine lifecycle
   useEffect(() => {
@@ -103,6 +116,7 @@ export default function App() {
     saveName(nameRef.current.trim());
     setStats(null);
     setRank(-1);
+    e.setEra(eraRef.current);
     e.startGame();
   }, []);
 
@@ -235,6 +249,8 @@ export default function App() {
           settings={settings}
           onSettings={updateSettings}
           isTouch={isTouch}
+          era={era}
+          onEra={pickEra}
         />
       )}
 
