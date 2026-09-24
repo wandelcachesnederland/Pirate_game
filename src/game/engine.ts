@@ -4,12 +4,9 @@ import { Input } from './input';
 import { Sfx } from './audio';
 import {
   buildIsland,
-  cannonLocalX,
   drawChest,
   drawCoin,
   drawCrate,
-  drawShip,
-  drawShipShadow,
   islandRadiusAt,
   makeGlow,
   makeVignette,
@@ -17,8 +14,11 @@ import {
   makeWaveTile,
   rr,
 } from './render';
+import { cannonLocalX, drawShip, drawShipShadow } from './sprites';
+import { angDiff, TAU } from './math';
 
-const TAU = Math.PI * 2;
+// Re-exported so callers can keep importing `angDiff` from the engine.
+export { angDiff };
 const HALF_PI = Math.PI / 2;
 export const WORLD = 2100;
 const MAX_PARTICLES = 1100;
@@ -52,12 +52,6 @@ const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 function pick<T>(arr: T[]): T {
   return arr[(Math.random() * arr.length) | 0];
-}
-export function angDiff(a: number, b: number) {
-  let d = (b - a) % TAU;
-  if (d > Math.PI) d -= TAU;
-  else if (d < -Math.PI) d += TAU;
-  return d;
 }
 
 interface Particle {
