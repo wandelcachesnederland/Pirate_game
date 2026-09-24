@@ -82,6 +82,8 @@ interface Ball {
   dmg: number;
   chain: boolean;
   small: boolean;
+  /** Mortar shell: arcs overhead, then explodes on landing. */
+  mortar: boolean;
 }
 interface Pickup {
   x: number;
@@ -998,6 +1000,7 @@ export class Engine {
       dmg: v.dmg,
       chain: s.team === 0 && this.pstats.chain,
       small: false,
+      mortar: !!s.def.mortar,
     });
     this.fxMuzzle(x, y, dir, s.team === 0);
     s.vx -= Math.cos(dir) * 5;
@@ -1045,7 +1048,7 @@ export class Engine {
     const oy = p.y + Math.sin(a) * 10;
     this.balls.push({
       x: ox, y: oy, vx: Math.cos(a) * spd + p.vx * 0.3, vy: Math.sin(a) * spd + p.vy * 0.3,
-      life, max: life, team: 0, dmg: 4 + lvl * 2, chain: false, small: true,
+      life, max: life, team: 0, dmg: 4 + lvl * 2, chain: false, small: true, mortar: false,
     });
     this.emit(P_FLASH, ox, oy, 0, 0, 0.07, 7, 9, '', 1, 0);
     for (let i = 0; i < 2; i++) {
@@ -1433,18 +1436,25 @@ export class Engine {
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       let remove = false;
+      // a mortar shell is only dangerous once it drops out of its arc
+      const falling = !b.mortar || 1 - b.life / b.max > 0.62;
       if (b.life <= 0) {
-        this.fxSplash(b.x, b.y, b.small ? 0.55 : 1);
-        this.sfx.splash(this.volAt(b.x, b.y) * (b.small ? 0.4 : 0.8), this.panAt(b.x));
+        if (b.mortar) this.mortarBlast(b);
+        else {
+          this.fxSplash(b.x, b.y, b.small ? 0.55 : 1);
+          this.sfx.splash(this.volAt(b.x, b.y) * (b.small ? 0.4 : 0.8), this.panAt(b.x));
+        }
         remove = true;
-      } else if (this.pointInIsland(b.x, b.y, -4)) {
-        this.fxSand(b.x, b.y);
+      } else if (falling && this.pointInIsland(b.x, b.y, -4)) {
+        if (b.mortar) this.mortarBlast(b);
+        else this.fxSand(b.x, b.y);
         remove = true;
-      } else {
+      } else if (falling) {
         for (const s of this.ships) {
           if (s.team === b.team || s.sinking >= 0) continue;
           if (this.ballHitsShip(b, s)) {
-            this.onBallHit(b, s);
+            if (b.mortar) this.mortarBlast(b);
+            else this.onBallHit(b, s);
             remove = true;
             break;
           }
@@ -1573,6 +1583,30 @@ export class Engine {
     }
   }
 
+  /** Mortar shell landing: area damage with falloff, plus a shove outward. */
+  private mortarBlast(b: Ball) {
+    const R = 58;
+    this.fxExplosion(b.x, b.y, 0.8);
+    this.emit(P_RING, b.x, b.y, 0, 0, 0.45, 8, R + 30, '#ffb347', 1, 0, 0, 0, 0.8);
+    this.addTrauma(0.18);
+    const vol = this.volAt(b.x, b.y);
+    this.sfx.cannon(vol * 0.9, this.panAt(b.x));
+    this.sfx.splash(vol * 0.7, this.panAt(b.x));
+    for (const s of this.ships) {
+      if (s.sinking >= 0 || s.team === b.team) continue;
+      const d = Math.hypot(s.x - b.x, s.y - b.y);
+      const reach = R + s.def.length * 0.35;
+      if (d > reach) continue;
+      const k = clamp(1 - d / reach, 0.4, 1);
+      const nx = (s.x - b.x) / (d || 1);
+      const ny = (s.y - b.y) / (d || 1);
+      s.vx += nx * 55 * k;
+      s.vy += ny * 55 * k;
+      if (s === this.player) this.hurtPlayer(b.dmg * k, nx, ny, false);
+      else this.damageShip(s, b.dmg * k, b.team === 0);
+    }
+  }
+
   private fireBlast(fs: Ship) {
     const R = 125;
     this.fxExplosion(fs.x, fs.y, 1.6);
@@ -1609,7 +1643,13 @@ export class Engine {
       const sp = rand(50, 210) * (0.7 + s.def.length / 140);
       this.addPickup(s.x + rand(-8, 8), s.y + rand(-8, 8), Math.cos(a) * sp + s.vx * 0.3, Math.sin(a) * sp + s.vy * 0.3, 0, per);
     }
-    if (s.isBoss || (s.def.kind === 'merchant' && Math.random() < 0.35) || (s.def.kind === 'frigate' && Math.random() < 0.35)) {
+    // treasure galleons always pay out; merchants and frigates sometimes do
+    if (
+      s.isBoss ||
+      s.def.kind === 'galleon' ||
+      (s.def.kind === 'merchant' && Math.random() < 0.35) ||
+      (s.def.kind === 'frigate' && Math.random() < 0.35)
+    ) {
       const a = rand(0, TAU);
       this.addPickup(s.x, s.y, Math.cos(a) * 60, Math.sin(a) * 60, 1, per * (s.isBoss ? 20 : 12));
     }
@@ -2155,19 +2195,33 @@ export class Engine {
     ctx.beginPath();
     for (const b of bs) {
       const k = 1 - b.life / b.max;
-      const z = Math.sin(k * Math.PI) * (b.small ? 6 : 16);
-      const r = b.small ? 2 : 3;
-      const sx = b.x + z * 0.5;
-      const sy = b.y + z * 0.75;
+      const z = b.mortar ? Math.sin(k * Math.PI) * 74 : Math.sin(k * Math.PI) * (b.small ? 6 : 16);
+      const r = b.mortar ? 3 + k * 4 : b.small ? 2 : 3;
+      // a shell high overhead casts its shadow straight down on the target
+      const sx = b.mortar ? b.x : b.x + z * 0.5;
+      const sy = b.mortar ? b.y : b.y + z * 0.75;
       ctx.moveTo(sx + r, sy);
       ctx.arc(sx, sy, r, 0, TAU);
     }
     ctx.fill();
+    // landing marker so mortar fire can be dodged
+    ctx.strokeStyle = 'rgba(255,170,80,0.5)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    for (const b of bs) {
+      if (!b.mortar) continue;
+      const k = 1 - b.life / b.max;
+      const rr = 10 + (1 - k) * 26;
+      ctx.moveTo(b.x + rr, b.y);
+      ctx.arc(b.x, b.y, rr, 0, TAU);
+    }
+    ctx.stroke();
     ctx.strokeStyle = 'rgba(235,235,235,0.42)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.beginPath();
     for (const b of bs) {
+      if (b.mortar) continue;
       const sp = Math.hypot(b.vx, b.vy) || 1;
       const L = b.small ? 9 : 16;
       ctx.moveTo(b.x, b.y);
@@ -2177,17 +2231,22 @@ export class Engine {
     ctx.fillStyle = '#121212';
     ctx.beginPath();
     for (const b of bs) {
-      const r = b.small ? 2.2 : 3.6;
-      ctx.moveTo(b.x + r, b.y);
-      ctx.arc(b.x, b.y, r, 0, TAU);
+      const k = 1 - b.life / b.max;
+      const z = b.mortar ? Math.sin(k * Math.PI) * 74 : 0;
+      const r = b.mortar ? 4.2 : b.small ? 2.2 : 3.6;
+      const by = b.y - z;
+      ctx.moveTo(b.x + r, by);
+      ctx.arc(b.x, by, r, 0, TAU);
     }
     ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.beginPath();
     for (const b of bs) {
       if (b.small) continue;
-      ctx.moveTo(b.x - 0.1, b.y - 1.2);
-      ctx.arc(b.x - 1.2, b.y - 1.2, 1.1, 0, TAU);
+      const k = 1 - b.life / b.max;
+      const z = b.mortar ? Math.sin(k * Math.PI) * 74 : 0;
+      ctx.moveTo(b.x - 0.1, b.y - z - 1.2);
+      ctx.arc(b.x - 1.2, b.y - z - 1.2, 1.1, 0, TAU);
     }
     ctx.fill();
   }

@@ -1,8 +1,23 @@
 export type Screen = 'menu' | 'playing' | 'paused' | 'upgrade' | 'gameover';
 
-export type ShipKind = 'player' | 'merchant' | 'sloop' | 'brig' | 'frigate' | 'manowar' | 'fireship';
+export type ShipKind =
+  | 'player'
+  | 'merchant'
+  | 'schooner'
+  | 'galleon'
+  | 'sloop'
+  | 'cutter'
+  | 'brig'
+  | 'corvette'
+  | 'bombketch'
+  | 'frigate'
+  | 'privateer'
+  | 'manowar'
+  | 'fireship';
 
-export type Faction = 'pirate' | 'spain' | 'england' | 'merchant' | 'fire';
+export type Faction = 'pirate' | 'spain' | 'england' | 'france' | 'merchant' | 'fire';
+
+export type HullStyle = 'default' | 'longship' | 'ironclad' | 'caravel';
 
 export interface ShipDef {
   kind: ShipKind;
@@ -27,6 +42,16 @@ export interface ShipDef {
   trim: string;
   sail: string;
   sailShade: string;
+  /** Lobs arcing, exploding shells instead of flat broadsides. */
+  mortar?: boolean;
+  /** Reserved: ignores false flags once a disguise system exists. */
+  seesThroughDisguise?: boolean;
+  /** Gun decks drawn as extra rows of gun ports (default 1). */
+  decks?: number;
+  /** Silhouette variant drawn by the hull painter (default 'default'). */
+  hullStyle?: HullStyle;
+  /** Cache key override so variants of one kind get their own sprite. */
+  styleKey?: string;
 }
 
 export interface Ship {
