@@ -184,8 +184,11 @@ function HelpOverlay({
         </div>
 
         <p className="mb-3 text-sm leading-snug text-parch/90">
-          Before naval cannon, your weapons are archers and pulley-drawn bolt launchers — same controls,
-          no cannonballs. Boarding takes prisoners. Inhabited islands may share a people or a defence
+          Before naval cannon your weapons are bows, winch-drawn bolt launchers and sling stones — and,
+          in the Byzantine and Arab seas, Greek fire from bronze siphons and fire arrows. Same controls,
+          no cannonballs. Nothing goes off on impact in those waters: fire is what kills, so a burning
+          hull takes damage over time, and burning naphtha spread by a shot that fell short keeps
+          burning on the water. Boarding takes prisoners. Inhabited islands may share a people or a defence
           pact: anger one enough to start a fight, and all its kin and allies attack when you approach.
           Island labels identify their people, alliance and hostility. Leave them alone and tempers cool.
         </p>
@@ -211,7 +214,7 @@ function HelpOverlay({
                   crew and her flag!
                 </li>
                 <li>
-                  Buy <b>Grape &amp; Canister</b> (or <b>Arrow Storm</b> in early eras) and a special-fire button appears — one tap sweeps canoes and
+                  Buy <b>Grape &amp; Canister</b> (in early eras <b>Arrow Storm</b>, or a <b>Fire Pot Volley</b> where the siphons are) and a special-fire button appears — one tap sweeps canoes and
                   boarding parties off your hull. Island war canoes only fight near their own beach, so sail clear of
                   their waters to shake them off.
                 </li>
@@ -275,7 +278,7 @@ function HelpOverlay({
                       <KeyCap>R</KeyCap>
                     </>
                   }
-                  label="Grapeshot / Arrow Storm — sweep the deck (once fitted)"
+                  label="Grapeshot / Arrow Storm / Fire Pot Volley — sweep the deck (once fitted)"
                 />
                 <Row
                   keys={

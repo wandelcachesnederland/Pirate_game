@@ -287,6 +287,31 @@ export class Sfx {
     this.noise(d, t, 1.15, 0.16 * vol, 'lowpass', 620, 200, 0.7, 0.09);
   }
 
+  /** A fire siphon: bronze nozzle, a rasping hiss of naphtha spraying out. */
+  siphon(vol = 1, pan = 0) {
+    if (!this.ok() || vol < 0.04 || !this.gate('siphon', 0.07)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    // the hiss of the jet, swept outwards as the nozzle plays over the target
+    this.noise(d, t, 0.55, 0.42 * vol, 'bandpass', 1300, 3400, 1.1, 0.02, 0.7);
+    this.tone(d, t, 'sawtooth', 190, 95, 0.38, 0.13 * vol, 0.012);
+    // and the low roar of a thing that is already burning at the nozzle
+    this.noise(d, t, 0.75, 0.22 * vol, 'lowpass', 900, 260, 0.8, 0.05);
+  }
+
+  /** Something going up by fire, not powder: a whoosh of flame and a crackle. */
+  fireBurst(vol = 1, pan = 0) {
+    if (!this.ok() || vol < 0.05 || !this.gate('fireburst', 0.12)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    const v = vol * (0.85 + Math.random() * 0.3);
+    this.noise(d, t, 0.95, 0.5 * v, 'bandpass', 460, 1500, 0.8, 0.06, 1.15);
+    this.tone(d, t, 'sine', 125, 46, 0.6, 0.45 * v, 0.02);
+    for (let i = 0; i < 9; i++) {
+      this.noise(d, t + 0.04 + Math.random() * 0.7, 0.06 + Math.random() * 0.09, 0.15 * v, 'bandpass', 2300 + Math.random() * 1800, 1000, 0.9, 0.004, 0.85 + Math.random() * 0.6);
+    }
+  }
+
   /** A guided missile: hard booster roar, then a thin scream fading out. */
   missile(vol = 1, pan = 0) {
     if (!this.ok() || !this.gate('missile', 0.07)) return;

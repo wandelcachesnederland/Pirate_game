@@ -36,7 +36,19 @@ import {
 } from './render';
 import { PROVOKE, assignIslandPolitics, coolOff, flagOf, provokeNetwork, rollSettlement } from './settlements';
 import { cannonLocalX, drawFlagArt, drawShip, drawShipShadow } from './sprites';
-import { armShipForEra, projectileFor, upgradeForEra, usesGunpowder, type ProjectileKind } from './weapons';
+import {
+  armShipForEra,
+  armamentFor,
+  blastKindFor,
+  isBlunt,
+  isIncendiary,
+  projectileFor,
+  SHOT_PROFILE,
+  upgradeForEra,
+  usesGunpowder,
+  type Armament,
+  type ProjectileKind,
+} from './weapons';
 import { angDiff, TAU } from './math';
 
 // Re-exported so callers can keep importing `angDiff` from the engine.
@@ -81,6 +93,14 @@ const NATIVE_LEASH = [340, 540];
 const NATIVE_GUARD = 320;
 /** Spent raiders loiter this long off the beach before hauling out. */
 const NATIVE_BEACH = [11, 19];
+/** How often a burning hull takes its fire damage — bites you can read. */
+const BURN_TICK = 0.28;
+/** Chance per second that fire jumps between two hulls lying alongside. */
+const FIRE_SPREAD = 0.4;
+/** Greek fire floats and keeps burning: seconds a slick lives on the water. */
+const SLICK_LIFE = 3.6;
+/** Canvases of flaming naphtha afloat at once (older ones burn out first). */
+const MAX_SLICKS = 44;
 const FONT = '"Pirata One", Georgia, serif';
 const FELL = '"IM Fell English", Georgia, serif';
 
@@ -144,6 +164,18 @@ interface Ball {
   mortar: boolean;
   /** Chase gun: fired fore or aft; hits boats hard and real timbers lightly. */
   chaser?: boolean;
+}
+interface Slick {
+  x: number;
+  y: number;
+  r: number;
+  life: number;
+  max: number;
+  /** Only hulls of the other side are hurt by it (fire does not read flags). */
+  team: 0 | 1;
+  /** Damage per second to a hull lying in the flames. */
+  dps: number;
+  seed: number;
 }
 interface Pickup {
   x: number;
@@ -282,6 +314,8 @@ export class Engine {
   private parts: Particle[] = [];
   private pCount = 0;
   private pickups: Pickup[] = [];
+  /** Greek fire that missed: naphtha still burning on the water. */
+  private slicks: Slick[] = [];
   private texts: FText[] = [];
   private volleys: Volley[] = [];
   private streaks: Streak[] = [];
@@ -726,6 +760,7 @@ export class Engine {
     this.generateWorld();
     this.ships = [];
     this.balls = [];
+    this.slicks = [];
     this.pickups = [];
     this.texts = [];
     this.volleys = [];
@@ -838,6 +873,10 @@ export class Engine {
       aiJitter: enemy ? Math.max(0.035, 0.13 - 0.009 * (w - 1)) : 0,
       aiLead: enemy ? Math.min(1, 0.25 + 0.11 * (w - 1)) : 0,
       slowTimer: 0,
+      burn: 0,
+      burnRate: 0,
+      burnTick: 0,
+      burnFromPlayer: false,
       hitTimer: 99,
       fxTimer: 0,
       wakeTimer: 0,
@@ -1108,6 +1147,7 @@ export class Engine {
     if (this.nativeCallTimer > 0) this.nativeCallTimer -= rdt;
     if (playing) this.updatePlayerInput(dt);
     this.updateShips(dt);
+    if (playing) this.updateBurning(dt);
     if (playing) {
       this.updateNatives(dt);
       this.updateSettlements(dt);
@@ -1119,6 +1159,7 @@ export class Engine {
     }
     this.updateVolleys(dt);
     this.updateBalls(dt);
+    if (playing) this.updateSlicks(dt);
     this.updatePickups(dt);
     this.updateParticles(dt);
     this.updateTexts(dt);
@@ -1297,8 +1338,9 @@ export class Engine {
     const dir = s.angle + v.rel + rand(-1, 1) * (s.team === 0 ? 0.03 : s.aiJitter);
     const spd = s.ballSpeed * rand(0.97, 1.03);
     const life = (s.range / spd) * rand(0.95, 1.05);
+    const kind = s.def.projectile ?? projectileFor(this.eraId, v.lx < 0);
     this.balls.push({
-      projectile: s.def.projectile ?? projectileFor(this.eraId, v.lx < 0),
+      projectile: kind,
       x,
       y,
       vx: Math.cos(dir) * spd + s.vx * 0.5,
@@ -1314,7 +1356,7 @@ export class Engine {
     if (!usesGunpowder(this.eraId)) {
       if (v.side < 0) s.recoilL = 1;
       else s.recoilR = 1;
-      this.sfx.bow(this.volAt(x, y), this.panAt(x));
+      this.fireSound(kind, x, y);
       return;
     }
     if (s.def.projectile === 'missile') {
@@ -1368,13 +1410,14 @@ export class Engine {
     const life = (range + 50) / spd;
     const ox = p.x + Math.cos(a) * 10;
     const oy = p.y + Math.sin(a) * 10;
+    const kind = projectileFor(this.eraId, true);
     this.balls.push({
-      projectile: projectileFor(this.eraId, true),
+      projectile: kind,
       x: ox, y: oy, vx: Math.cos(a) * spd + p.vx * 0.3, vy: Math.sin(a) * spd + p.vy * 0.3,
       life, max: life, team: 0, dmg: 4 + lvl * 2, chain: false, small: true, mortar: false,
     });
     if (!usesGunpowder(this.eraId)) {
-      this.sfx.bow(0.8, this.panAt(ox));
+      this.fireSound(kind, ox, oy);
       return;
     }
     this.emit(P_FLASH, ox, oy, 0, 0, 0.07, 7, 9, '', 1, 0);
@@ -1442,14 +1485,15 @@ export class Engine {
     const ty = target.y + target.vy * t * 0.9;
     const a = Math.atan2(ty - oy, tx - ox) + rand(-0.03, 0.03);
     const life = (g.range + 60) / spd;
+    const kind = projectileFor(this.eraId);
     this.balls.push({
-      projectile: projectileFor(this.eraId),
+      projectile: kind,
       x: ox, y: oy,
       vx: Math.cos(a) * spd + p.vx * 0.35, vy: Math.sin(a) * spd + p.vy * 0.35,
       life, max: life, team: 0, dmg: g.dmg, chain: this.pstats.chain, small: true, mortar: false, chaser: true,
     });
     if (!usesGunpowder(this.eraId)) {
-      this.sfx.bow(0.8, this.panAt(ox));
+      this.fireSound(kind, ox, oy);
       return true;
     }
     // a light gun: flash, a wisp of smoke and a hard crack
@@ -1482,7 +1526,10 @@ export class Engine {
     const g = GRAPE[lvl - 1];
     this.grapeCd = g.cd;
     const gunpowder = usesGunpowder(this.eraId);
+    const arm = this.arm;
+    const fireVolley = !gunpowder && isIncendiary(arm.heavy);
     if (gunpowder) this.sfx.grapeshot(0.9, 0);
+    else if (fireVolley) this.sfx.siphon(1, 0);
     else this.sfx.bow(1, 0);
     this.addTrauma(0.34);
     this.hullShake = 0.75;
@@ -1517,6 +1564,21 @@ export class Engine {
       }
       this.emit(P_RING, p.x, p.y, 0, 0, 0.42, 10, g.range, '#ffd88a', 1, 0, 0, 0, 0.55);
 
+    } else if (fireVolley) {
+      // A sheet of burning naphtha sluiced all round the hull. Nothing goes
+      // off — it simply sets everything afloat alight.
+      for (let i = 0; i < 40; i++) {
+        const a = i * TAU / 40 + rand(-0.06, 0.06);
+        const sp = rand(140, 320);
+        this.emit(P_FIRE, p.x + Math.cos(a) * p.def.length * 0.3, p.y + Math.sin(a) * p.def.length * 0.3,
+          Math.cos(a) * sp, Math.sin(a) * sp, rand(0.28, 0.55), rand(4, 8), -4, pick(FIRE_COLORS), 1, 2.2);
+      }
+      for (let i = 0; i < 16; i++) {
+        const a = rand(0, TAU);
+        this.emit(P_SMOKE, p.x, p.y, Math.cos(a) * g.range * 0.6, Math.sin(a) * g.range * 0.6,
+          rand(0.9, 1.6), rand(6, 10), 20, pick(SMOKE_DARK), 1, 1.8, 0, 0, 0.5);
+      }
+      this.emit(P_RING, p.x, p.y, 0, 0, 0.5, 8, g.range * 0.8, '#ff9a3c', 1, 0, 0, 0, 0.5);
     } else {
       // Visible arrows sweep the same short-range area as the instant volley.
       for (let i = 0; i < 34; i++) {
@@ -1552,11 +1614,16 @@ export class Engine {
       e.vx += nx * shove;
       e.vy += ny * shove;
       e.slowTimer = Math.max(e.slowTimer, openBoat ? 2.4 : 1.2);
-      this.fxHit(e.x, e.y, Math.atan2(ny, nx), openBoat ? 1.1 : 0.8);
+      const dir = Math.atan2(ny, nx);
+      // burning naphtha thrown over a hull: it lands alight and stays alight
+      if (fireVolley) this.fxFireHit(e.x, e.y, dir, openBoat ? 0.8 : 1);
+      else this.fxHit(e.x, e.y, dir, openBoat ? 1.1 : 0.8, gunpowder);
+      if (fireVolley) this.igniteShip(e, 4, 0.008, true);
       this.sfx.hit(this.volAt(e.x, e.y) * 0.7, this.panAt(e.x));
     }
-    if (killed > 0) this.addText(p.x, p.y - 56, gunpowder ? 'GRAPE!' : 'ARROW STORM!', '#ffd84d', 26);
-    else if (hits > 0) this.addText(p.x, p.y - 56, gunpowder ? 'GRAPE!' : 'ARROW STORM!', '#ffd84d', 18);
+    const volley = gunpowder ? 'GRAPE!' : arm.volleyName;
+    if (killed > 0) this.addText(p.x, p.y - 56, volley, '#ffd84d', 26);
+    else if (hits > 0) this.addText(p.x, p.y - 56, volley, '#ffd84d', 18);
     else this.addText(p.x, p.y - 56, 'Nothing within reach', '#e6d3a3', 15);
   }
 
@@ -2294,7 +2361,12 @@ export class Engine {
     this.provokeIsland(is, PROVOKE.shelling, 'shell');
   }
 
-  /** The walls come down: the battery is silenced and the magazine pays out. */
+  /**
+   * The walls come down: the battery is silenced and the stores pay out. Where
+   * the fort keeps powder, its magazine goes up with the wall. In the
+   * pre-gunpowder seas there is no magazine to go up — the curtain wall simply
+   * collapses in dust and rubble, and the loot is stores, not powder.
+   */
   private razeFort(is: Island, f: Fortress) {
     f.ruined = true;
     f.hp = 0;
@@ -2311,9 +2383,16 @@ export class Engine {
     const fr = islandRadiusAt(is, f.angle) * 0.8;
     const fx = is.x + Math.cos(f.angle) * fr;
     const fy = is.y + Math.sin(f.angle) * fr;
-    this.fxExplosion(fx, fy, 1.1);
+    if (blastKindFor(this.eraId) === 'powder') {
+      this.fxExplosion(fx, fy, 1.1);
+      this.sfx.explosion(Math.max(0.55, this.volAt(fx, fy)), this.panAt(fx));
+    } else {
+      // a stone wall coming down: dust, rubble and a rumble, nothing more
+      this.fxCollapse(fx, fy, 1.2);
+      this.sfx.thud(1);
+      this.sfx.splash(this.volAt(fx, fy) * 0.5, this.panAt(fx));
+    }
     this.fxSparkle(fx, fy, 14, '#ffd27a');
-    this.sfx.explosion(Math.max(0.55, this.volAt(fx, fy)), this.panAt(fx));
     this.sfx.fanfare();
     this.addTrauma(0.45);
     const st = is.settlement;
@@ -2359,11 +2438,12 @@ export class Engine {
     const tx = p.x + p.vx * lead;
     const ty = p.y + p.vy * lead;
     const base = Math.atan2(ty - sy, tx - sx);
+    const kind = projectileFor(this.eraId, f.guns % 2 === 0);
     for (let i = 0; i < f.guns; i++) {
       const a = base + (i - (f.guns - 1) / 2) * 0.05 + rand(-0.035, 0.035);
       const life = dist / f.ballSpeed + 0.35;
       this.balls.push({
-        projectile: projectileFor(this.eraId, i % 2 === 0),
+        projectile: kind,
         x: sx,
         y: sy,
         vx: Math.cos(a) * f.ballSpeed,
@@ -2408,11 +2488,26 @@ export class Engine {
         this.emit(P_SMOKE, b.x, b.y, rand(-10, 10), rand(-10, 10), rand(0.5, 0.9), rand(2.5, 4.5), 10, pick(SMOKE_LIGHT), 1, 2, 0, 0, 0.4);
         this.emit(P_FIRE, b.x, b.y, rand(-8, 8), rand(-8, 8), rand(0.08, 0.16), rand(2, 3.5), 0, pick(FIRE_COLORS), 1, 3);
       }
+      // shot that is alight leaves a trail of flame and smoke behind it
+      if (b.projectile === 'fireArrow') {
+        if (Math.random() < 0.45) {
+          this.emit(P_FIRE, b.x, b.y, rand(-16, 16), rand(-16, 16), rand(0.12, 0.26), rand(1.8, 3.2), -2, pick(FIRE_COLORS), 1, 2.2, 0, 0, 0.8);
+        }
+      } else if (b.projectile === 'greekFire') {
+        for (let k = 0; k < 2; k++) {
+          this.emit(P_FIRE, b.x + rand(-2, 2), b.y + rand(-2, 2), rand(-30, 30), rand(-30, 30), rand(0.18, 0.36), rand(3, 5.5), -3, pick(FIRE_COLORS), 1, 1.6, 0, 0, 0.85);
+        }
+        if (Math.random() < 0.5) {
+          this.emit(P_SMOKE, b.x, b.y, this.windX * 22 + rand(-10, 10), this.windY * 22 + rand(-10, 10), rand(0.7, 1.3), rand(3, 6), 10, pick(SMOKE_DARK), 1, 1.4, 0, 0, 0.45);
+        }
+      }
       // a mortar shell is only dangerous once it drops out of its arc
       const falling = !b.mortar || 1 - b.life / b.max > 0.62;
       if (b.life <= 0) {
         if (b.mortar) this.mortarBlast(b);
         else {
+          // Greek fire carries on burning on the water; an arrow just sinks
+          if (b.projectile === 'greekFire') this.spawnSlick(b);
           this.fxSplash(b.x, b.y, b.small ? 0.55 : 1);
           this.sfx.splash(this.volAt(b.x, b.y) * (b.small ? 0.4 : 0.8), this.panAt(b.x));
         }
@@ -2463,9 +2558,10 @@ export class Engine {
 
   private onBallHit(b: Ball, s: Ship) {
     const dir = Math.atan2(b.vy, b.vx);
+    const prof = SHOT_PROFILE[b.projectile];
     // a chase gun is small calibre: it guts an open boat and bounces off a hull
     const openBoat = s.def.oared === true && s.def.length <= 60;
-    let dmg = b.dmg * rand(0.85, 1.15) * (b.chaser && !openBoat ? CHASER_BIG : 1);
+    let dmg = b.dmg * prof.dmg * rand(0.85, 1.15) * (b.chaser && !openBoat ? CHASER_BIG : 1);
     let crit = false;
     if (b.team === 0 && !b.small && Math.random() < 0.1) {
       dmg *= 2;
@@ -2479,13 +2575,25 @@ export class Engine {
       s.vx += Math.cos(dir) * 30;
       s.vy += Math.sin(dir) * 30;
       if (b.team === 0) this.addTrauma(0.16);
-    } else this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1);
+    } else if (b.projectile === 'greekFire') {
+      // a jet of burning naphtha: it bursts across the planking and stays there
+      this.fxFireHit(b.x, b.y, dir, b.small ? 0.8 : 1.15);
+      this.sfx.burn(Math.max(0.4, this.volAt(b.x, b.y)) * 0.8, this.panAt(b.x));
+    } else if (isBlunt(b.projectile)) {
+      // a stone: dust, splinters and a hard shove — never a spark
+      this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1, false);
+    } else this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1, prof.sparks);
     // a chase gun hit knocks a canoe off its stroke and back down the wake
     const knock = b.projectile === 'missile' ? 26 : b.chaser ? (openBoat ? 70 : 12) : b.small ? 4 : 10;
     s.vx += Math.cos(dir) * knock;
     s.vy += Math.sin(dir) * knock;
     s.angVel += rand(-0.15, 0.15);
     if (b.chaser && openBoat) s.slowTimer = Math.max(s.slowTimer, 1.4);
+    // incendiaries leave the target burning; barbed shot drags at her rigging
+    if (prof.slow > 0) s.slowTimer = Math.max(s.slowTimer, prof.slow * (b.small ? 0.5 : 1));
+    if (prof.ignite > 0 && Math.random() < prof.ignite * (b.small ? 0.6 : 1)) {
+      this.igniteShip(s, prof.burn, prof.burnRate, b.team === 0);
+    }
     if (b.team === 0) {
       if (!b.small) this.stats.hits++;
       this.firstHit = true;
@@ -2542,6 +2650,152 @@ export class Engine {
     if (s.team === 1 && !s.surrendered && s.hitByPlayer) this.maybeSurrender(s);
   }
 
+  // ================================================================ fire
+  /** The armament of the sea being sailed: cannon, bows, bolts or siphons. */
+  private get arm(): Armament {
+    return armamentFor(this.eraId);
+  }
+
+  /** The report of one shot: powder, bowstring or fire siphon. */
+  private fireSound(kind: ProjectileKind, x: number, y: number) {
+    const vol = Math.max(0.35, this.volAt(x, y));
+    const pan = this.panAt(x);
+    // a siphon roars; bows, winches and slings all speak with a bowstring snap
+    if (kind === 'greekFire') this.sfx.siphon(vol, pan);
+    else this.sfx.bow(vol, pan);
+  }
+
+  /**
+   * Set a hull alight. Without powder, fire is what finishes a ship: it eats
+   * the hull over the next few seconds and can leap to whatever is lying
+   * alongside. The hit itself is what drags at the rigging (`SHOT_PROFILE.slow`).
+   * The player's crew turns out with buckets and wet canvas, so fire on her own
+   * deck is shorter and milder than fire in an enemy's.
+   */
+  private igniteShip(s: Ship, time: number, rate: number, byPlayer: boolean) {
+    if (s.sinking >= 0 || s.captured || s.dead || time <= 0) return;
+    const player = s === this.player;
+    const t = player ? time * 0.7 : time;
+    const r = player ? rate * 0.7 : rate;
+    const fresh = !(s.burn > 0);
+    s.burn = Math.max(s.burn, t);
+    s.burnRate = Math.max(s.burnRate, r);
+    if (s.burnTick <= 0) s.burnTick = 0.12;
+    if (byPlayer) s.burnFromPlayer = true;
+    if (!fresh) return;
+    if (player) {
+      this.addText(s.x, s.y - 58, 'FIRE ABOARD!', '#ff9a3c', 24);
+      this.flashRed = Math.min(0.7, this.flashRed + 0.22);
+      this.addTrauma(0.2);
+    } else {
+      this.addText(s.x, s.y - 26, 'AFIRE!', '#ff9a3c', 15);
+    }
+    this.sfx.burn(Math.max(0.4, this.volAt(s.x, s.y)), this.panAt(s.x));
+  }
+
+  /** One tick of fire damage — heat and smoke, not a powder blast. */
+  private fireDamage(s: Ship, amount: number) {
+    if (amount <= 0) return;
+    if (s === this.player) {
+      // burning hurts, but it must not rattle the camera every quarter second
+      this.waveDamage += amount;
+      this.flashRed = Math.min(0.7, this.flashRed + amount * 0.005);
+      if (Math.random() < 0.2) this.addTrauma(0.04);
+      this.damageShip(s, amount, false);
+    } else {
+      this.damageShip(s, amount, s.burnFromPlayer);
+    }
+  }
+
+  /** Tongues of flame and smoke coming off a burning hull. */
+  private burnFx(s: Ship, dt: number) {
+    const hl = s.def.length * 0.5;
+    const hw = s.def.width * 0.5;
+    const c = Math.cos(s.angle);
+    const sn = Math.sin(s.angle);
+    const n = Math.max(1, Math.round(dt * 30));
+    for (let i = 0; i < n; i++) {
+      const lx = rand(-0.7, 0.7) * hl;
+      const ly = rand(-0.6, 0.6) * hw;
+      const x = s.x + c * lx - sn * ly;
+      const y = s.y + sn * lx + c * ly;
+      this.emit(P_FIRE, x, y, s.vx * 0.7 + rand(-16, 16), s.vy * 0.7 + rand(-16, 16), rand(0.3, 0.6), rand(4.5, 8), -8, pick(FIRE_COLORS), 1, 0.8, 0, 0, 0.85);
+      if (Math.random() < 0.5) {
+        this.emit(P_SMOKE, x, y, this.windX * 30 + rand(-10, 10), this.windY * 30 + rand(-10, 10), rand(1.1, 2), rand(6, 10), 18, pick(SMOKE_DARK), 1, 1.2, 0, 0, 0.5);
+      }
+    }
+  }
+
+  /**
+   * Keep every burning hull alight: fire eats the hull and leaps the gap to a
+   * ship lying alongside. The rigging damage is felt at the moment of the hit
+   * (see `SHOT_PROFILE.slow`), not as a permanent drag.
+   */
+  private updateBurning(dt: number) {
+    for (const s of this.ships) {
+      if (s.dead || s.sinking >= 0 || !(s.burn > 0)) continue;
+      s.burn = Math.max(0, s.burn - dt);
+      s.burnTick -= dt;
+      this.burnFx(s, dt);
+      if (s.burnTick <= 0) {
+        s.burnTick = BURN_TICK;
+        this.fireDamage(s, s.maxHp * s.burnRate * BURN_TICK);
+      }
+      if (s.burn <= 0) {
+        s.burnRate = 0;
+        s.burnFromPlayer = false;
+        continue;
+      }
+      for (const o of this.ships) {
+        if (o === s || o.dead || o.sinking >= 0 || o.burn > 0) continue;
+        const reach = (s.def.length + o.def.length) * 0.42;
+        if (Math.hypot(o.x - s.x, o.y - s.y) > reach) continue;
+        if (Math.random() < dt * FIRE_SPREAD) {
+          this.igniteShip(o, 2.5, 0.006, s.burnFromPlayer || s === this.player);
+        }
+      }
+    }
+  }
+
+  /** A slick of naphtha still burning on the water where a shot fell short. */
+  private spawnSlick(b: Ball) {
+    const r = (b.small ? 22 : 34) * (1 + Math.random() * 0.25);
+    if (this.slicks.length >= MAX_SLICKS) this.slicks.shift();
+    this.slicks.push({
+      x: b.x, y: b.y, r, life: SLICK_LIFE, max: SLICK_LIFE,
+      team: b.team, dps: b.dmg * 0.5, seed: Math.random() * TAU,
+    });
+  }
+
+  /** Whoever crosses a burning slick catches fire; the sea carries the smoke. */
+  private updateSlicks(dt: number) {
+    for (let i = this.slicks.length - 1; i >= 0; i--) {
+      const sl = this.slicks[i];
+      sl.life -= dt;
+      if (Math.random() < dt * 20) {
+        const a = rand(0, TAU);
+        const d = Math.sqrt(Math.random()) * sl.r;
+        const x = sl.x + Math.cos(a) * d;
+        const y = sl.y + Math.sin(a) * d;
+        this.emit(P_FIRE, x, y, this.windX * 16 + rand(-10, 10), this.windY * 16 + rand(-10, 10), rand(0.25, 0.5), rand(3.5, 7), -6, pick(FIRE_COLORS), 1, 1, 0, 0, 0.8);
+      }
+      if (Math.random() < dt * 5) {
+        this.emit(P_SMOKE, sl.x + rand(-sl.r, sl.r) * 0.6, sl.y + rand(-sl.r, sl.r) * 0.6, this.windX * 34, this.windY * 34, rand(1.2, 2.2), rand(7, 12), 20, pick(SMOKE_DARK), 1, 1.2, 0, 0, 0.5);
+      }
+      for (const s of this.ships) {
+        if (s.dead || s.sinking >= 0 || s.team === sl.team) continue;
+        if (Math.hypot(s.x - sl.x, s.y - sl.y) > sl.r + s.def.length * 0.35) continue;
+        this.fireDamage(s, sl.dps * dt);
+        // linger in the flames and they take hold of your own timbers
+        if (Math.random() < Math.min(1, dt * 1.6)) this.igniteShip(s, 1.8, 0.006, sl.team === 0);
+      }
+      if (sl.life <= 0) {
+        this.slicks[i] = this.slicks[this.slicks.length - 1];
+        this.slicks.pop();
+      }
+    }
+  }
+
   /** A mauled foe may strike her colours instead of fighting to the death. */
   private maybeSurrender(s: Ship) {
     // a fisherman has no flag to strike: he just rows harder
@@ -2579,13 +2833,15 @@ export class Engine {
       if (s.peaceful) this.addText(s.x, s.y - 34, 'their fishing boat…', '#ffd8a8', 16);
     }
     const big = s.def.length / 60;
-    if (usesGunpowder(this.eraId)) {
+    if (blastKindFor(this.eraId) === 'powder') {
+      // a magazine going up: white flash, shockwave, a blast you can hear
       this.fxExplosion(s.x, s.y, big);
       this.sfx.explosion(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
     } else {
-      // no powder on the water: she goes up by pitch and hand, or founders
+      // no powder on the water: she goes up by pitch, oil and hand — a sheet of
+      // flame and a cloud of smoke, or she simply founders. Never a blast.
       this.fxBurnOut(s, big);
-      this.sfx.burn(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
+      this.sfx.fireBurst(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
     }
     if (s.team === 1) {
       if (reward) {
@@ -2610,7 +2866,8 @@ export class Engine {
         this.zoomPunch = s.isBoss ? 0.14 : 0.06;
         this.flashWhite = s.isBoss ? 0.55 : 0.2;
       } else {
-        this.addText(s.x, s.y - 30, 'KABOOM!', '#ff8a3a', 26);
+        // no magazine below decks: the fire ship is a bonfire, not a bomb
+        this.addText(s.x, s.y - 30, blastKindFor(this.eraId) === 'powder' ? 'KABOOM!' : 'ABLAZE!', '#ff8a3a', 26);
       }
       this.addTrauma(s.isBoss ? 0.95 : 0.45);
       if (s.def.kind === 'fireship') this.fireBlast(s);
@@ -2625,8 +2882,12 @@ export class Engine {
       this.input.clear();
       this.sfx.stopMusic();
       this.sfx.gameOver();
-      if (usesGunpowder(this.eraId)) this.fxExplosion(s.x + rand(-15, 15), s.y + rand(-10, 10), 1.2);
-      else this.fxBurnOut(s, 1.1);
+      if (blastKindFor(this.eraId) === 'powder') {
+        this.fxExplosion(s.x + rand(-15, 15), s.y + rand(-10, 10), 1.2);
+      } else {
+        this.fxBurnOut(s, 1.1);
+        this.sfx.fireBurst(Math.max(0.5, this.volAt(s.x, s.y)), this.panAt(s.x));
+      }
     }
   }
 
@@ -2681,9 +2942,21 @@ export class Engine {
     }
   }
 
+  /**
+   * A fire ship reaching its target. Where powder is carried she goes off like
+   * a magazine; in the pre-gunpowder seas the pitch, oil and brushwood all
+   * catch at once and a wall of flame sweeps out instead. The damage is the
+   * same either way — what changes is that nothing there explodes.
+   */
   private fireBlast(fs: Ship) {
     const R = 125;
-    this.fxExplosion(fs.x, fs.y, 1.6);
+    if (blastKindFor(this.eraId) === 'powder') {
+      this.fxExplosion(fs.x, fs.y, 1.6);
+      this.sfx.explosion(Math.max(0.5, this.volAt(fs.x, fs.y)), this.panAt(fs.x));
+    } else {
+      this.fxFireBurst(fs.x, fs.y, 1.7);
+      this.sfx.fireBurst(Math.max(0.5, this.volAt(fs.x, fs.y)), this.panAt(fs.x));
+    }
     this.emit(P_RING, fs.x, fs.y, 0, 0, 0.55, 10, R + 40, '#ffb347', 1, 0, 0, 0, 0.9);
     this.addTrauma(0.5);
     const dmgBase = 30 * (1 + 0.05 * (this.wave - 1));
@@ -2696,6 +2969,8 @@ export class Engine {
       const ny = (s.y - fs.y) / (d || 1);
       s.vx += nx * 90 * k;
       s.vy += ny * 90 * k;
+      // the flames take hold of whatever she was grappled to
+      this.igniteShip(s, 3 * k, 0.007, fs.hitByPlayer);
       if (s === this.player) this.hurtPlayer(dmgBase * k, nx, ny, false);
       else this.damageShip(s, dmgBase * 1.4 * k, fs.hitByPlayer);
     }
@@ -3124,22 +3399,101 @@ export class Engine {
     this.emit(P_FOAM, x, y, 0, 0, 1.2, 5 * sc, 12 * sc, '#ffffff', 0, 0, 0, 0, 0.5);
   }
 
-  private fxHit(x: number, y: number, dir: number, sc: number) {
-    this.emit(P_FLASH, x, y, 0, 0, 0.12, 14 * sc, 22 * sc, '', 1, 0);
+  /**
+   * A hit on a hull: splinters, a puff of dust and smoke — and sparks only
+   * where hot iron actually strikes iron. Arrows, bolts and stones land with
+   * a wooden thud, so `sparks` is false for everything without powder.
+   */
+  private fxHit(x: number, y: number, dir: number, sc: number, sparks = true) {
+    if (sparks) this.emit(P_FLASH, x, y, 0, 0, 0.12, 14 * sc, 22 * sc, '', 1, 0);
+    else this.emit(P_SAND, x, y, 0, 0, 0.18, 9 * sc, 16 * sc, pick(['#e6cf96', '#d9d2c2', '#cfc7b4']), 0, 0, 0, 0, 0.75);
     const n = Math.round(12 * sc);
     for (let i = 0; i < n; i++) {
       const a = dir + rand(-1.1, 1.1) + (Math.random() < 0.25 ? Math.PI : 0);
       const sp = rand(60, 260);
       this.emit(P_SPLINTER, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.45, 0.9), rand(3, 6), 0, pick(WOOD), 1, 3.2, rand(0, TAU), rand(-18, 18));
     }
-    for (let i = 0; i < 5; i++) {
-      const a = dir + rand(-1, 1);
-      const sp = rand(150, 320);
-      this.emit(P_SPARK, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.15, 0.3), 1.5, 0, '#ffcf6b', 1, 3);
+    if (sparks) {
+      for (let i = 0; i < 5; i++) {
+        const a = dir + rand(-1, 1);
+        const sp = rand(150, 320);
+        this.emit(P_SPARK, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.15, 0.3), 1.5, 0, '#ffcf6b', 1, 3);
+      }
     }
     for (let i = 0; i < 3; i++) {
       this.emit(P_SMOKE, x, y, rand(-25, 25) + this.windX * 20, rand(-25, 25) + this.windY * 20, rand(0.7, 1.3), rand(4, 7), 14, pick(SMOKE_DARK), 1, 1.8, 0, 0, 0.5);
     }
+  }
+
+  /** A jet of Greek fire bursting across a hull: flame, smoke, splinters. */
+  private fxFireHit(x: number, y: number, dir: number, sc: number) {
+    const n = Math.round(20 * sc);
+    for (let i = 0; i < n; i++) {
+      const a = dir + rand(-0.9, 0.9) + (Math.random() < 0.3 ? Math.PI : 0);
+      const sp = rand(70, 300) * (0.7 + sc * 0.3);
+      this.emit(P_FIRE, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.3, 0.65), rand(5, 10), -5, pick(FIRE_COLORS), 1, 2.4);
+    }
+    for (let i = 0; i < Math.round(9 * sc); i++) {
+      const a = dir + rand(-1.2, 1.2);
+      const sp = rand(80, 300);
+      this.emit(P_SPLINTER, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.4, 0.85), rand(3, 5.5), 0, pick(WOOD), 1, 3, rand(0, TAU), rand(-16, 16));
+    }
+    for (let i = 0; i < 5; i++) {
+      this.emit(P_SMOKE, x, y, rand(-35, 35) + this.windX * 30, rand(-35, 35) + this.windY * 30, rand(0.9, 1.7), rand(6, 11), 20, pick(SMOKE_DARK), 1, 1.6, 0, 0, 0.55);
+    }
+    this.emit(P_RING, x, y, 0, 0, 0.35, 6, 46 * sc, '#ffb347', 1, 0, 0, 0, 0.6);
+  }
+
+  /**
+   * A hull going up by fire rather than by magazine: a sheet of flame, a cloud
+   * of smoke and a spray of burning splinters. No white flash, no powder ring,
+   * no shockwave — nothing here goes off, it simply burns all at once.
+   */
+  private fxFireBurst(x: number, y: number, sc: number) {
+    const nf = Math.round(26 * sc);
+    for (let i = 0; i < nf; i++) {
+      const a = rand(0, TAU);
+      const sp = rand(30, 210) * Math.sqrt(Math.max(0.4, sc));
+      this.emit(P_FIRE, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.45, 0.95), rand(6, 13), -5, pick(FIRE_COLORS), 1, 2.6, 0, 0, 0.95);
+    }
+    for (let i = 0; i < Math.round(20 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(20, 130);
+      this.emit(P_SMOKE, x, y, Math.cos(a) * sp + this.windX * 26, Math.sin(a) * sp + this.windY * 26, rand(1.5, 2.8), rand(10, 19), 26, pick(SMOKE_DARK), 1, 1.5, 0, 0, 0.65);
+    }
+    for (let i = 0; i < Math.round(20 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(60, 260);
+      this.emit(P_SPLINTER, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.6, 1.2), rand(4, 8), 0, pick(WOOD), 1, 2.6, rand(0, TAU), rand(-16, 16));
+    }
+    // embers riding the wind, not a shower of sparks
+    for (let i = 0; i < Math.round(10 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(60, 240);
+      this.emit(P_SPARK, x, y, Math.cos(a) * sp + this.windX * 30, Math.sin(a) * sp + this.windY * 30, rand(0.5, 1.1), 1.8, 0, pick(['#ffb347', '#ff7b2e']), 1, 1.6);
+    }
+    this.emit(P_RING, x, y, 0, 0, 0.7, 6, 96 * sc, '#ff9a3c', 1, 0, 0, 0, 0.55);
+    this.emit(P_RING, x, y, 0, 0, 1.4, 8, 54 * sc, '#ffd7a0', 0, 0, 0, 0, 0.35);
+  }
+
+  /** A stone wall coming down: dust, rubble and splinters — no flame at all. */
+  private fxCollapse(x: number, y: number, sc: number) {
+    for (let i = 0; i < Math.round(22 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(20, 150);
+      this.emit(P_SMOKE, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(1.2, 2.4), rand(9, 17), 24, pick(SMOKE_LIGHT), 1, 1.5, 0, 0, 0.6);
+    }
+    for (let i = 0; i < Math.round(16 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(40, 220);
+      this.emit(P_SAND, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.5, 1), rand(3.5, 7), 0, pick(['#b9b3a6', '#8f8c82', '#d9d2c2']), 1, 2.6, rand(0, TAU), rand(-14, 14));
+    }
+    for (let i = 0; i < Math.round(10 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(60, 240);
+      this.emit(P_SPLINTER, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.5, 1), rand(3, 6), 0, pick(WOOD), 1, 2.6, rand(0, TAU), rand(-16, 16));
+    }
+    this.emit(P_RING, x, y, 0, 0, 0.9, 8, 80 * sc, '#cfc7b4', 0, 0, 0, 0, 0.4);
   }
 
   private fxExplosion(x: number, y: number, sc: number) {
@@ -3294,6 +3648,7 @@ export class Engine {
     this.drawWater(ctx);
     this.drawBounds(ctx);
     this.drawIslands(ctx);
+    this.drawSlicks(ctx);
     this.drawParticles(ctx, 0);
     this.drawPickups(ctx);
 
@@ -3303,6 +3658,7 @@ export class Engine {
     for (const s of this.ships)
       if (s !== p && this.shipVisible(s)) drawShip(ctx, s, this.time, this.windAngle, s.falseFlag ?? s.def.faction);
     if (p && !p.dead && this.shipVisible(p)) drawShip(ctx, p, this.time, this.windAngle, p.falseFlag ?? p.def.faction);
+    this.drawBurning(ctx);
     if (this.screen !== 'menu') this.drawReloadArcs(ctx);
     this.drawBalls(ctx);
     this.drawParticles(ctx, 1);
@@ -3474,6 +3830,70 @@ export class Engine {
         ctx.restore();
       }
     }
+  }
+
+  /**
+   * Greek fire on the water: a patch of flame that keeps burning wherever a
+   * shot fell short. Drawn under the hulls, so a ship crossing it sails into
+   * the fire rather than over it.
+   */
+  private drawSlicks(ctx: CanvasRenderingContext2D) {
+    const sl = this.slicks;
+    if (!sl.length) return;
+    const t = this.time;
+    const x0 = this.vx0;
+    const x1 = this.vx1;
+    const y0 = this.vy0;
+    const y1 = this.vy1;
+    ctx.globalCompositeOperation = 'lighter';
+    for (const s of sl) {
+      if (s.x < x0 - 80 || s.x > x1 + 80 || s.y < y0 - 80 || s.y > y1 + 80) continue;
+      // the flames gutter and lean downwind as the naphtha burns away
+      const fade = clamp(s.life / s.max, 0, 1);
+      const flick = 0.82 + 0.18 * Math.sin(t * 9 + s.seed);
+      const rx = s.r * flick;
+      const ry = s.r * (0.62 + 0.12 * Math.sin(t * 7.3 + s.seed * 2));
+      const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, rx);
+      g.addColorStop(0, `rgba(255,196,96,${0.55 * fade})`);
+      g.addColorStop(0.45, `rgba(255,120,40,${0.4 * fade})`);
+      g.addColorStop(1, 'rgba(180,40,10,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y, rx, ry, Math.atan2(this.windY, this.windX), 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#2b1a12';
+    for (const s of sl) {
+      if (s.x < x0 - 80 || s.x > x1 + 80 || s.y < y0 - 80 || s.y > y1 + 80) continue;
+      const fade = clamp(s.life / s.max, 0, 1);
+      ctx.globalAlpha = 0.35 * fade;
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y, s.r * 0.85, s.r * 0.5, Math.atan2(this.windY, this.windX), 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /** A hull on fire glows: a warm light under her decks and up her rigging. */
+  private drawBurning(ctx: CanvasRenderingContext2D) {
+    if (!this.ships.length) return;
+    ctx.globalCompositeOperation = 'lighter';
+    for (const s of this.ships) {
+      if (!(s.burn > 0) || s.dead || !this.shipVisible(s)) continue;
+      const hl = s.def.length * 0.5;
+      const flick = 0.75 + 0.25 * Math.sin(this.time * 11 + s.bob);
+      for (let i = 0; i < 3; i++) {
+        const off = (i - 1) * hl * 0.55;
+        const g = hl * 1.25 * flick;
+        const x = s.x + Math.cos(s.angle) * off;
+        const y = s.y + Math.sin(s.angle) * off;
+        ctx.globalAlpha = 0.3 + 0.12 * Math.sin(this.time * 13 + i * 2 + s.bob);
+        ctx.drawImage(this.glowWarm, x - g, y - g, g * 2, g * 2);
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
   }
 
   private drawPickups(ctx: CanvasRenderingContext2D) {
@@ -3660,7 +4080,50 @@ export class Engine {
       }
       ctx.save();
       ctx.translate(b.x, b.y);
+      if (b.projectile === 'stone') {
+        // a rough rock, tumbling as it flies
+        ctx.rotate(Math.atan2(b.vy, b.vx) + this.time * 3.5);
+        ctx.fillStyle = '#9a938a';
+        ctx.beginPath();
+        ctx.moveTo(-4.5, -2.4); ctx.lineTo(1.4, -4.2); ctx.lineTo(5, -0.8);
+        ctx.lineTo(3, 3.4); ctx.lineTo(-2.4, 3.8); ctx.lineTo(-5.2, 0.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(60,55,48,0.85)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.22)';
+        ctx.beginPath();
+        ctx.moveTo(-1.6, -2.6); ctx.lineTo(1.4, -3.4); ctx.lineTo(1.8, -1.6); ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        continue;
+      }
+      if (b.projectile === 'greekFire') {
+        // a jet of burning naphtha: a blob of flame with a tail of it behind
+        ctx.rotate(Math.atan2(b.vy, b.vx));
+        const flick = 0.85 + Math.sin(this.time * 40 + b.x * 0.1) * 0.15;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = 'rgba(255,120,40,0.85)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 9 * flick, 4.6 * flick, 0, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = '#ffd98a';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 5 * flick, 2.6 * flick, 0, 0, TAU);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = 'rgba(255,150,60,0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-6, 0);
+        ctx.lineTo(-20 - flick * 4, 0);
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      }
       ctx.rotate(Math.atan2(b.vy, b.vx));
+      const fireArrow = b.projectile === 'fireArrow';
       const length = b.projectile === 'bolt' ? 19 : 13;
       ctx.strokeStyle = '#d8bd7f';
       ctx.lineWidth = b.projectile === 'bolt' ? 2.5 : 1.5;
@@ -3672,6 +4135,20 @@ export class Engine {
       ctx.beginPath();
       ctx.moveTo(6, 0); ctx.lineTo(0, -3); ctx.lineTo(0, 3);
       ctx.closePath(); ctx.fill();
+      if (fireArrow) {
+        // a wad of burning tow behind the head
+        ctx.globalCompositeOperation = 'lighter';
+        const flick = 0.8 + Math.sin(this.time * 34 + b.y * 0.1) * 0.2;
+        ctx.fillStyle = 'rgba(255,150,50,0.9)';
+        ctx.beginPath();
+        ctx.ellipse(3, 0, 4.6 * flick, 3 * flick, 0, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = '#ffe6a8';
+        ctx.beginPath();
+        ctx.ellipse(3, 0, 2 * flick, 1.5 * flick, 0, 0, TAU);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
       ctx.restore();
     }
   }
@@ -4442,7 +4919,7 @@ export class Engine {
     const touch = this.isTouch || this.input.usedTouch;
     const l1 = touch ? 'Drag on the left side to steer' : 'A / D steer   ·   W / S trim sails';
     const l2 = touch
-      ? (usesGunpowder(this.eraId) ? 'Tap FIRE — cannons shoot from the SIDES!' : 'Tap FIRE — bows & pulley launchers fire from the SIDES!')
+      ? `Tap FIRE — ${this.arm.weaponWord} fire from the SIDES!`
       : 'Q / E fire port & starboard   ·   SPACE or CLICK smart broadside';
     const u = this.ui;
     const W = this.w;

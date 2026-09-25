@@ -3,8 +3,9 @@
 // under every portrait so a captain can tell a gun platform from a sprinter at
 // a glance.
 
-import { isSteelHull, type ShipDef } from '../types';
+import { isSteelHull, type EraId, type ShipDef } from '../types';
 import { ERA_SHIPS } from './era';
+import { armamentFor, usesGunpowder } from '../weapons';
 
 export interface ShipTraits {
   strengths: string[];
@@ -42,8 +43,9 @@ export function shipScores(def: ShipDef): ShipScores {
   };
 }
 
-/** Strengths and weaknesses, strongest line first. 1-3 of each, never empty. */
-export function shipTraits(def: ShipDef): ShipTraits {
+/** Strengths and weaknesses, strongest line first. 1-3 of each, never empty.
+ * Pass the era to name the armament a pre-gunpowder hull really carries. */
+export function shipTraits(def: ShipDef, era?: EraId): ShipTraits {
   const strengths: [number, string][] = [];
   const weaknesses: [number, string][] = [];
   const hpR = def.hp / MAX.hp;
@@ -60,7 +62,12 @@ export function shipTraits(def: ShipDef): ShipTraits {
   if (def.oared || isSteelHull(def.hullStyle)) strengths.push([0.75, isSteelHull(def.hullStyle) ? 'Burns fuel — wind means nothing' : 'Paddles — wind means nothing']);
   if (def.mortar) strengths.push([0.72, 'Lobs exploding shells']);
   if ((def.crew ?? 0) >= 120) strengths.push([0.68, `Big boarding crew (${def.crew})`]);
-  if (big && def.cannons >= 3) strengths.push([0.66, def.weapon === 'mechanical' ? 'Ranks of archers and pulley-drawn launchers' : 'Carries a whole fort’s worth of guns']);
+  if (big && def.cannons >= 3) {
+    const mechanical = def.weapon === 'mechanical'
+      ? (era && !usesGunpowder(era) ? armamentFor(era).heavyName : 'Ranks of archers and pulley-drawn launchers')
+      : null;
+    strengths.push([0.66, mechanical ?? 'Carries a whole fort’s worth of guns']);
+  }
 
   if (hpR <= 0.4) weaknesses.push([1 - hpR, `Thin hull (${def.hp})`]);
   if (spdR <= 0.65) weaknesses.push([1 - spdR, `Slow — ${def.speed} knots`]);

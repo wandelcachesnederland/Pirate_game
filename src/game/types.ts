@@ -1,7 +1,21 @@
 export type Screen = 'menu' | 'playing' | 'paused' | 'upgrade' | 'gameover';
 
-/** What actually flies when a ship fires. */
-export type ProjectileKind = 'arrow' | 'bolt' | 'cannonball' | 'missile';
+/**
+ * What actually flies when a ship fires.
+ *
+ * `arrow`, `bolt`, `fireArrow`, `greekFire` and `stone` are the shots of the
+ * pre-gunpowder seas (see `weapons.ts`): bowstrings, winch-drawn engines,
+ * incendiaries and sling/torsion stones. Nothing among them goes off on impact
+ * — what kills a hull without powder is fire and weight, not a blast.
+ */
+export type ProjectileKind =
+  | 'arrow'
+  | 'bolt'
+  | 'fireArrow'
+  | 'greekFire'
+  | 'stone'
+  | 'cannonball'
+  | 'missile';
 
 export type ShipKind =
   | 'player'
@@ -327,6 +341,18 @@ export interface Ship {
   aiJitter: number;
   aiLead: number;
   slowTimer: number;
+  /**
+   * Seconds of fire left burning in this hull (0 = not alight). Without powder
+   * a ship is killed by fire, so a hit from a fire arrow or a Greek-fire siphon
+   * leaves her burning: see `igniteShip` / `updateBurning` in the engine.
+   */
+  burn: number;
+  /** Fire damage per second, as a fraction of this hull's own maximum. */
+  burnRate: number;
+  /** Countdown to the next burn tick (keeps the damage in readable bites). */
+  burnTick: number;
+  /** The fire was started by the player's shot — sinking her counts against them. */
+  burnFromPlayer: boolean;
   hitTimer: number;
   fxTimer: number;
   wakeTimer: number;
