@@ -54,7 +54,22 @@ export type ShipKind =
   // Hawai\u02bbi — rival ali\u02bbi and sandalwood traders
   | 'rivalWaa'
   | 'kauaiFlagship'
-  | 'sandTrader';
+  | 'sandTrader'
+  // Successor Wars — Rhodians and Ptolemies
+  | 'rhodesTrieres'
+  | 'ptolemGalley'
+  | 'alexGrain'
+  | 'ptolemFlagship'
+  // First Contact — rival Maya and the strangers
+  | 'mayaRival'
+  | 'cacaoTrader'
+  | 'conqCaravel'
+  | 'conqCapitana'
+  // Pacific balsas — Puná islanders and rival traders
+  | 'rivalBalsa'
+  | 'punaBalsa'
+  | 'spondylusTrader'
+  | 'punaArmada';
 
 export type Faction =
   | 'pirate'
@@ -71,7 +86,13 @@ export type Faction =
   | 'china'
   | 'japan'
   | 'maori'
-  | 'hawaii';
+  | 'hawaii'
+  | 'macedon'
+  | 'rhodes'
+  | 'ptolemy'
+  | 'maya'
+  | 'inca'
+  | 'puna';
 
 export type HullStyle =
   | 'default'
@@ -101,7 +122,11 @@ export type EraId =
   | 'japanese'
   // Polynesia — waka and wa\u02bba waters
   | 'maori'
-  | 'hawaii';
+  | 'hawaii'
+  // Successors and the Americas
+  | 'macedon'
+  | 'maya'
+  | 'inca';
 
 export interface ShipDef {
   kind: ShipKind;

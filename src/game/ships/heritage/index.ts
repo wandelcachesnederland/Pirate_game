@@ -1,4 +1,4 @@
-// Heritage collection: playable flagships from seven seafaring cultures.
+// Heritage collection: playable flagships from ten seafaring cultures.
 //
 // Each hull sails as the hero of its own era (see `era/index.ts`) — one
 // heritage ship per era. Every entry is a `kind: 'player'` ShipDef with a
@@ -12,6 +12,9 @@ import { CHINESE_JUNK } from './chinese';
 import { JAPANESE_ATAKEBUNE } from './japanese';
 import { MAORI_WAKA } from './maori';
 import { HAWAII_WAA } from './hawaii';
+import { MACEDON_SIXTEEN } from './macedon';
+import { MAYA_TULUM } from './maya';
+import { INCA_BALSA } from './inca';
 
 export interface HeritageShip {
   id: string;
@@ -80,6 +83,30 @@ export const HERITAGE_SHIPS: HeritageShip[] = [
     blurb: 'Unification Wars peleleu: swift double-hulled war canoe.',
     def: HAWAII_WAA,
   },
+  {
+    id: 'macedon',
+    culture: 'Macedonian',
+    waters: 'Eastern Mediterranean',
+    year: '306 BC',
+    blurb: 'Successor Wars siege galley: the largest warship afloat.',
+    def: MACEDON_SIXTEEN,
+  },
+  {
+    id: 'maya',
+    culture: 'Maya',
+    waters: 'Bay of Honduras',
+    year: '1517',
+    blurb: 'First Contact war canoe of Tulum: drive the strangers off.',
+    def: MAYA_TULUM,
+  },
+  {
+    id: 'inca',
+    culture: 'Inca',
+    waters: 'Pacific Coast',
+    year: '1465',
+    blurb: 'Pacific war balsa: log raft of the Sapa Inca.',
+    def: INCA_BALSA,
+  },
 ];
 
 export {
@@ -87,7 +114,10 @@ export {
   CHINESE_JUNK,
   GREEK_TRIREME,
   HAWAII_WAA,
+  INCA_BALSA,
   JAPANESE_ATAKEBUNE,
+  MACEDON_SIXTEEN,
+  MAYA_TULUM,
   MAORI_WAKA,
   ROMAN_QUINQUEREME,
 };

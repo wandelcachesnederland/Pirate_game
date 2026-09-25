@@ -190,6 +190,77 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.fillStyle = '#f4f1e6';
       ctx.fillRect(cx - 2.5, -0.6, 5, 1.2);
       break;
+    case 'macedon':
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.6, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#e8b830';
+      ctx.lineWidth = 1.0;
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * TAU;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * 2.2, Math.sin(a) * 2.2);
+        ctx.lineTo(cx + Math.cos(a) * 3.4, Math.sin(a) * 3.4);
+        ctx.stroke();
+      }
+      break;
+    case 'rhodes':
+      ctx.fillStyle = '#f4f1e6';
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * TAU;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(a) * 1.7, Math.sin(a) * 1.7, 1.1, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c94a6a';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'ptolemy':
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 3.0, 0, TAU);
+      ctx.stroke();
+      break;
+    case 'maya':
+      ctx.fillStyle = '#2e8a6a';
+      ctx.fillRect(cx - 2.4, 1.6, 4.8, 1.4);
+      ctx.fillRect(cx - 1.6, 0.2, 3.2, 1.4);
+      ctx.fillRect(cx - 0.8, -1.2, 1.6, 1.4);
+      ctx.fillStyle = '#b5352c';
+      ctx.beginPath();
+      ctx.arc(cx, -2.4, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'inca':
+      ctx.fillStyle = '#c9403b';
+      ctx.fillRect(cx - 2.2, -2.6, 4.4, 1.2);
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(cx - 2.2, -1.4, 4.4, 1.2);
+      ctx.fillStyle = '#3f7f4a';
+      ctx.fillRect(cx - 2.2, -0.2, 4.4, 1.2);
+      ctx.fillStyle = '#2e5e8c';
+      ctx.fillRect(cx - 2.2, 1.0, 4.4, 1.2);
+      break;
+    case 'puna':
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.4, -0.6);
+      ctx.lineTo(cx, -2.4);
+      ctx.lineTo(cx + 2.4, -0.6);
+      ctx.moveTo(cx - 2.4, 2.2);
+      ctx.lineTo(cx, 0.4);
+      ctx.lineTo(cx + 2.4, 2.2);
+      ctx.stroke();
+      break;
   }
   ctx.restore();
 }
@@ -367,6 +438,107 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       ctx.moveTo(w * 0.42, 0);
       ctx.lineTo(0, h * 0.6);
       ctx.stroke();
+      break;
+    }
+    case 'macedon': {
+      ctx.fillStyle = '#1f3a7a';
+      ctx.fillRect(0, 0, w, h);
+      const mx = w * 0.5;
+      const my = h * 0.5;
+      const mr = Math.min(w, h) * 0.14;
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(mx, my, mr, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#e8b830';
+      ctx.lineWidth = Math.max(0.5, h * 0.05);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * TAU;
+        ctx.beginPath();
+        ctx.moveTo(mx + Math.cos(a) * mr * 1.5, my + Math.sin(a) * mr * 1.5);
+        ctx.lineTo(mx + Math.cos(a) * mr * 2.9, my + Math.sin(a) * mr * 2.9);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'rhodes': {
+      ctx.fillStyle = '#4a6a9a';
+      ctx.fillRect(0, 0, w, h);
+      const rx = w * 0.5;
+      const ry = h * 0.5;
+      const rr = Math.min(w, h) * 0.26;
+      ctx.fillStyle = '#f4f1e6';
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * TAU;
+        ctx.beginPath();
+        ctx.arc(rx + Math.cos(a) * rr * 0.62, ry + Math.sin(a) * rr * 0.62, rr * 0.42, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c94a6a';
+      ctx.beginPath();
+      ctx.arc(rx, ry, rr * 0.34, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'ptolemy': {
+      ctx.fillStyle = '#3a1a5a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.21, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'maya': {
+      ctx.fillStyle = '#2e8a6a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8e0cc';
+      ctx.fillRect(w * 0.14, h * 0.62, w * 0.72, h * 0.16);
+      ctx.fillRect(w * 0.24, h * 0.46, w * 0.52, h * 0.16);
+      ctx.fillRect(w * 0.34, h * 0.3, w * 0.32, h * 0.16);
+      ctx.fillStyle = '#b5352c';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.2, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'inca': {
+      const cols = ['#c9403b', '#e67e22', '#e8b830', '#3f7f4a', '#2e5e8c'];
+      for (let i = 0; i < cols.length; i++) {
+        ctx.fillStyle = cols[i];
+        ctx.fillRect(0, (h * i) / cols.length, w, h / cols.length + 0.5);
+      }
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.2, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#7a2d5a';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'puna': {
+      ctx.fillStyle = '#1f4a7a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = Math.max(0.5, h * 0.08);
+      for (let i = 0; i < 2; i++) {
+        const yy = h * (0.32 + i * 0.28);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1, yy);
+        ctx.lineTo(w * 0.5, yy - h * 0.12);
+        ctx.lineTo(w * 0.9, yy);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.78, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
       break;
     }
     case 'fire': {

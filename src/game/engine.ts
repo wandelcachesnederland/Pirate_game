@@ -1967,6 +1967,18 @@ export class Engine {
         return 'Māori';
       case 'hawaii':
         return 'Hawaiian';
+      case 'macedon':
+        return 'Macedonian';
+      case 'rhodes':
+        return 'Rhodian';
+      case 'ptolemy':
+        return 'Ptolemaic';
+      case 'maya':
+        return 'Maya';
+      case 'inca':
+        return 'Inca';
+      case 'puna':
+        return 'Pun\u00e1';
       case 'native':
         return 'native';
       case 'fire':

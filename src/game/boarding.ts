@@ -106,6 +106,30 @@ export function surrenderChance(kind: ShipKind): number {
       return 0.15;
     case 'sandTrader':
       return 0.75;
+    case 'rhodesTrieres':
+      return 0.35;
+    case 'ptolemGalley':
+      return 0.3;
+    case 'alexGrain':
+      return 0.75;
+    case 'ptolemFlagship':
+      return 0.15;
+    case 'mayaRival':
+      return 0.35;
+    case 'cacaoTrader':
+      return 0.75;
+    case 'conqCaravel':
+      return 0.3;
+    case 'conqCapitana':
+      return 0.15;
+    case 'rivalBalsa':
+      return 0.3;
+    case 'punaBalsa':
+      return 0.35;
+    case 'spondylusTrader':
+      return 0.75;
+    case 'punaArmada':
+      return 0.15;
     default:
       return 0; // player, fireship, warCanoe
   }

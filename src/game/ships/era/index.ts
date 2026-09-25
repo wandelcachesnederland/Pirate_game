@@ -19,8 +19,11 @@ import {
   CHINESE_JUNK,
   GREEK_TRIREME,
   HAWAII_WAA,
+  INCA_BALSA,
   JAPANESE_ATAKEBUNE,
+  MACEDON_SIXTEEN,
   MAORI_WAKA,
+  MAYA_TULUM,
   ROMAN_QUINQUEREME,
 } from '../heritage';
 
@@ -142,6 +145,33 @@ export const ERA_SHIPS: EraShip[] = [
     group: 'Heritage Seas',
     homeWaters: 'the Kona Coast',
   },
+  {
+    id: 'macedon',
+    era: 'Macedon at Sea',
+    year: '306 BC',
+    blurb: "Demetrius's siege galley: the largest warship afloat. Slow, unstoppable.",
+    def: MACEDON_SIXTEEN,
+    group: 'Heritage Seas',
+    homeWaters: 'off Salamis, Cyprus',
+  },
+  {
+    id: 'maya',
+    era: 'Maya First Contact',
+    year: '1517',
+    blurb: 'Great war canoe of Tulum — drive the strangers from your shores.',
+    def: MAYA_TULUM,
+    group: 'Heritage Seas',
+    homeWaters: 'the Bay of Honduras',
+  },
+  {
+    id: 'inca',
+    era: 'Inca Pacific Voyages',
+    year: '1465',
+    blurb: "Tupac's great balsa — the Sapa Inca's reach on the western sea.",
+    def: INCA_BALSA,
+    group: 'Heritage Seas',
+    homeWaters: 'the Gulf of Guayaquil',
+  },
 ];
 
 export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
@@ -157,6 +187,9 @@ export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
   japanese: JAPANESE_ATAKEBUNE,
   maori: MAORI_WAKA,
   hawaii: HAWAII_WAA,
+  macedon: MACEDON_SIXTEEN,
+  maya: MAYA_TULUM,
+  inca: INCA_BALSA,
 };
 
 export const DEFAULT_ERA: EraId = 'golden';
@@ -166,4 +199,4 @@ export function eraShip(id: EraId): EraShip {
 }
 
 export { BLACK_GULL, HMS_VENGEANCE, SANTA_BRISA, SEA_WOLF, USS_REVENANT };
-export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, JAPANESE_ATAKEBUNE, MAORI_WAKA, ROMAN_QUINQUEREME };
+export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, ROMAN_QUINQUEREME };

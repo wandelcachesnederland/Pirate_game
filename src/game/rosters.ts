@@ -338,6 +338,119 @@ export const HAWAII_ROSTER: EraRoster = {
   ],
 };
 
+export const MACEDON_ROSTER: EraRoster = {
+  early: [
+    ['alexGrain', 'alexGrain', 'ptolemGalley'],
+    ['ptolemGalley', 'ptolemGalley', 'rhodesTrieres'],
+    ['fireship', 'fireship', 'ptolemGalley'],
+    ['ptolemGalley', 'rhodesTrieres', 'alexGrain', 'cilician'],
+    ['ptolemFlagship'],
+  ],
+  boss: 'ptolemFlagship',
+  jackpot: 'alexGrain',
+  trader: 'alexGrain',
+  pool: [
+    { kind: 'ptolemGalley', cost: 2.2, weight: 3 },
+    { kind: 'rhodesTrieres', cost: 1.4, weight: 3 },
+    { kind: 'cilician', cost: 1.3, weight: 2, minWave: 4 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'alexGrain', cost: 0.8, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Alexandrian grain ships — seize them!',
+    'Ptolemaic galleys give chase!',
+    'Beware the fire ships!',
+    'Rhodes sends its wolves!',
+    "Ptolemy's flagship approaches!",
+  ],
+  bossTitle: "Ptolemy sails — with Alexandria's grain!",
+  lines: [
+    'More oars on the horizon!',
+    'They want your head, Basileus!',
+    'For Alexander!',
+    'Blood in the water...',
+    'Ptolemy has doubled your bounty!',
+    'Enemy galleys close in from all sides!',
+  ],
+};
+
+export const MAYA_ROSTER: EraRoster = {
+  early: [
+    ['cacaoTrader', 'mayaRival', 'cacaoTrader'],
+    ['mayaRival', 'mayaRival', 'cacaoTrader'],
+    ['fireship', 'mayaRival', 'mayaRival'],
+    ['mayaRival', 'mayaRival', 'cacaoTrader', 'mayaRival'],
+    ['conqCapitana'],
+  ],
+  boss: 'conqCapitana',
+  jackpot: 'cacaoTrader',
+  trader: 'cacaoTrader',
+  pool: [
+    { kind: 'mayaRival', cost: 1.8, weight: 3 },
+    { kind: 'conqCaravel', cost: 2.6, weight: 2, minWave: 6 },
+    { kind: 'warCanoe', cost: 1.1, weight: 2 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'cacaoTrader', cost: 0.8, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A rival trading fleet — seize the cacao!',
+    'Rival ahauob give chase!',
+    'Beware the fire rafts!',
+    'The kuchkabal sends its warriors!',
+    'A white-winged canoe from the east!',
+  ],
+  bossTitle: 'The strangers return — drive them off!',
+  lines: [
+    'More paddles on the horizon!',
+    'They want your head, Ahau!',
+    'No quarter given!',
+    'Blood in the water...',
+    'The strangers have doubled your bounty!',
+    'Warriors close in from all sides!',
+  ],
+};
+
+export const INCA_ROSTER: EraRoster = {
+  early: [
+    ['spondylusTrader', 'punaBalsa', 'spondylusTrader'],
+    ['punaBalsa', 'punaBalsa', 'rivalBalsa'],
+    ['fireship', 'punaBalsa', 'punaBalsa'],
+    ['punaBalsa', 'rivalBalsa', 'spondylusTrader', 'punaBalsa'],
+    ['punaArmada'],
+  ],
+  boss: 'punaArmada',
+  jackpot: 'spondylusTrader',
+  trader: 'spondylusTrader',
+  pool: [
+    { kind: 'punaBalsa', cost: 1.8, weight: 3 },
+    { kind: 'rivalBalsa', cost: 2.2, weight: 2 },
+    { kind: 'warCanoe', cost: 1.1, weight: 2 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'spondylusTrader', cost: 0.8, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Spondylus traders — seize the red gold!',
+    'Puná war balsas give chase!',
+    'Beware the fire rafts!',
+    'The islanders send their wolves!',
+    'The Puná island armada approaches!',
+  ],
+  bossTitle: 'The Puná sail — with a spondylus fleet!',
+  lines: [
+    'More paddles on the horizon!',
+    'They want your head, Apu!',
+    'For the Sapa Inca!',
+    'Blood in the water...',
+    'The islanders have doubled your bounty!',
+    'War balsas close in from all sides!',
+  ],
+};
+
 export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   golden: SAIL_ROSTER,
   exploration: SAIL_ROSTER,
@@ -351,4 +464,7 @@ export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   japanese: JAPANESE_ROSTER,
   maori: MAORI_ROSTER,
   hawaii: HAWAII_ROSTER,
+  macedon: MACEDON_ROSTER,
+  maya: MAYA_ROSTER,
+  inca: INCA_ROSTER,
 };
