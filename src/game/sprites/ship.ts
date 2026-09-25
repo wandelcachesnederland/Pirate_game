@@ -2,7 +2,7 @@
 // into the two entry points the engine calls each frame.
 
 import { angDiff, TAU } from '../math';
-import type { Faction, Ship } from '../types';
+import { isSteelHull, type Faction, type Ship } from '../types';
 import { cannonLocalX, shipPaths } from './hull';
 import { getHullSprite } from './hullSprite';
 import {
@@ -136,20 +136,21 @@ export function drawShip(
   const nm = paths.masts.length;
   const style = def.hullStyle ?? 'default';
 
-  if (style === 'ironclad') {
-    // ---- IRONCLAD: no canvas — a stub mast and a live smoke plume
+  if (isSteelHull(style)) {
+    // ---- STEEL: no canvas — a stub mast and a live smoke plume from the stack
+    const funnelX = style === 'freighter' ? -hl * 0.42 : style === 'tanker' ? -hl * 0.6 : style === 'submarine' ? -hl * 0.08 : -hl * 0.26;
     ctx.fillStyle = '#2a1a0c';
     ctx.beginPath();
-    ctx.arc(-hl * 0.28, 0, 2, 0, TAU);
+    ctx.arc(funnelX, 0, 2, 0, TAU);
     ctx.fill();
     for (let i = 0; i < 4; i++) {
       const k = (t * 0.8 + i * 0.25 + s.bob) % 1;
       const dwx = Math.cos(rel) * k * 34;
       const dwy = Math.sin(rel) * k * 34;
       ctx.globalAlpha = baseA * (1 - k) * 0.5;
-      ctx.fillStyle = i % 2 ? '#4a4d50' : '#5c6064';
+      ctx.fillStyle = style === 'submarine' ? '#6a6d70' : i % 2 ? '#4a4d50' : '#5c6064';
       ctx.beginPath();
-      ctx.arc(-hl * 0.28 + dwx, dwy, 2.5 + k * 6, 0, TAU);
+      ctx.arc(funnelX + dwx, dwy, 2.5 + k * 6, 0, TAU);
       ctx.fill();
     }
     ctx.globalAlpha = baseA;
@@ -227,10 +228,10 @@ export function drawShip(
 
   // ---- 7. emblem + mast tops
   const mainIdx = Math.min(1, nm - 1);
-  if (!flash && style !== 'ironclad' && style !== 'longship' && mainIdx >= 0) {
+  if (!flash && !isSteelHull(style) && style !== 'longship' && mainIdx >= 0) {
     drawEmblem(ctx, def.faction, paths.masts[mainIdx], bulge, yard);
   }
-  if (style !== 'ironclad' && !oared) {
+  if (!isSteelHull(style) && !oared) {
     ctx.fillStyle = '#2a1a0c';
     for (let m = 0; m < nm; m++) {
       ctx.beginPath();
@@ -244,8 +245,8 @@ export function drawShip(
     }
   }
 
-  // ---- 8. ensign (masthead, or a short jackstaff on oared/ironclad hulls)
-  const flagX = style === 'ironclad' || oared ? -hl * 0.6 : paths.masts[0] - 3.2;
+  // ---- 8. ensign (masthead, or a short jackstaff on oared/steel hulls)
+  const flagX = isSteelHull(style) || oared ? -hl * 0.6 : paths.masts[0] - 3.2;
   if (s.surrendered) drawSurrenderFlag(ctx, flagX, rel, t + s.bob, def.length > 85 ? 1.25 : 1);
   else drawEnsign(ctx, flag, flagX, rel, t + s.bob, def.length > 85 ? 1.25 : 1);
 

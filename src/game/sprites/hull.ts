@@ -96,6 +96,41 @@ export function hullShape(p: Path2D, hl: number, hw: number, style: HullStyle = 
     p.closePath();
     return;
   }
+  if (style === 'warship') {
+    // steel warship: fine raked bow, long parallel body, transom stern
+    p.moveTo(hl * 1.02, 0);
+    p.quadraticCurveTo(hl * 0.82, -hw * 0.72, hl * 0.52, -hw);
+    p.lineTo(-hl * 0.82, -hw);
+    p.quadraticCurveTo(-hl * 0.96, -hw * 0.82, -hl * 0.96, 0);
+    p.quadraticCurveTo(-hl * 0.96, hw * 0.82, -hl * 0.82, hw);
+    p.lineTo(hl * 0.52, hw);
+    p.quadraticCurveTo(hl * 0.82, hw * 0.72, hl * 1.02, 0);
+    p.closePath();
+    return;
+  }
+  if (style === 'submarine') {
+    // surfaced submarine: a cigar with a rounded bow and a tapering stern
+    p.moveTo(hl * 1.04, 0);
+    p.bezierCurveTo(hl * 0.78, -hw * 0.9, hl * 0.4, -hw, -hl * 0.5, -hw * 0.92);
+    p.bezierCurveTo(-hl * 0.92, -hw * 0.7, -hl * 0.96, -hw * 0.3, -hl * 0.96, 0);
+    p.bezierCurveTo(-hl * 0.96, hw * 0.3, -hl * 0.92, hw * 0.7, -hl * 0.5, hw * 0.92);
+    p.bezierCurveTo(hl * 0.4, hw, hl * 0.78, hw * 0.9, hl * 1.04, 0);
+    p.closePath();
+    return;
+  }
+  if (style === 'freighter' || style === 'tanker') {
+    // merchant steel: bluff bow, endless parallel midbody, flat stern
+    p.moveTo(hl * 1.0, 0);
+    p.quadraticCurveTo(hl * 0.9, -hw * 0.86, hl * 0.58, -hw);
+    p.lineTo(-hl * 0.86, -hw);
+    p.lineTo(-hl * 0.94, -hw * 0.86);
+    p.lineTo(-hl * 0.94, hw * 0.86);
+    p.lineTo(-hl * 0.86, hw);
+    p.lineTo(hl * 0.58, hw);
+    p.quadraticCurveTo(hl * 0.9, hw * 0.86, hl * 1.0, 0);
+    p.closePath();
+    return;
+  }
   p.moveTo(hl, 0);
   p.bezierCurveTo(hl * 0.62, -hw * 0.98, hl * 0.05, -hw, -hl * 0.35, -hw);
   p.lineTo(-hl * 0.9, -hw * 0.82);

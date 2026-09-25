@@ -14,6 +14,7 @@ import type {
   UpgradeOffer,
 } from './types';
 import { SHIP_DEFS, UPGRADES, waveCompositionFor, waveTitleFor } from './data';
+import { isSteelHull } from './types';
 import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
 import { DEFAULT_REGION, regionById } from './worlds';
 import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from './boarding';
@@ -1297,7 +1298,7 @@ export class Engine {
     const spd = s.ballSpeed * rand(0.97, 1.03);
     const life = (s.range / spd) * rand(0.95, 1.05);
     this.balls.push({
-      projectile: projectileFor(this.eraId, v.lx < 0),
+      projectile: s.def.projectile ?? projectileFor(this.eraId, v.lx < 0),
       x,
       y,
       vx: Math.cos(dir) * spd + s.vx * 0.5,
@@ -1314,6 +1315,12 @@ export class Engine {
       if (v.side < 0) s.recoilL = 1;
       else s.recoilR = 1;
       this.sfx.bow(this.volAt(x, y), this.panAt(x));
+      return;
+    }
+    if (s.def.projectile === 'missile') {
+      s.vx -= Math.cos(dir) * 3;
+      this.fxMuzzle(x, y, dir, s.team === 0);
+      this.sfx.missile(this.volAt(x, y), this.panAt(x));
       return;
     }
     this.fxMuzzle(x, y, dir, s.team === 0);
@@ -1611,7 +1618,7 @@ export class Engine {
   private shipPhysics(s: Ship, dt: number) {
     s.sail += (s.sailTarget - s.sail) * Math.min(1, dt * 2.5);
     const slow = s.slowTimer > 0 ? 0.55 : 1;
-    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared || s.def.hullStyle === 'ironclad') * slow;
+    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared || isSteelHull(s.def.hullStyle)) * slow;
     const c = Math.cos(s.angle);
     const sn = Math.sin(s.angle);
     let fwd = s.vx * c + s.vy * sn;
@@ -2396,6 +2403,11 @@ export class Engine {
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       let remove = false;
+      // a missile leaves its booster smoke hanging on the water
+      if (b.projectile === 'missile' && Math.random() < 0.7) {
+        this.emit(P_SMOKE, b.x, b.y, rand(-10, 10), rand(-10, 10), rand(0.5, 0.9), rand(2.5, 4.5), 10, pick(SMOKE_LIGHT), 1, 2, 0, 0, 0.4);
+        this.emit(P_FIRE, b.x, b.y, rand(-8, 8), rand(-8, 8), rand(0.08, 0.16), rand(2, 3.5), 0, pick(FIRE_COLORS), 1, 3);
+      }
       // a mortar shell is only dangerous once it drops out of its arc
       const falling = !b.mortar || 1 - b.life / b.max > 0.62;
       if (b.life <= 0) {
@@ -2459,9 +2471,17 @@ export class Engine {
       dmg *= 2;
       crit = true;
     }
-    this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1);
+    if (b.projectile === 'missile') {
+      // anti-ship missile: one hard hit, fireball, no luck involved
+      dmg = b.dmg * rand(0.95, 1.15);
+      this.fxExplosion(b.x, b.y, 0.8);
+      this.sfx.explosion(Math.max(0.5, this.volAt(b.x, b.y)), this.panAt(b.x));
+      s.vx += Math.cos(dir) * 30;
+      s.vy += Math.sin(dir) * 30;
+      if (b.team === 0) this.addTrauma(0.16);
+    } else this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1);
     // a chase gun hit knocks a canoe off its stroke and back down the wake
-    const knock = b.chaser ? (openBoat ? 70 : 12) : b.small ? 4 : 10;
+    const knock = b.projectile === 'missile' ? 26 : b.chaser ? (openBoat ? 70 : 12) : b.small ? 4 : 10;
     s.vx += Math.cos(dir) * knock;
     s.vy += Math.sin(dir) * knock;
     s.angVel += rand(-0.15, 0.15);
@@ -2559,8 +2579,14 @@ export class Engine {
       if (s.peaceful) this.addText(s.x, s.y - 34, 'their fishing boat…', '#ffd8a8', 16);
     }
     const big = s.def.length / 60;
-    this.fxExplosion(s.x, s.y, big);
-    this.sfx.explosion(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
+    if (usesGunpowder(this.eraId)) {
+      this.fxExplosion(s.x, s.y, big);
+      this.sfx.explosion(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
+    } else {
+      // no powder on the water: she goes up by pitch and hand, or founders
+      this.fxBurnOut(s, big);
+      this.sfx.burn(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
+    }
     if (s.team === 1) {
       if (reward) {
         this.stats.sunk++;
@@ -2599,8 +2625,31 @@ export class Engine {
       this.input.clear();
       this.sfx.stopMusic();
       this.sfx.gameOver();
-      this.fxExplosion(s.x + rand(-15, 15), s.y + rand(-10, 10), 1.2);
+      if (usesGunpowder(this.eraId)) this.fxExplosion(s.x + rand(-15, 15), s.y + rand(-10, 10), 1.2);
+      else this.fxBurnOut(s, 1.1);
     }
+  }
+
+  /** A vessel going up by hand, not by magazine: pitch, oars and flames. */
+  private fxBurnOut(s: Ship, sc = 1) {
+    const x = s.x;
+    const y = s.y;
+    for (let i = 0; i < Math.round(16 * sc); i++) {
+      const a = rand(0, TAU);
+      const sp = rand(20, 110);
+      this.emit(P_FIRE, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.5, 1.1), rand(5, 11), -4, pick(FIRE_COLORS), 1, 2.4);
+    }
+    for (let i = 0; i < 14; i++) {
+      const a = rand(0, TAU);
+      const sp = rand(15, 90);
+      this.emit(P_SMOKE, x, y, Math.cos(a) * sp + this.windX * 18, Math.sin(a) * sp + this.windY * 18, rand(1.4, 2.4), rand(8, 15), 22, pick(SMOKE_DARK), 1, 1.5, 0, 0, 0.6);
+    }
+    for (let i = 0; i < 18; i++) {
+      const a = rand(0, TAU);
+      const sp = rand(60, 240);
+      this.emit(P_SPLINTER, x, y, Math.cos(a) * sp, Math.sin(a) * sp, rand(0.6, 1.2), rand(3, 7), 0, pick(WOOD), 1, 2.4, rand(0, TAU), rand(-14, 14));
+    }
+    this.emit(P_RING, x, y, 0, 0, 0.6, 5, 60 * sc, '#ffb98a', 1, 0, 0, 0, 0.55);
   }
 
   /** Mortar shell landing: area damage with falloff, plus a shove outward. */
@@ -3586,6 +3635,29 @@ export class Engine {
     ctx.fill();
     for (const b of bs) {
       if (b.projectile === 'cannonball') continue;
+      if (b.projectile === 'missile') {
+        // a sea-skimmer: white body, burning booster, drawn along its flight line
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(Math.atan2(b.vy, b.vx));
+        ctx.strokeStyle = 'rgba(255,160,70,0.8)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-16, 0);
+        ctx.lineTo(-6, 0);
+        ctx.stroke();
+        ctx.fillStyle = '#e8ecef';
+        ctx.beginPath();
+        ctx.moveTo(9, 0);
+        ctx.lineTo(-6, -2.6);
+        ctx.lineTo(-6, 2.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#c9403b';
+        ctx.fillRect(-6, -2.6, 3.5, 5.2);
+        ctx.restore();
+        continue;
+      }
       ctx.save();
       ctx.translate(b.x, b.y);
       ctx.rotate(Math.atan2(b.vy, b.vx));
@@ -4008,7 +4080,7 @@ export class Engine {
     ctx.textAlign = 'center';
     this.outlined(
       ctx,
-      p.def.oared ? 'OARS' : p.def.hullStyle === 'ironclad' ? 'STEAM' : 'SAIL',
+      p.def.oared ? 'OARS' : isSteelHull(p.def.hullStyle) ? 'STEAM' : 'SAIL',
       gx + gw / 2,
       ccy + cr + 9 * u,
       '#f3e2b3',
@@ -4287,7 +4359,7 @@ export class Engine {
     ctx.fillText('S', 0, r * 0.57);
     ctx.fillText('E', r * 0.56, 0);
     ctx.fillText('W', -r * 0.55, 0);
-    const good = (this.windFactor(p.angle, !!p.def.oared || p.def.hullStyle === 'ironclad') - 0.46) / 0.54;
+    const good = (this.windFactor(p.angle, !!p.def.oared || isSteelHull(p.def.hullStyle)) - 0.46) / 0.54;
     ctx.save();
     ctx.rotate(p.angle);
     ctx.fillStyle = good > 0.72 ? '#2f9e44' : good > 0.4 ? '#e0a32a' : '#c0392b';

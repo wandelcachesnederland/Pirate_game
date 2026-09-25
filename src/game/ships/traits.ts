@@ -3,7 +3,7 @@
 // under every portrait so a captain can tell a gun platform from a sprinter at
 // a glance.
 
-import type { ShipDef } from '../types';
+import { isSteelHull, type ShipDef } from '../types';
 import { ERA_SHIPS } from './era';
 
 export interface ShipTraits {
@@ -57,7 +57,7 @@ export function shipTraits(def: ShipDef): ShipTraits {
   if (gunR >= 0.8) strengths.push([gunR, `Heavy broadside — ${def.cannons} a side`]);
   if (turnR >= 0.85) strengths.push([turnR, 'Nimble helm']);
   if (def.reload <= 2.6) strengths.push([0.7, `Quick reload (${def.reload.toFixed(1)}s)`]);
-  if (def.oared || def.hullStyle === 'ironclad') strengths.push([0.75, def.hullStyle === 'ironclad' ? 'Burns coal — wind means nothing' : 'Paddles — wind means nothing']);
+  if (def.oared || isSteelHull(def.hullStyle)) strengths.push([0.75, isSteelHull(def.hullStyle) ? 'Burns fuel — wind means nothing' : 'Paddles — wind means nothing']);
   if (def.mortar) strengths.push([0.72, 'Lobs exploding shells']);
   if ((def.crew ?? 0) >= 120) strengths.push([0.68, `Big boarding crew (${def.crew})`]);
   if (big && def.cannons >= 3) strengths.push([0.66, def.weapon === 'mechanical' ? 'Ranks of archers and pulley-drawn launchers' : 'Carries a whole fort’s worth of guns']);

@@ -26,6 +26,36 @@ Early-era upgrades use matching names and effects: Deck Archers, Chase Ballistas
 Arrow Storm, Rigging Bolts, stronger bows/pulleys, and additional bow stations.
 The era picker shows the technology before setting sail.
 
+## New eras: steel navies and the Barbary shore
+
+Four later eras sail in their own seas, each with era-authentic ships, weapons
+and music. All four count as gunpowder eras in the technology table.
+
+- **Barbary War (1801)** — the Barbary Coast. You sail the schooner USS
+  Enterprise against Tripolitan xebecs, polacres and gunboats; the Bashaw's
+  Meshuda leads their fleet. Prize ships and tribute convoys to take.
+  The band plays *Hail, Columbia*.
+- **Great War at Sea (1916)** — the Dogger Bank. You command HMS Havoc of the
+  Dover patrol against Kaiserliche Marine torpedo boats, U-boats, raiders and a
+  dreadnought; munitions ships are the richest prizes. The band plays *It's a
+  Long Way to Tipperary* and *Mademoiselle from Armentières*.
+- **Second World War at Sea (1943)** — the Solomons. You command USS Kestrel
+  against Tokyo Express destroyers, escorts, submarines and a super battleship;
+  marus and troop transports are the prizes. The band plays the Navy Hymn and
+  *Colonel Bogey March*.
+- **Tanker War (1988)** — the Strait of Hormuz. You command the Kaman-class
+  fast attack craft IRIS Tir against US Navy patrol boats, guided-missile
+  destroyers and a frigate; laden tankers and a supertanker are the prizes.
+  The band plays *Tangeh-ye Hormoz*.
+
+Steel eras (Great War, Second World War, Tanker War, and the Ironclads) burn
+coal or oil: the wind means nothing to them, their HUD reads STEAM, and they
+sail without canvas. Tanker War destroyers and the IRIS Tir fire guided
+missiles instead of shot: fast, hard-hitting, non-dodgeable once launched.
+The Second World War battleship lobs arcing shells with a dodgeable landing
+marker. Mechanical eras still see no ship explosions anywhere: hulls burn and
+go down by fire, not by magazine.
+
 ## Peoples and alliances
 
 Each new chart distributes inhabited islands among up to six procedural peoples.

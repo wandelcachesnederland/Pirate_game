@@ -1,10 +1,14 @@
-import type { EraId, ShipDef, UpgradeDef, UpgradeId } from './types';
+import type { EraId, ProjectileKind, ShipDef, UpgradeDef, UpgradeId } from './types';
+
+export type { ProjectileKind };
 
 export type WeaponTechnology = 'mechanical' | 'gunpowder';
-export type ProjectileKind = 'arrow' | 'bolt' | 'cannonball';
 
 /** Naval cannon availability, not the date gunpowder was first discovered.
- * Inca Pacific waters also predate local access to cannon. */
+ * Inca Pacific waters also predate local access to cannon. The steel navies
+ * (Dreadnought to the guided-missile era) are 'gunpowder' in the broad sense:
+ * their shells, torpedoes and rockets all go off on impact, which is exactly
+ * what the pre-gunpowder seas must never do. */
 export const ERA_WEAPONS: Record<EraId, WeaponTechnology> = {
   golden: 'gunpowder', exploration: 'gunpowder', napoleonic: 'gunpowder',
   ironclad: 'gunpowder', chinese: 'gunpowder', japanese: 'gunpowder',
@@ -13,6 +17,7 @@ export const ERA_WEAPONS: Record<EraId, WeaponTechnology> = {
   viking: 'mechanical', roman: 'mechanical', greek: 'mechanical',
   arab: 'mechanical', macedon: 'mechanical', byzantium: 'mechanical',
   egypt: 'mechanical', chola: 'mechanical', vietnam: 'mechanical', inca: 'mechanical',
+  barbary: 'gunpowder', ww1: 'gunpowder', ww2: 'gunpowder', hormuz: 'gunpowder',
 };
 
 export function usesGunpowder(era: EraId): boolean {

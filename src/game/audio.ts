@@ -276,6 +276,27 @@ export class Sfx {
     }
   }
 
+  /** A ship on fire: hungry crackle, rushing flame, no powder in it. */
+  burn(vol = 1, pan = 0) {
+    if (!this.ok() || vol < 0.05 || !this.gate('burn', 0.3)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    for (let i = 0; i < 7; i++) {
+      this.noise(d, t + i * 0.045, 0.07 + Math.random() * 0.09, 0.16 * vol, 'bandpass', 2600 + Math.random() * 1600, 900, 0.9, 0.004, 0.8 + Math.random() * 0.5);
+    }
+    this.noise(d, t, 1.15, 0.16 * vol, 'lowpass', 620, 200, 0.7, 0.09);
+  }
+
+  /** A guided missile: hard booster roar, then a thin scream fading out. */
+  missile(vol = 1, pan = 0) {
+    if (!this.ok() || !this.gate('missile', 0.07)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    this.noise(d, t, 0.9, 0.5 * vol, 'lowpass', 1500, 260, 0.8, 0.02, 1.6);
+    this.tone(d, t, 'sawtooth', 130, 310, 0.9, 0.12 * vol, 0.03);
+    this.tone(d, t + 0.1, 'square', 1900, 620, 0.85, 0.05 * vol, 0.25);
+  }
+
   splash(vol = 1, pan = 0) {
     if (!this.ok() || vol < 0.04 || !this.gate('splash', 0.035)) return;
     const t = this.ctx!.currentTime;

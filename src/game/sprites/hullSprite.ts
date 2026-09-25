@@ -8,7 +8,7 @@
 
 import { makeCanvas } from '../canvas';
 import { mulberry32, shade, TAU } from '../math';
-import type { ShipDef } from '../types';
+import { isSteelHull, type ShipDef } from '../types';
 import { clearPathCache, shipPaths, styleId } from './hull';
 
 interface HullSprite {
@@ -42,8 +42,8 @@ export function buildHullSprite(def: ShipDef): HullSprite {
   const rnd = mulberry32(def.length * 7919 + def.width * 131 + def.masts);
   const oared = !!def.oared;
 
-  // ---- bowsprit (drawn under the hull) + its stays
-  if (!oared) {
+  // ---- bowsprit (drawn under the hull) + its stays — never on steel, no canvas there
+  if (!oared && !isSteelHull(def.hullStyle)) {
     ctx.strokeStyle = '#33200f';
     ctx.lineWidth = 2.6;
     ctx.lineCap = 'round';
@@ -85,8 +85,8 @@ export function buildHullSprite(def: ShipDef): HullSprite {
   ctx.stroke(paths.hull);
   ctx.restore();
 
-  // ---- gun ports (def.decks rows per side) — not on paddled craft
-  if (!oared && def.weapon !== 'mechanical') {
+  // ---- gun ports (def.decks rows per side) — not on paddled or merchant craft
+  if (!oared && def.weapon !== 'mechanical' && def.hullStyle !== 'submarine' && def.hullStyle !== 'freighter' && def.hullStyle !== 'tanker') {
     const decks = def.decks ?? 1;
     const ports = Math.max(2, Math.round(def.length / 13));
     for (let d = 0; d < decks; d++) {
@@ -158,6 +158,152 @@ export function buildHullSprite(def: ShipDef): HullSprite {
       ctx.lineTo(hl * 0.45, sgn * hw * 0.34);
     }
     ctx.stroke();
+  } else if (isSteelHull(def.hullStyle)) {
+    // ---- steel decks: superstructure, funnels and machinery, painted once.
+    // Details scale off length/width so the same painter serves a patrol boat
+    // and a supertanker.
+    const steel = def.hullStyle;
+    ctx.strokeStyle = 'rgba(20,24,28,0.5)';
+    ctx.lineWidth = 0.6;
+    if (steel === 'submarine') {
+      // conning tower with a periscope, a deck gun forward, hydroplanes aft
+      ctx.fillStyle = shade(def.hull, 1.18);
+      ctx.fillRect(-hl * 0.16, -hw * 0.42, hl * 0.24, hw * 0.84);
+      ctx.strokeRect(-hl * 0.16, -hw * 0.42, hl * 0.24, hw * 0.84);
+      ctx.strokeStyle = shade(def.hull, 1.4); // periscopes
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-hl * 0.04, 0);
+      ctx.lineTo(hl * 0.05, -hw * 0.5);
+      ctx.stroke();
+      ctx.fillStyle = '#2b2f33'; // deck gun
+      ctx.beginPath();
+      ctx.arc(hl * 0.3, 0, hw * 0.16, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(hl * 0.3, -0.7, hw * 0.5, 1.4);
+      ctx.fillStyle = shade(def.hull, 0.8); // bow planes + rudder
+      ctx.fillRect(hl * 0.62, -hw * 1.05, hl * 0.06, hw * 2.1);
+      ctx.fillRect(-hl * 0.92, -hw * 0.9, hl * 0.05, hw * 1.8);
+    } else if (steel === 'freighter') {
+      // tramp steamer: raised bridge aft of amidships, funnel, kingposts and
+      // hatch covers fore and aft
+      ctx.fillStyle = shade(def.hull, 1.25);
+      ctx.fillRect(-hl * 0.34, -hw * 0.6, hl * 0.3, hw * 1.2); // bridge house
+      ctx.strokeRect(-hl * 0.34, -hw * 0.6, hl * 0.3, hw * 1.2);
+      ctx.fillStyle = 'rgba(20,26,34,0.7)'; // wheelhouse
+      ctx.fillRect(-hl * 0.06, -hw * 0.34, hl * 0.07, hw * 0.68);
+      ctx.fillStyle = shade(def.hull, 0.62); // funnel behind the bridge
+      ctx.beginPath();
+      ctx.ellipse(-hl * 0.42, 0, hw * 0.16, hw * 0.3, 0, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#1a1d20';
+      ctx.stroke();
+      // kingposts + derricks over the holds
+      ctx.strokeStyle = shade(def.deck, 0.55);
+      ctx.lineWidth = 0.8;
+      for (const mx of [hl * 0.28, -hl * 0.02]) {
+        ctx.beginPath();
+        ctx.moveTo(mx, -hw * 0.5);
+        ctx.lineTo(mx, hw * 0.5);
+        ctx.moveTo(mx - hw * 0.3, -hw * 0.4);
+        ctx.lineTo(mx + hw * 0.5, hw * 0.55);
+        ctx.moveTo(mx + hw * 0.3, hw * 0.4);
+        ctx.lineTo(mx - hw * 0.5, -hw * 0.55);
+        ctx.stroke();
+      }
+      // hatch covers
+      ctx.fillStyle = shade(def.deck, 0.8);
+      for (const [hx, hwid] of [[hl * 0.05, hl * 0.18], [hl * 0.38, hl * 0.14]] as const) {
+        ctx.fillRect(hx, -hw * 0.34, hwid, hw * 0.68);
+        ctx.strokeRect(hx, -hw * 0.34, hwid, hw * 0.68);
+      }
+    } else if (steel === 'tanker') {
+      // oil tanker: a pipeline run the length of the deck, superstructure and
+      // funnel all the way aft, a bow mast forward
+      ctx.strokeStyle = shade(def.hull, 0.55);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(hl * 0.72, -hw * 0.22);
+      ctx.lineTo(-hl * 0.5, -hw * 0.22);
+      ctx.moveTo(hl * 0.72, hw * 0.22);
+      ctx.lineTo(-hl * 0.5, hw * 0.22);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 7; i++) {
+        const px = hl * 0.62 - (i / 6) * hl * 1.05;
+        ctx.beginPath();
+        ctx.moveTo(px, -hw * 0.3);
+        ctx.lineTo(px, hw * 0.3);
+        ctx.stroke();
+      }
+      ctx.fillStyle = shade(def.hull, 1.25); // aft bridge house
+      ctx.fillRect(-hl * 0.46, -hw * 0.58, hl * 0.2, hw * 1.16);
+      ctx.strokeRect(-hl * 0.46, -hw * 0.58, hl * 0.2, hw * 1.16);
+      ctx.fillStyle = shade(def.hull, 0.62); // funnel
+      ctx.beginPath();
+      ctx.ellipse(-hl * 0.6, 0, hw * 0.14, hw * 0.26, 0, 0, TAU);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = shade(def.hull, 1.1); // bow mast
+      ctx.beginPath();
+      ctx.arc(hl * 0.52, 0, hw * 0.1, 0, TAU);
+      ctx.fill();
+    } else {
+      // ---- warship: blocky superstructure, funnels, turrets fore and aft.
+      // Longer hulls grow a third amidships turret (the dreadnoughts).
+      const big = def.length > 92;
+      const turrets: [number, number][] = big
+        ? [[hl * 0.58, 1], [-hl * 0.62, -1], [-hl * 0.1, 1]]
+        : [[hl * 0.55, 1], [-hl * 0.5, -1]];
+      for (const [tx, dir] of turrets) {
+        ctx.fillStyle = shade(def.hull, 1.2);
+        ctx.beginPath();
+        ctx.ellipse(tx, 0, hw * 0.34, hw * 0.3, 0, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(14,18,22,0.8)';
+        ctx.stroke();
+        ctx.fillStyle = '#20242a'; // guns trained abeam, action stations
+        ctx.fillRect(tx - 1, dir < 0 ? -hw * 1.7 : hw * 0.4, 2, hw * 1.3);
+        ctx.fillStyle = shade(def.hull, 0.85);
+        ctx.fillRect(tx - 1, dir < 0 ? -hw * 1.7 : hw * 0.4, 2, hw * 0.35);
+      }
+      // superstructure block + bridge
+      ctx.fillStyle = shade(def.hull, 1.18);
+      ctx.fillRect(-hl * 0.3, -hw * 0.52, hl * 0.34, hw * 1.04);
+      ctx.strokeRect(-hl * 0.3, -hw * 0.52, hl * 0.34, hw * 1.04);
+      ctx.fillStyle = 'rgba(20,26,34,0.7)'; // bridge windows
+      ctx.fillRect(hl * 0.02, -hw * 0.3, hl * 0.045, hw * 0.6);
+      // funnels — two on the larger hulls, one raked on the smaller
+      ctx.fillStyle = shade(def.hull, 0.6);
+      const funnels: number[] = big ? [-hl * 0.2, -hl * 0.38] : [-hl * 0.24];
+      for (const fx of funnels) {
+        ctx.beginPath();
+        ctx.ellipse(fx, 0, hw * 0.13, hw * 0.26, 0, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = '#191c1f';
+        ctx.stroke();
+      }
+      // tripod mast
+      ctx.strokeStyle = shade(def.hull, 1.35);
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-hl * 0.32, -hw * 0.2);
+      ctx.lineTo(-hl * 0.28, hw * 0.2);
+      ctx.stroke();
+      // stern racks / davits
+      ctx.fillStyle = shade(def.hull, 0.8);
+      for (const sgn of [-1, 1]) ctx.fillRect(-hl * 0.82, sgn * hw * 0.62 - 0.6, hl * 0.14, 1.2);
+      // hull portholes
+      ctx.fillStyle = 'rgba(180,220,235,0.5)';
+      const ports = Math.max(6, Math.round(def.length / 9));
+      for (let i = 0; i < ports; i++) {
+        const px = -hl * 0.8 + (i / (ports - 1)) * hl * 1.5;
+        ctx.beginPath();
+        ctx.arc(px, -hw * 0.66, 0.55, 0, TAU);
+        ctx.arc(px, hw * 0.66, 0.55, 0, TAU);
+        ctx.fill();
+      }
+    }
   } else {
     // ---- forecastle (raised bow deck)
     ctx.fillStyle = shade(def.deck, 1.12);
