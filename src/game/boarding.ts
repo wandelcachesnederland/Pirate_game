@@ -130,6 +130,52 @@ export function surrenderChance(kind: ShipKind): number {
       return 0.75;
     case 'punaArmada':
       return 0.15;
+    case 'venetianGalley':
+      return 0.35;
+    case 'spanishGalley':
+      return 0.3;
+    case 'venetianTrader':
+      return 0.7;
+    case 'laReal':
+      return 0.15;
+    case 'japanFlagship':
+      return 0.15;
+    case 'umayyadGalley':
+      return 0.3;
+    case 'shalandi':
+      return 0.4;
+    case 'umayyadSupply':
+      return 0.75;
+    case 'maslamaFlagship':
+      return 0.15;
+    case 'sherdenGalley':
+      return 0.3;
+    case 'sherdenRaider':
+      return 0.35;
+    case 'clanShip':
+      return 0.7;
+    case 'sherdenArmada':
+      return 0.15;
+    case 'srivJong':
+      return 0.3;
+    case 'srivScout':
+      return 0.4;
+    case 'spiceTrader':
+      return 0.7;
+    case 'royalJong':
+      return 0.15;
+    case 'yuanScout':
+      return 0.35;
+    case 'yuanFlagship':
+      return 0.15;
+    case 'spanBrigantine':
+      return 0.35;
+    case 'tlaxCanoe':
+      return 0.35;
+    case 'supplyBrig':
+      return 0.7;
+    case 'cortesCapitana':
+      return 0.15;
     default:
       return 0; // player, fireship, warCanoe
   }

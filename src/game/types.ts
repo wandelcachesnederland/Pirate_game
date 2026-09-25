@@ -69,7 +69,37 @@ export type ShipKind =
   | 'rivalBalsa'
   | 'punaBalsa'
   | 'spondylusTrader'
-  | 'punaArmada';
+  | 'punaArmada'
+  // Lepanto — galleys of the Holy League
+  | 'venetianGalley'
+  | 'spanishGalley'
+  | 'venetianTrader'
+  | 'laReal'
+  // Imjin War — Hideyoshi's flagship
+  | 'japanFlagship'
+  // Constantinople — the Caliph's galleys
+  | 'umayyadGalley'
+  | 'shalandi'
+  | 'umayyadSupply'
+  | 'maslamaFlagship'
+  // Sea Peoples — Sherden raiders
+  | 'sherdenGalley'
+  | 'sherdenRaider'
+  | 'clanShip'
+  | 'sherdenArmada'
+  // Bay of Bengal — Srivijayan jongs
+  | 'srivJong'
+  | 'srivScout'
+  | 'spiceTrader'
+  | 'royalJong'
+  // Bach Dang — the Khan's fleet
+  | 'yuanScout'
+  | 'yuanFlagship'
+  // Lake Texcoco — brigantines and allies
+  | 'spanBrigantine'
+  | 'tlaxCanoe'
+  | 'supplyBrig'
+  | 'cortesCapitana';
 
 export type Faction =
   | 'pirate'
@@ -92,7 +122,17 @@ export type Faction =
   | 'ptolemy'
   | 'maya'
   | 'inca'
-  | 'puna';
+  | 'puna'
+  | 'ottoman'
+  | 'venice'
+  | 'korea'
+  | 'byzantium'
+  | 'egypt'
+  | 'sherden'
+  | 'chola'
+  | 'srivijaya'
+  | 'daiviet'
+  | 'aztec';
 
 export type HullStyle =
   | 'default'
@@ -126,7 +166,15 @@ export type EraId =
   // Successors and the Americas
   | 'macedon'
   | 'maya'
-  | 'inca';
+  | 'inca'
+  // Galleys, turtles and lakes
+  | 'lepanto'
+  | 'korea'
+  | 'byzantium'
+  | 'egypt'
+  | 'chola'
+  | 'vietnam'
+  | 'aztec';
 
 export interface ShipDef {
   kind: ShipKind;

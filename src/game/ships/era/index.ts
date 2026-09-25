@@ -16,15 +16,22 @@ import { SEA_WOLF } from './seaWolf';
 import { USS_REVENANT } from './ussRevenant';
 import {
   ARAB_BOOM,
+  AZTEC_CANOE,
+  BYZANTIUM_DROMON,
   CHINESE_JUNK,
+  CHOLA_TIGER,
+  EGYPT_GALLEY,
   GREEK_TRIREME,
   HAWAII_WAA,
   INCA_BALSA,
   JAPANESE_ATAKEBUNE,
+  KOREA_TURTLE,
+  LEPANTO_SULTANA,
   MACEDON_SIXTEEN,
   MAORI_WAKA,
   MAYA_TULUM,
   ROMAN_QUINQUEREME,
+  VIETNAM_JUNK,
 } from '../heritage';
 
 export interface EraShip {
@@ -172,6 +179,69 @@ export const ERA_SHIPS: EraShip[] = [
     group: 'Heritage Seas',
     homeWaters: 'the Gulf of Guayaquil',
   },
+  {
+    id: 'lepanto',
+    era: 'Lepanto',
+    year: '1571',
+    blurb: 'Ottoman war galley: bow guns, oars, boarders. The League awaits.',
+    def: LEPANTO_SULTANA,
+    group: 'Heritage Seas',
+    homeWaters: 'the Gulf of Patras',
+  },
+  {
+    id: 'korea',
+    era: 'Imjin War',
+    year: '1597',
+    blurb: 'Turtle ship: iron roof, cannon on every side. Hold the strait.',
+    def: KOREA_TURTLE,
+    group: 'Heritage Seas',
+    homeWaters: 'the Myeongnyang Strait',
+  },
+  {
+    id: 'byzantium',
+    era: 'Siege of Constantinople',
+    year: '717',
+    blurb: "Dromon with Greek fire: burn the Caliph's fleet off the strait.",
+    def: BYZANTIUM_DROMON,
+    group: 'Heritage Seas',
+    homeWaters: 'the Bosporus',
+  },
+  {
+    id: 'egypt',
+    era: 'Against the Sea Peoples',
+    year: '1178 BC',
+    blurb: "Ramesses III's war galley: the first naval battle in history.",
+    def: EGYPT_GALLEY,
+    group: 'Heritage Seas',
+    homeWaters: 'the Nile Delta',
+  },
+  {
+    id: 'chola',
+    era: 'Chola Across the Bay',
+    year: '1025',
+    blurb: 'Chola war ship: carry the Tiger across the Bay of Bengal.',
+    def: CHOLA_TIGER,
+    group: 'Heritage Seas',
+    homeWaters: 'the Bay of Bengal',
+  },
+  {
+    id: 'vietnam',
+    era: 'Bạch Đằng River',
+    year: '1288',
+    blurb: "Vietnamese war junk: lure the Khan's fleet onto the stakes.",
+    def: VIETNAM_JUNK,
+    group: 'Heritage Seas',
+    homeWaters: 'the Bạch Đằng River',
+  },
+  {
+    id: 'aztec',
+    era: 'Fall of Tenochtitlan',
+    year: '1521',
+    blurb: 'War canoe of Cuauhtémoc: defend the lake to the last.',
+    def: AZTEC_CANOE,
+    group: 'Heritage Seas',
+    homeWaters: 'Lake Texcoco',
+  },
 ];
 
 export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
@@ -190,6 +260,13 @@ export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
   macedon: MACEDON_SIXTEEN,
   maya: MAYA_TULUM,
   inca: INCA_BALSA,
+  lepanto: LEPANTO_SULTANA,
+  korea: KOREA_TURTLE,
+  byzantium: BYZANTIUM_DROMON,
+  egypt: EGYPT_GALLEY,
+  chola: CHOLA_TIGER,
+  vietnam: VIETNAM_JUNK,
+  aztec: AZTEC_CANOE,
 };
 
 export const DEFAULT_ERA: EraId = 'golden';
@@ -199,4 +276,4 @@ export function eraShip(id: EraId): EraShip {
 }
 
 export { BLACK_GULL, HMS_VENGEANCE, SANTA_BRISA, SEA_WOLF, USS_REVENANT };
-export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, ROMAN_QUINQUEREME };
+export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, ROMAN_QUINQUEREME, AZTEC_CANOE, BYZANTIUM_DROMON, CHOLA_TIGER, EGYPT_GALLEY, KOREA_TURTLE, LEPANTO_SULTANA, VIETNAM_JUNK };

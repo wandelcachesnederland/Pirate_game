@@ -1,4 +1,4 @@
-// Heritage collection: playable flagships from ten seafaring cultures.
+// Heritage collection: playable flagships from seventeen seafaring cultures.
 //
 // Each hull sails as the hero of its own era (see `era/index.ts`) — one
 // heritage ship per era. Every entry is a `kind: 'player'` ShipDef with a
@@ -15,6 +15,13 @@ import { HAWAII_WAA } from './hawaii';
 import { MACEDON_SIXTEEN } from './macedon';
 import { MAYA_TULUM } from './maya';
 import { INCA_BALSA } from './inca';
+import { LEPANTO_SULTANA } from './lepanto';
+import { KOREA_TURTLE } from './korea';
+import { BYZANTIUM_DROMON } from './byzantium';
+import { EGYPT_GALLEY } from './egypt';
+import { CHOLA_TIGER } from './chola';
+import { VIETNAM_JUNK } from './vietnam';
+import { AZTEC_CANOE } from './aztec';
 
 export interface HeritageShip {
   id: string;
@@ -107,17 +114,80 @@ export const HERITAGE_SHIPS: HeritageShip[] = [
     blurb: 'Pacific war balsa: log raft of the Sapa Inca.',
     def: INCA_BALSA,
   },
+  {
+    id: 'lepanto',
+    culture: 'Ottoman',
+    waters: 'Gulf of Patras',
+    year: '1571',
+    blurb: 'Lepanto war galley: bow guns, oars, janissary boarders.',
+    def: LEPANTO_SULTANA,
+  },
+  {
+    id: 'korea',
+    culture: 'Korean',
+    waters: 'Myeongnyang Strait',
+    year: '1597',
+    blurb: 'Imjin War turtle ship: iron roof, cannon on every side.',
+    def: KOREA_TURTLE,
+  },
+  {
+    id: 'byzantium',
+    culture: 'Byzantine',
+    waters: 'Bosporus',
+    year: '717',
+    blurb: 'Greek-fire dromon: bronze siphons, burning seas.',
+    def: BYZANTIUM_DROMON,
+  },
+  {
+    id: 'egypt',
+    culture: 'Egyptian',
+    waters: 'Nile Delta',
+    year: '1178 BC',
+    blurb: 'New Kingdom war galley: the first naval battle in history.',
+    def: EGYPT_GALLEY,
+  },
+  {
+    id: 'chola',
+    culture: 'Chola',
+    waters: 'Bay of Bengal',
+    year: '1025',
+    blurb: 'Tiger-throne war ship: sewn planks, far horizons.',
+    def: CHOLA_TIGER,
+  },
+  {
+    id: 'vietnam',
+    culture: 'Vietnamese',
+    waters: 'Bach Dang River',
+    year: '1288',
+    blurb: 'War junk of Dai Viet: lure the Khan onto the stakes.',
+    def: VIETNAM_JUNK,
+  },
+  {
+    id: 'aztec',
+    culture: 'Aztec',
+    waters: 'Lake Texcoco',
+    year: '1521',
+    blurb: 'War canoe of the last tlatoani: defend the lake.',
+    def: AZTEC_CANOE,
+  },
 ];
 
 export {
   ARAB_BOOM,
+  AZTEC_CANOE,
+  BYZANTIUM_DROMON,
   CHINESE_JUNK,
+  CHOLA_TIGER,
+  EGYPT_GALLEY,
   GREEK_TRIREME,
   HAWAII_WAA,
   INCA_BALSA,
   JAPANESE_ATAKEBUNE,
+  KOREA_TURTLE,
+  LEPANTO_SULTANA,
   MACEDON_SIXTEEN,
   MAYA_TULUM,
   MAORI_WAKA,
   ROMAN_QUINQUEREME,
+  VIETNAM_JUNK,
 };

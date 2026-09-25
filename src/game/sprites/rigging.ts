@@ -55,6 +55,20 @@ function fleurDeLis(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: nu
   ctx.fillRect(cx - s * 0.62, cy + s * 0.34, s * 1.24, s * 0.24);
 }
 
+/** A 5-pointed star path about (cx, cy) with outer radius `r` (caller fills). */
+function star5(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rr = i % 2 === 0 ? r : r * 0.42;
+    const a = (i / 10) * TAU - Math.PI / 2;
+    const px = cx + Math.cos(a) * rr;
+    const py = cy + Math.sin(a) * rr;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
 export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number, bulge: number, yard: number) {
   if (f === 'fire') return;
   ctx.save();
@@ -259,6 +273,100 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.moveTo(cx - 2.4, 2.2);
       ctx.lineTo(cx, 0.4);
       ctx.lineTo(cx + 2.4, 2.2);
+      ctx.stroke();
+      break;
+    case 'ottoman':
+      ctx.strokeStyle = '#b3261e';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, Math.PI * 0.35, Math.PI * 1.65);
+      ctx.stroke();
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(cx + 1.2, 0, 0.7, 0, TAU);
+      ctx.fill();
+      break;
+    case 'venice':
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.5, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(cx - 3.0, -0.7, 1.8, 1.4);
+      ctx.fillRect(cx + 1.2, -0.7, 1.8, 1.4);
+      break;
+    case 'korea':
+      ctx.fillStyle = '#2e5e8c';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, Math.PI, TAU);
+      ctx.fill();
+      break;
+    case 'byzantium':
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(cx - 0.7, -3.2, 1.4, 6.4);
+      ctx.fillRect(cx - 2.2, -1.2, 4.4, 1.4);
+      break;
+    case 'egypt':
+      ctx.fillStyle = '#274a7a';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'sherden':
+      ctx.strokeStyle = '#2e2e34';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(cx - 1.1, 0, 1.9, Math.PI * 0.4, Math.PI * 1.6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx + 1.1, 0, 1.9, Math.PI * 1.4, Math.PI * 0.6);
+      ctx.stroke();
+      break;
+    case 'chola':
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(cx - 2.4, -2.6, 4.8, 5.2);
+      ctx.fillStyle = '#2a1a10';
+      ctx.fillRect(cx - 1.5, -2.6, 0.9, 5.2);
+      ctx.fillRect(cx - 0.45, -2.6, 0.9, 5.2);
+      ctx.fillRect(cx + 0.6, -2.6, 0.9, 5.2);
+      break;
+    case 'srivijaya':
+      ctx.fillStyle = '#1f5a3a';
+      ctx.beginPath();
+      ctx.moveTo(cx, 2.6);
+      ctx.lineTo(cx - 2.4, -1.6);
+      ctx.lineTo(cx - 0.8, -1.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, 2.6);
+      ctx.lineTo(cx + 2.4, -1.6);
+      ctx.lineTo(cx + 0.8, -1.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(cx - 0.7, -2.6, 1.4, 5.2);
+      break;
+    case 'daiviet':
+      ctx.fillStyle = '#b3261e';
+      star5(ctx, cx, 0, 2.6);
+      ctx.fill();
+      break;
+    case 'aztec':
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#b3261e';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
       ctx.stroke();
       break;
   }
@@ -539,6 +647,151 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       ctx.beginPath();
       ctx.arc(w * 0.5, h * 0.78, Math.min(w, h) * 0.09, 0, TAU);
       ctx.fill();
+      break;
+    }
+    case 'ottoman': {
+      ctx.fillStyle = '#b3261e';
+      ctx.fillRect(0, 0, w, h);
+      const ox = w * 0.44;
+      const oy = h * 0.5;
+      const orr = Math.min(w, h) * 0.3;
+      ctx.fillStyle = '#f4f1e6';
+      ctx.beginPath();
+      ctx.arc(ox, oy, orr, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(ox + orr * 0.45, oy, orr * 0.82, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#f4f1e6';
+      star5(ctx, ox + orr * 1.05, oy, Math.min(w, h) * 0.11);
+      ctx.fill();
+      break;
+    }
+    case 'venice': {
+      ctx.fillStyle = '#d4a72c';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#a02323';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.18, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(w * 0.12, h * 0.42, w * 0.24, h * 0.16);
+      ctx.fillRect(w * 0.64, h * 0.42, w * 0.24, h * 0.16);
+      break;
+    }
+    case 'korea': {
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2e5e8c';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.26, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.26, Math.PI, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#1a1a1a';
+      const bw = w * 0.07;
+      const bh = h * 0.09;
+      const bars: Array<[number, number]> = [
+        [0.08, 0.12],
+        [0.85, 0.12],
+        [0.08, 0.79],
+        [0.85, 0.79],
+      ];
+      for (const [bx, by] of bars) {
+        for (let i = 0; i < 3; i++) ctx.fillRect(w * bx, h * by + i * bh * 1.4, bw, bh);
+      }
+      break;
+    }
+    case 'byzantium': {
+      ctx.fillStyle = '#a52a2a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(w * 0.44, h * 0.12, w * 0.12, h * 0.76);
+      ctx.fillRect(w * 0.24, h * 0.32, w * 0.52, h * 0.14);
+      break;
+    }
+    case 'egypt': {
+      ctx.fillStyle = '#e8c14a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#274a7a';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.22, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'sherden': {
+      ctx.fillStyle = '#2e2e34';
+      ctx.fillRect(0, 0, w, h);
+      const sr = Math.min(w, h) * 0.26;
+      for (const sxx of [w * 0.32, w * 0.68]) {
+        ctx.fillStyle = '#f4f1e6';
+        ctx.beginPath();
+        ctx.arc(sxx, h * 0.5, sr, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = '#2e2e34';
+        ctx.beginPath();
+        ctx.arc(sxx + (sxx < w * 0.5 ? sr * 0.5 : -sr * 0.5), h * 0.5, sr * 0.85, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.08, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'chola': {
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2a1a10';
+      for (let i = 0; i < 3; i++) ctx.fillRect(w * (0.2 + i * 0.22), 0, w * 0.11, h);
+      break;
+    }
+    case 'srivijaya': {
+      ctx.fillStyle = '#1f5a3a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#f4f1e6';
+      const lx = w * 0.5;
+      const ly = h * 0.72;
+      for (let i = -2; i <= 2; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(lx + i * w * 0.09 - w * 0.045, h * 0.24);
+        ctx.lineTo(lx + i * w * 0.09 + w * 0.045, h * 0.24);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(lx, ly - h * 0.06, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'daiviet': {
+      ctx.fillStyle = '#7a1a1a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8b830';
+      star5(ctx, w * 0.5, h * 0.5, Math.min(w, h) * 0.3);
+      ctx.fill();
+      break;
+    }
+    case 'aztec': {
+      ctx.fillStyle = '#1f8a8a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#b3261e';
+      ctx.lineWidth = Math.max(0.5, h * 0.07);
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
+      ctx.stroke();
       break;
     }
     case 'fire': {

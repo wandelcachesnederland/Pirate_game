@@ -451,6 +451,264 @@ export const INCA_ROSTER: EraRoster = {
   ],
 };
 
+export const LEPANTO_ROSTER: EraRoster = {
+  early: [
+    ['venetianTrader', 'venetianTrader', 'venetianGalley'],
+    ['venetianGalley', 'venetianGalley', 'spanishGalley'],
+    ['fireship', 'fireship', 'spanishGalley'],
+    ['venetianGalley', 'spanishGalley', 'venetianTrader', 'spanishGalley'],
+    ['laReal'],
+  ],
+  boss: 'laReal',
+  jackpot: 'venetianTrader',
+  trader: 'venetianTrader',
+  pool: [
+    { kind: 'venetianGalley', cost: 2.2, weight: 3 },
+    { kind: 'spanishGalley', cost: 2.4, weight: 2 },
+    { kind: 'venetianTrader', cost: 1.0, weight: 1 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A Venetian convoy — take it!',
+    'Galleys of the League give chase!',
+    'Beware the fire ships!',
+    'Don Juan sends his wolves!',
+    "Don Juan's La Real approaches!",
+  ],
+  bossTitle: 'The Holy League sails — with a treasure convoy!',
+  lines: [
+    'More oars on the horizon!',
+    'They want your head, Pasha!',
+    'For the Sultan!',
+    'Blood in the water...',
+    'Venice has doubled your bounty!',
+    'The League closes in from all sides!',
+  ],
+};
+
+export const KOREA_ROSTER: EraRoster = {
+  early: [
+    ['riceBune', 'riceBune', 'kobaya'],
+    ['sekiBune', 'kobaya', 'kobaya'],
+    ['fireship', 'fireship', 'sekiBune'],
+    ['sekiBune', 'sekiBune', 'kobaya', 'riceBune'],
+    ['japanFlagship'],
+  ],
+  boss: 'japanFlagship',
+  jackpot: 'riceBune',
+  trader: 'riceBune',
+  pool: [
+    { kind: 'sekiBune', cost: 2.2, weight: 3 },
+    { kind: 'kobaya', cost: 1.1, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'riceBune', cost: 1.0, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Japanese supply ships — burn them!',
+    'Samurai bune give chase!',
+    'Beware the fire ships!',
+    'Hideyoshi sends his wolves!',
+    'The samurai flagship approaches!',
+  ],
+  bossTitle: 'Hideyoshi sails — with a supply fleet!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Admiral!',
+    'Hold the strait!',
+    'Blood in the water...',
+    'Hideyoshi has doubled your bounty!',
+    'Enemy bune close in from all sides!',
+  ],
+};
+
+export const BYZANTIUM_ROSTER: EraRoster = {
+  early: [
+    ['umayyadSupply', 'umayyadSupply', 'umayyadGalley'],
+    ['umayyadGalley', 'umayyadGalley', 'shalandi'],
+    ['fireship', 'fireship', 'umayyadGalley'],
+    ['umayyadGalley', 'shalandi', 'umayyadSupply', 'shalandi'],
+    ['maslamaFlagship'],
+  ],
+  boss: 'maslamaFlagship',
+  jackpot: 'umayyadSupply',
+  trader: 'umayyadSupply',
+  pool: [
+    { kind: 'umayyadGalley', cost: 2.2, weight: 3 },
+    { kind: 'shalandi', cost: 1.3, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'umayyadSupply', cost: 0.8, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Arab supply ships — burn them!',
+    'Umayyad galleys give chase!',
+    'Beware the fire ships!',
+    'The Caliph sends his wolves!',
+    "Maslama's flagship approaches!",
+  ],
+  bossTitle: 'Maslama sails — with a supply fleet!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Drungarios!',
+    'For Constantinople!',
+    'Blood in the water...',
+    'The Caliph has doubled your bounty!',
+    'Arab galleys close in from all sides!',
+  ],
+};
+
+export const EGYPT_ROSTER: EraRoster = {
+  early: [
+    ['clanShip', 'clanShip', 'sherdenRaider'],
+    ['sherdenGalley', 'sherdenRaider', 'sherdenRaider'],
+    ['fireship', 'sherdenGalley', 'sherdenRaider'],
+    ['sherdenGalley', 'sherdenGalley', 'clanShip', 'sherdenRaider'],
+    ['sherdenArmada'],
+  ],
+  boss: 'sherdenArmada',
+  jackpot: 'clanShip',
+  trader: 'clanShip',
+  pool: [
+    { kind: 'sherdenGalley', cost: 2.2, weight: 3 },
+    { kind: 'sherdenRaider', cost: 1.3, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'clanShip', cost: 0.8, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Clan ships of the Sea Peoples — sink them!',
+    'Sherden raiders give chase!',
+    'Beware the fire rafts!',
+    'The North sends its wolves!',
+    'The great Sherden armada approaches!',
+  ],
+  bossTitle: 'The Sea Peoples sail — with their clan ships!',
+  lines: [
+    'More oars on the horizon!',
+    'They want your head, Commander!',
+    'For Pharaoh!',
+    'Blood in the water...',
+    'The Sherden have doubled your bounty!',
+    'Raiders close in from all sides!',
+  ],
+};
+
+export const CHOLA_ROSTER: EraRoster = {
+  early: [
+    ['spiceTrader', 'spiceTrader', 'srivScout'],
+    ['srivJong', 'srivScout', 'srivScout'],
+    ['fireship', 'fireship', 'srivJong'],
+    ['srivJong', 'srivScout', 'spiceTrader', 'srivScout'],
+    ['royalJong'],
+  ],
+  boss: 'royalJong',
+  jackpot: 'spiceTrader',
+  trader: 'spiceTrader',
+  pool: [
+    { kind: 'srivJong', cost: 2.6, weight: 3 },
+    { kind: 'srivScout', cost: 1.2, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'spiceTrader', cost: 1.2, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Spice traders — seize the cargo!',
+    'War jongs give chase!',
+    'Beware the fire ships!',
+    'The Maharaja sends his wolves!',
+    'The Srivijayan royal jong approaches!',
+  ],
+  bossTitle: 'The Maharaja sails — with a spice fleet!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Captain!',
+    'For the Tiger!',
+    'Blood in the water...',
+    'The Maharaja has doubled your bounty!',
+    'Jongs close in from all sides!',
+  ],
+};
+
+export const VIETNAM_ROSTER: EraRoster = {
+  early: [
+    ['grainJunk', 'grainJunk', 'yuanScout'],
+    ['warlordJunk', 'yuanScout', 'yuanScout'],
+    ['fireship', 'fireship', 'warlordJunk'],
+    ['warlordJunk', 'yuanScout', 'grainJunk', 'yuanScout'],
+    ['yuanFlagship'],
+  ],
+  boss: 'yuanFlagship',
+  jackpot: 'grainJunk',
+  trader: 'grainJunk',
+  pool: [
+    { kind: 'warlordJunk', cost: 2.6, weight: 3 },
+    { kind: 'yuanScout', cost: 1.5, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'grainJunk', cost: 1.2, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Mongol supply junks — burn them!',
+    'Yuan war junks give chase!',
+    'Beware the fire rafts!',
+    'The Khan sends his wolves!',
+    'The Mongol flagship approaches!',
+  ],
+  bossTitle: 'The Khan sails — with a supply fleet!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, General!',
+    'For Đại Việt!',
+    'Blood in the water...',
+    'The Khan has doubled your bounty!',
+    'Yuan junks close in from all sides!',
+  ],
+};
+
+export const AZTEC_ROSTER: EraRoster = {
+  early: [
+    ['supplyBrig', 'tlaxCanoe', 'supplyBrig'],
+    ['tlaxCanoe', 'tlaxCanoe', 'spanBrigantine'],
+    ['fireship', 'tlaxCanoe', 'spanBrigantine'],
+    ['spanBrigantine', 'tlaxCanoe', 'supplyBrig', 'tlaxCanoe'],
+    ['cortesCapitana'],
+  ],
+  boss: 'cortesCapitana',
+  jackpot: 'supplyBrig',
+  trader: 'supplyBrig',
+  pool: [
+    { kind: 'spanBrigantine', cost: 2.0, weight: 3 },
+    { kind: 'tlaxCanoe', cost: 1.6, weight: 3 },
+    { kind: 'warCanoe', cost: 1.1, weight: 2 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'supplyBrig', cost: 0.8, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Spanish supply brigs — seize them!',
+    'Brigantines give chase!',
+    'Beware the fire rafts!',
+    'Cortés sends his wolves!',
+    "Cortés's lake capitana approaches!",
+  ],
+  bossTitle: 'Cortés sails — with a supply fleet!',
+  lines: [
+    'More sails on the lake!',
+    'They want your head, Tlatoani!',
+    'For Tenochtitlan!',
+    'Blood in the water...',
+    'Cortés has doubled your bounty!',
+    'Brigantines close in from all sides!',
+  ],
+};
+
 export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   golden: SAIL_ROSTER,
   exploration: SAIL_ROSTER,
@@ -467,4 +725,11 @@ export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   macedon: MACEDON_ROSTER,
   maya: MAYA_ROSTER,
   inca: INCA_ROSTER,
+  lepanto: LEPANTO_ROSTER,
+  korea: KOREA_ROSTER,
+  byzantium: BYZANTIUM_ROSTER,
+  egypt: EGYPT_ROSTER,
+  chola: CHOLA_ROSTER,
+  vietnam: VIETNAM_ROSTER,
+  aztec: AZTEC_ROSTER,
 };

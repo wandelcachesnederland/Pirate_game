@@ -1979,6 +1979,26 @@ export class Engine {
         return 'Inca';
       case 'puna':
         return 'Pun\u00e1';
+      case 'ottoman':
+        return 'Ottoman';
+      case 'venice':
+        return 'Venetian';
+      case 'korea':
+        return 'Korean';
+      case 'byzantium':
+        return 'Byzantine';
+      case 'egypt':
+        return 'Egyptian';
+      case 'sherden':
+        return 'Sea Peoples';
+      case 'chola':
+        return 'Chola';
+      case 'srivijaya':
+        return 'Srivijayan';
+      case 'daiviet':
+        return 'Vietnamese';
+      case 'aztec':
+        return 'Aztec';
       case 'native':
         return 'native';
       case 'fire':
