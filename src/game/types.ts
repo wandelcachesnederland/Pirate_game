@@ -310,6 +310,14 @@ export interface Ship {
   surrenderRolls: number;
   /** Taken as a prize: prize crew aboard, counts as cleared like a sinking. */
   captured: boolean;
+  /** Village this boat belongs to; wave flotillas have none. */
+  homeIsland?: Island | null;
+  /**
+   * A village fishing boat: no fight in her. She works the shallows off her own
+   * beach, runs from a warship, and sinking her is what turns a mild village
+   * into an enemy.
+   */
+  peaceful?: boolean;
 }
 
 /**
@@ -417,4 +425,62 @@ export interface Island {
   half: number;
   shore: Path2D;
   seed: number;
+  /**
+   * Who lives here, how glad they are to see a strange sail, and how much they
+   * will take before they fight. Every island gets one; uninhabited islands just
+   * have `inhabited: false` and no opinions.
+   */
+  settlement: Settlement;
+}
+
+/** A stone battery on an inhabited island: it answers a hostile sail with shot. */
+export interface Fortress {
+  hp: number;
+  maxHp: number;
+  /** Guns in one salvo. */
+  guns: number;
+  /** How far out from the island the guns will reach. */
+  range: number;
+  /** Seconds between salvoes. */
+  reload: number;
+  /** Countdown to the next salvo. */
+  timer: number;
+  damage: number;
+  ballSpeed: number;
+  /** Bearing of the battery on the island's shore (world radians). */
+  angle: number;
+  /** Walls down and guns spiked — silent for the rest of the run. */
+  ruined: boolean;
+}
+
+/**
+ * An island's people. They start with a `friendliness` (0 = every sail is an
+ * enemy, 100 = saints) which sets their `patience`: the number of grievances
+ * they will swallow. `anger` counts the grievances the player has given them —
+ * a round into a fishing canoe, a sunk boat, a shell into their village. Cross
+ * the patience line and they are `hostile` until tempers cool.
+ */
+export interface Settlement {
+  inhabited: boolean;
+  friendliness: number;
+  anger: number;
+  patience: number;
+  /** Village name, for the log. */
+  name: string;
+  fortress?: Fortress;
+  hostile: boolean;
+  /** Seconds since the last grievance — how long they have been angry. */
+  calm: number;
+}
+
+/** Who lives in a stretch of water: how often, how friendly, how fortified. */
+export interface PeopleSpec {
+  /** Chance an island here is inhabited at all. */
+  inhabited: number;
+  /** Friendliness rolled for a village, low..high. */
+  friendliness: [number, number];
+  /** Chance an inhabited island also carries a fort (the chart caps the total). */
+  fort: number;
+  /** Village names drawn on for this sea. */
+  names: string[];
 }

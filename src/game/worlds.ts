@@ -6,7 +6,7 @@
 // so every age fights in its proper sea — the Caribbean for the pirates, the
 // Aegean for Salamis, Lake Texcoco for the fall of Tenochtitlan.
 
-import type { RegionId } from './types';
+import type { PeopleSpec, RegionId } from './types';
 
 /** Water tints. `light`/`dark` are "r,g,b," prefixes for the mottling tile. */
 export interface WaterTheme {
@@ -46,6 +46,13 @@ export interface RegionDef {
   islands: IslandTheme;
   /** Sea / sand / jungle swatches for the picker. */
   swatch: [string, string, string];
+  /**
+   * Who lives in these waters: how often an island is inhabited, how friendly
+   * those villages start, how eager they are to fort up, and what they are
+   * called. Every sea has its own temper — the Caribbean is thick with villages
+   * and grudges, the Kona Coast is quiet and hospitable.
+   */
+  people: PeopleSpec;
 }
 
 /** `#rrggbb` → `rgba(r, g, b, a)`, so a palette only needs its solid colours. */
@@ -104,9 +111,33 @@ function sea(spec: SeaSpec): { water: WaterTheme; islands: IslandTheme } {
   };
 }
 
-function seaRegion(id: RegionId, name: string, subtitle: string, blurb: string, spec: SeaSpec): RegionDef {
+/**
+ * A people's particulars: how often an island here is inhabited, the
+ * friendliness a village rolls, how often one carries a fort, and the names to
+ * draw on. See `settlements.ts` for what friendliness buys.
+ */
+function people(
+  inhabited: number,
+  friendliness: [number, number],
+  fort: number,
+  names: string[],
+): PeopleSpec {
+  return { inhabited, friendliness, fort, names };
+}
+
+/** Waters with no peoples of their own get a middling, nameless shore folk. */
+const PLAIN_FOLK = people(0.6, [10, 80], 0.12, ['Landfall', 'Saltcove', 'Windward', 'Gull Point']);
+
+function seaRegion(
+  id: RegionId,
+  name: string,
+  subtitle: string,
+  blurb: string,
+  spec: SeaSpec,
+  folk: PeopleSpec = PLAIN_FOLK,
+): RegionDef {
   const { water, islands } = sea(spec);
-  return { id, name, subtitle, blurb, water, islands, swatch: [water.base, spec.sand[1], spec.foliage[0]] };
+  return { id, name, subtitle, blurb, water, islands, swatch: [water.base, spec.sand[1], spec.foliage[0]], people: folk };
 }
 
 // ── the hand-tuned originals ────────────────────────────────────────────────
@@ -230,6 +261,9 @@ export const REGIONS: RegionDef[] = [
     water: CARIBBEAN_WATER,
     islands: CARIBBEAN_ISLANDS,
     swatch: ['#1a7394', '#edd7a1', '#2d6a30'],
+    people: people(0.72, [0, 95], 0.10, [
+      'Tortuga', 'Port Royal', 'Isla de la Vaca', 'Nevis', 'Roatán', 'Petit-Goâve', 'Santa Catalina',
+    ]),
   },
   {
     id: 'mediterranean',
@@ -239,6 +273,9 @@ export const REGIONS: RegionDef[] = [
     water: MEDITERRANEAN_WATER,
     islands: MEDITERRANEAN_ISLANDS,
     swatch: ['#1e6d9e', '#f0e3c0', '#5a7a3a'],
+    people: people(0.8, [0, 80], 0.20, [
+      'Salamis', 'Sunion', 'Melos', 'Tarentum', 'Syracuse', 'Delos', 'Cape Malea',
+    ]),
   },
   {
     id: 'arabian',
@@ -248,6 +285,9 @@ export const REGIONS: RegionDef[] = [
     water: ARABIAN_WATER,
     islands: ARABIAN_ISLANDS,
     swatch: ['#1f8a8a', '#f4dfa8', '#6b7a3a'],
+    people: people(0.68, [0, 75], 0.18, [
+      'Hormuz', 'Masqat', 'Socotra', 'Mirbat', 'Qays', 'Kharg', 'Dhofar',
+    ]),
   },
   {
     id: 'singapore',
@@ -257,6 +297,9 @@ export const REGIONS: RegionDef[] = [
     water: SINGAPORE_WATER,
     islands: SINGAPORE_ISLANDS,
     swatch: ['#146e60', '#eed9a0', '#1f5a2a'],
+    people: people(0.75, [5, 85], 0.14, [
+      'Palembang', 'Srivijaya', 'Tumasik', 'Langkasuka', 'Kedah', 'Bintan', 'Melaka',
+    ]),
   },
 
   // ── Age of Sail beyond the tropics ────────────────────────────────────────
@@ -273,6 +316,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#b9bcb4', '#d9dcd4', '#f2f4ee'],
       palm: ['#3a6b35', '#5c8b45', '#6b5238'],
     },
+    people(0.62, [5, 85], 0.16, ['Brest', 'A Coruña', 'Belle-Île', 'Ouessant', 'Ré', 'Oléron', 'Saint-Malo']),
   ),
   seaRegion('northSea', 'The North Sea', 'Norse waters · 900', 'Cold grey-green water, bare rock and black pine — a viking strand.', {
     water: ['#2a5a62', '140,205,205', '6,30,40'],
@@ -281,7 +325,9 @@ export const REGIONS: RegionDef[] = [
     foliage: ['#2b4a2f', ['#31543a', '#3d6642', '#243d28', '#48734a', '#2f5233', '#3a5f3d']],
     peaks: ['#6b7078', '#8a8f94', '#adb2b5'],
     palm: ['#2f5233', '#48734a', '#5a4630'],
-  }),
+  },
+  people(0.66, [0, 78], 0.18, ['Kaupang', 'Hedeby', 'Ribe', 'Birka', 'Jorvik', 'Orkney', 'Nidaros']),
+  ),
   seaRegion(
     'chesapeake',
     'Chesapeake Bay',
@@ -295,6 +341,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#7a7560', '#918c74', '#a8a289'],
       palm: ['#3f5f2c', '#5f8040', '#6b5238'],
     },
+    people(0.6, [10, 88], 0.1, ['Norfolk', 'Hampton', 'Yorktown', 'Sewell’s Point', 'Craney Island', 'Old Point', 'Willoughby']),
   ),
 
   // ── Classical and medieval seas ───────────────────────────────────────────
@@ -311,6 +358,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#c9c4b4', '#e2ddd0', '#f7f4ea'],
       palm: ['#6b6b3d', '#8a8b52', '#7a5a30'],
     },
+    people(0.8, [0, 85], 0.18, ['Salamis', 'Delos', 'Naxos', 'Aegina', 'Paros', 'Samos', 'Sigeion']),
   ),
   seaRegion(
     'bosporus',
@@ -325,6 +373,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#7d7a68', '#9c9884', '#bcb8a2'],
       palm: ['#35592f', '#527a42', '#6b5238'],
     },
+    people(0.82, [0, 75], 0.22, ['Chrysopolis', 'Hieria', 'Chalkedon', 'Sosthenion', 'Damalis', 'Bithynia', 'Galata']),
   ),
   seaRegion(
     'ionian',
@@ -339,6 +388,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#a09a80', '#bcb69c', '#d6d1b8'],
       palm: ['#4f6334', '#708547', '#6b5238'],
     },
+    people(0.74, [0, 80], 0.22, ['Naupaktos', 'Patras', 'Corfu', 'Cephalonia', 'Zante', 'Lepanto', 'Missolonghi']),
   ),
   seaRegion(
     'nileDelta',
@@ -353,6 +403,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#a89a70', '#c2b48a', '#d8cca2'],
       palm: ['#3f6b2b', '#628c40', '#8a6a3a'],
     },
+    people(0.85, [0, 70], 0.18, ['Per-Amun', 'Sais', 'Buto', 'Kanopus', 'Tamiathis', 'Rosetta', 'Mendes']),
   ),
 
   // ── Indian Ocean and the East ─────────────────────────────────────────────
@@ -369,6 +420,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#6b7a4a', '#8a9a5f', '#aab87a'],
       palm: ['#2f6b2c', '#5aa04a', '#7a5530'],
     },
+    people(0.78, [5, 85], 0.14, ['Kadaram', 'Nagapattinam', 'Srivijaya', 'Maldives', 'Palk Strait', 'Thanjavur', 'Kaveri']),
   ),
   seaRegion('tonkin', 'Gulf of Tonkin', 'Bạch Đằng · 1288', 'Jade water under limestone towers — the stakes wait at low tide.', {
     water: ['#1c6b62', '150,230,200', '4,38,40'],
@@ -377,7 +429,9 @@ export const REGIONS: RegionDef[] = [
     foliage: ['#2b6330', ['#316b34', '#3d7a3c', '#1f4d24', '#4a8a46', '#2b6330', '#367038']],
     peaks: ['#5c6b5a', '#7d8a74', '#a2ab96'],
     palm: ['#2b6330', '#4a8a46', '#6b5238'],
-  }),
+  },
+  people(0.74, [0, 78], 0.16, ['Vân Đồn', 'Bạch Đằng', 'Hải Phòng', 'Cát Bà', 'Vạn Ninh', 'Đồ Sơn', 'Cửa Ông']),
+  ),
   seaRegion(
     'inlandSea',
     'The Inland Sea',
@@ -391,6 +445,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#787c74', '#969a90', '#b4b8ae'],
       palm: ['#2b5230', '#487a46', '#6b5238'],
     },
+    people(0.78, [0, 75], 0.18, ['Miyajima', 'Itsukushima', 'Innosima', 'Shiwaku', 'Naoshima', 'Awaji', 'Tomogashima']),
   ),
   seaRegion(
     'koreaStrait',
@@ -405,6 +460,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#7a7a70', '#98988c', '#b6b6a8'],
       palm: ['#356032', '#578a4a', '#6b5238'],
     },
+    people(0.72, [0, 70], 0.18, ['Hansan', 'Jindo', 'Uldolmok', 'Noryang', 'Yeosu', 'Kojedo', 'Myeongnyang']),
   ),
 
   // ── Polynesia and the Americas ────────────────────────────────────────────
@@ -421,6 +477,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#4a5a52', '#6b7a6f', '#96a49a'],
       palm: ['#2f6b3a', '#5aa055', '#7a5530'],
     },
+    people(0.58, [30, 95], 0.05, ['Kororāreka', 'Waitangi', 'Kerikeri', 'Paihia', 'Moturoa', 'Urupukapuka', 'Rangihoua']),
   ),
   seaRegion(
     'konaCoast',
@@ -435,6 +492,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#4a4038', '#6b5c50', '#8a7a68'],
       palm: ['#6b6832', '#a8a560', '#6b4a28'],
     },
+    people(0.6, [30, 95], 0.05, ['Kailua', 'Kealakekua', 'Honaunau', 'Kaʻūpūlehu', 'Kohala', 'Waimea', 'Miloliʻi']),
   ),
   seaRegion(
     'peruvianCoast',
@@ -449,6 +507,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#8a7a62', '#a89a80', '#cdbfa4'],
       palm: ['#5c5c30', '#8a8a50', '#7a5530'],
     },
+    people(0.55, [20, 92], 0.07, ['Tumbes', 'Puná', 'Santa Clara', 'Chanduy', 'Jambelí', 'Salango', 'Manta']),
   ),
   seaRegion(
     'texcoco',
@@ -463,6 +522,7 @@ export const REGIONS: RegionDef[] = [
       peaks: ['#8a8470', '#a89e88', '#c6bca4'],
       palm: ['#3a6323', '#729e46', '#8a6a3a'],
     },
+    people(0.92, [0, 60], 0.24, ['Tenochtitlan', 'Tlatelolco', 'Xochimilco', 'Tacuba', 'Chapultepec', 'Iztapalapa', 'Coyoacan']),
   ),
 ];
 

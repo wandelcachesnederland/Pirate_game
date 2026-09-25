@@ -1,6 +1,7 @@
 import { makeCanvas } from './canvas';
 import { mulberry32, TAU } from './math';
-import type { Island } from './types';
+import { wildIsland } from './settlements';
+import type { Island, Settlement } from './types';
 import { CARIBBEAN_ISLANDS, type IslandTheme } from './worlds';
 
 export function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -193,6 +194,14 @@ function drawHut(ctx: CanvasRenderingContext2D, x: number, y: number, s: number,
   ctx.restore();
 }
 
+/** What the painter should put on an island: a village, a fort, both or none. */
+export interface IslandLook {
+  /** Who lives here — decides the village, and the flag over it. */
+  settlement?: Settlement;
+  /** Colours flying over the village: red if these people start out hostile. */
+  flag?: 'white' | 'red';
+}
+
 export function buildIsland(
   x: number,
   y: number,
@@ -200,6 +209,7 @@ export function buildIsland(
   seed: number,
   res: number,
   theme: IslandTheme = CARIBBEAN_ISLANDS,
+  look: IslandLook = {},
 ): Island {
   const rnd = mulberry32(seed);
   const harm = [
@@ -311,8 +321,9 @@ export function buildIsland(
     const d = islandRadiusAt(base, a) + 8 + rnd() * 26;
     drawRock(ctx, Math.cos(a) * d, Math.sin(a) * d, 3 + rnd() * 6, rnd);
   }
-  // a little fishing village with a dock
-  if (rnd() < 0.5) {
+  // a fishing village with a dock — inhabited islands only
+  const inhabited = look.settlement ? look.settlement.inhabited : true;
+  if (inhabited) {
     const a = rnd() * TAU;
     const d = islandRadiusAt(base, a);
     const dx = Math.cos(a);
@@ -333,14 +344,128 @@ export function buildIsland(
     }
     ctx.stroke();
     ctx.restore();
-    for (let k = 0; k < 3; k++) {
-      const aa = a + (k - 1) * 0.16;
+    for (let k = 0; k < 4; k++) {
+      const aa = a + (k - 1.5) * 0.16;
       const dd = islandRadiusAt(base, aa) * (0.8 - (k % 2) * 0.08);
       drawHut(ctx, Math.cos(aa) * dd, Math.sin(aa) * dd, 10 + rnd() * 4, aa + rnd() * 0.4);
     }
+    // a canoe hauled up on the sand
+    ctx.save();
+    const ca = a + 0.7;
+    const cd = islandRadiusAt(base, ca) * 0.94;
+    ctx.translate(Math.cos(ca) * cd, Math.sin(ca) * cd);
+    ctx.rotate(ca + 0.9);
+    ctx.fillStyle = '#8a6338';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 9, 2.6, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#6b4a26';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 6.5, 1.5, 0, 0, TAU);
+    ctx.fill();
+    ctx.restore();
   }
+
+  // a stone battery on the shore, if this island is one of the fortified few
+  if (look.settlement?.fortress) {
+    drawFort(ctx, base, r, look.settlement.fortress.angle, look.flag ?? 'white');
+  }
+
   const shore = poly(1, 1.5);
-  return { x, y, r, maxR, harm, canvas: c, half, shore, seed };
+  return { x, y, r, maxR, harm, canvas: c, half, shore, seed, settlement: look.settlement ?? wildIsland() };
+}
+
+/** A stone battery: curtain wall, keep and guns looking out to sea. */
+function drawFort(
+  ctx: CanvasRenderingContext2D,
+  base: { r: number; harm: { amp: number; freq: number; phase: number }[] },
+  r: number,
+  angle: number,
+  flag: 'white' | 'red',
+) {
+  const d = islandRadiusAt(base, angle) * 0.8;
+  const s = Math.max(10, Math.min(24, r * 0.2));
+  ctx.save();
+  ctx.translate(Math.cos(angle) * d, Math.sin(angle) * d);
+  ctx.rotate(angle);
+  // footing shadow
+  ctx.fillStyle = 'rgba(0,20,10,0.28)';
+  ctx.beginPath();
+  ctx.ellipse(1, 2, s * 1.25, s * 0.95, 0, 0, TAU);
+  ctx.fill();
+  // curtain wall with battlements
+  ctx.fillStyle = '#9d9a90';
+  ctx.strokeStyle = '#5d5a51';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.rect(-s * 0.95, -s * 0.8, s * 1.6, s * 1.6);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#b0aca1';
+  for (let i = 0; i < 5; i++) ctx.fillRect(-s * 0.95 + i * s * 0.32, -s * 0.96, s * 0.2, s * 0.18);
+  // the keep
+  ctx.fillStyle = '#b6b2a6';
+  ctx.beginPath();
+  ctx.arc(-s * 0.2, 0, s * 0.44, 0, TAU);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#8f8c82';
+  ctx.beginPath();
+  ctx.arc(-s * 0.2, 0, s * 0.26, 0, TAU);
+  ctx.fill();
+  // gun ports, facing the sea
+  ctx.fillStyle = '#2b2925';
+  for (let i = -1; i <= 1; i++) ctx.fillRect(s * 0.34, i * s * 0.44 - s * 0.1, s * 0.24, s * 0.2);
+  // colours on the staff
+  const fy = -s * 1.6;
+  ctx.strokeStyle = '#5a4630';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.2, -s * 0.4);
+  ctx.lineTo(-s * 0.2, fy);
+  ctx.stroke();
+  ctx.fillStyle = flag === 'red' ? '#b3261e' : '#f3ead2';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.2, fy);
+  ctx.lineTo(-s * 0.2 + s * 0.6, fy + s * 0.17);
+  ctx.lineTo(-s * 0.2, fy + s * 0.34);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * A silenced fort: scorch, tumbled blocks and a snapped staff, painted straight
+ * onto the island's baked sprite the moment the walls come down.
+ */
+export function drawFortRuin(
+  ctx: CanvasRenderingContext2D,
+  base: { r: number; harm: { amp: number; freq: number; phase: number }[] },
+  r: number,
+  angle: number,
+) {
+  const d = islandRadiusAt(base, angle) * 0.8;
+  const s = Math.max(10, Math.min(24, r * 0.2));
+  ctx.save();
+  ctx.translate(Math.cos(angle) * d, Math.sin(angle) * d);
+  ctx.rotate(angle + 0.3);
+  ctx.fillStyle = 'rgba(20,12,6,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, s * 1.3, s * 1.0, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#7d7a70';
+  for (let i = 0; i < 7; i++) {
+    const a = (i / 7) * TAU + 0.4;
+    const dd = s * (0.5 + (i % 3) * 0.28);
+    ctx.fillRect(Math.cos(a) * dd, Math.sin(a) * dd, s * 0.34, s * 0.26);
+  }
+  ctx.strokeStyle = '#4a3a28';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.2, 0);
+  ctx.lineTo(-s * 0.7, s * 0.5);
+  ctx.stroke();
+  ctx.restore();
 }
 
 // ---------------------------------------------------------------- pickups

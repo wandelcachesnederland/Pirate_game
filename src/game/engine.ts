@@ -1,6 +1,7 @@
 import type {
   CapturedFlag,
   EraId,
+  Fortress,
   GameStats,
   Island,
   RegionId,
@@ -30,7 +31,9 @@ import {
   makeWaterTile,
   makeWaveTile,
   rr,
+  drawFortRuin,
 } from './render';
+import { PROVOKE, coolOff, flagOf, provoke, provokeBoats, rollSettlement } from './settlements';
 import { cannonLocalX, drawFlagArt, drawShip, drawShipShadow } from './sprites';
 import { angDiff, TAU } from './math';
 
@@ -735,7 +738,9 @@ export class Engine {
     this.islands = [];
     const res = clamp(this.viewScale * this.dpr, 0.7, 1.25);
     const seedBase = (Math.random() * 1e9) | 0;
-    const theme = regionById(this.regionId).islands;
+    const region = regionById(this.regionId);
+    const theme = region.islands;
+    let forts = 0;
     let tries = 0;
     // the chart is four times the sea it was — island count keeps the old density
     while (this.islands.length < 30 && tries++ < 2500) {
@@ -751,7 +756,12 @@ export class Engine {
         }
       }
       if (!ok) continue;
-      this.islands.push(buildIsland(x, y, r, seedBase + tries * 7919, res, theme));
+      // who lives here, if anyone: friendliness, patience and the odd fortress
+      const settlement = rollSettlement(region.people, forts, this.wave);
+      if (settlement.fortress) forts++;
+      this.islands.push(
+        buildIsland(x, y, r, seedBase + tries * 7919, res, theme, { settlement, flag: flagOf(settlement) }),
+      );
     }
   }
 
@@ -900,7 +910,9 @@ export class Engine {
 
   private countEnemies(): number {
     let n = 0;
-    for (const s of this.ships) if (s.team === 1 && s.sinking < 0 && !s.captured) n++;
+    // civilians don't count: a village's fishing boat out working the shallows
+    // must never hold up the end of a wave
+    for (const s of this.ships) if (s.team === 1 && s.sinking < 0 && !s.captured && !s.peaceful) n++;
     return n;
   }
 
@@ -1075,6 +1087,8 @@ export class Engine {
     this.updateShips(dt);
     if (playing) {
       this.updateNatives(dt);
+      this.updateSettlements(dt);
+      this.updateForts(dt);
       this.updateSwivel(dt);
       this.updateChasers(dt);
       this.updateBoarding();
@@ -1297,7 +1311,8 @@ export class Engine {
     let best: Ship | null = null;
     let bd = range;
     for (const e of this.ships) {
-      if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered) continue;
+      // an unarmed fisherman is not a target: the gun crew waits for a fight
+      if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered || e.peaceful) continue;
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (d < bd) {
         bd = d;
@@ -1351,7 +1366,8 @@ export class Engine {
     let best: Ship | null = null;
     let bestScore = Infinity;
     for (const e of this.ships) {
-      if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered) continue;
+      // chase guns are for pursuers, not for unarmed fishermen
+      if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered || e.peaceful) continue;
       const dx = e.x - s.x;
       const dy = e.y - s.y;
       const d = Math.hypot(dx, dy);
@@ -1889,6 +1905,7 @@ export class Engine {
    * has already been set for home).
    */
   private nativeBreakOff(s: Ship, dt: number, dist: number): boolean {
+    if (s.peaceful) return this.peacefulBoat(s, dt, dist);
     if (s.leash <= 0) return false; // no home waters on record: fight as she pleases
     const hx = s.homeX;
     const hy = s.homeY;
@@ -1904,7 +1921,11 @@ export class Engine {
       s.beach = -1;
       // patience burns only while there is a fight on
       if (dist < 900) s.hunt -= dt;
-      const strayed = homeDist > s.leash * 0.9;
+      // turn for home with room to spare: a canoe sweeping through a turn at
+      // full paddle carries most of her length past the mark before the new
+      // heading bites, so the break-off line sits inside the leash
+      const turnMargin = Math.min(130, s.leash * 0.35);
+      const strayed = homeDist > s.leash - turnMargin;
       const outOfReach = dist > Math.max(NATIVE_GUARD, s.leash * 1.5);
       if (!strayed && !outOfReach && (s.hunt > 0 || inTheirWaters)) return false;
       s.nativeState = 'home';
@@ -1921,7 +1942,12 @@ export class Engine {
         // round. Still carrying way out to sea? back the oars down so the turn
         // bites sooner and the party keeps to its own waters.
         const outward = (s.vx * (s.x - hx) + s.vy * (s.y - hy)) / (homeDist || 1);
-        this.steer(s, Math.atan2(hy - s.y, hx - s.x), outward > 30 ? 0.4 : 1, false);
+        // still being carried out past the mark? back the oars right down and
+        // let her swing round: a canoe that turns at full paddle sweeps a
+        // hundred yards past the line before the new heading bites
+        const overTheLine = homeDist > s.leash * 0.8;
+        const throttle = outward > 30 ? (overTheLine ? 0.12 : 0.4) : 1;
+        this.steer(s, Math.atan2(hy - s.y, hx - s.x), throttle, false);
         return true;
       }
       s.nativeState = 'lurk';
@@ -1932,9 +1958,19 @@ export class Engine {
       s.nativeState = 'hunt';
       return false;
     }
-    const bearing = Math.atan2(s.y - hy, s.x - hx);
-    this.steer(s, bearing + HALF_PI * s.aiWander + Math.sin(this.time * 0.5 + s.bob) * 0.4, 0.4, false);
-    if (dist > 620) {
+    // holding station off their own beach: steer for a point on a circle around
+    // home and keep on it. (Steering along a bearing from home instead let a
+    // party with a small `aiWander` paddle straight out to sea.)
+    const toShip = Math.atan2(s.y - hy, s.x - hx);
+    const holdR = Math.min(240, Math.max(110, s.leash * 0.45));
+    const lap = toShip + (s.aiWander >= 0 ? 0.6 : -0.6);
+    const tx = hx + Math.cos(lap) * holdR;
+    const ty = hy + Math.sin(lap) * holdR;
+    this.steer(s, Math.atan2(ty - s.y, tx - s.x), 0.45, false);
+    // even a party that still has fight in it will not wait off the beach all
+    // day: loitering burns off what patience is left, and then they go in
+    s.hunt -= dt * 0.4;
+    if (dist > 620 || s.hunt < -25) {
       // the player is long gone: the crew beaches her and melts into the trees
       if (s.beach < 0) s.beach = rand(NATIVE_BEACH[0], NATIVE_BEACH[1]);
       else {
@@ -2009,6 +2045,7 @@ export class Engine {
    * than a village's canoes).
    */
   private anchorNative(s: Ship, island?: Island, mul = 1) {
+    s.homeIsland = island ?? null;
     if (island) {
       const a = Math.atan2(s.y - island.y, s.x - island.x);
       const r = islandRadiusAt(island, a) + 60;
@@ -2028,23 +2065,50 @@ export class Engine {
     s.aiWander = Math.random() < 0.5 ? -1 : 1;
   }
 
-  /** Islanders: war parties paddle out from islands the player sails past. */
+  /**
+   * Islanders. A village that is up in arms sends its war canoes after a sail it
+   * can see; a peaceful village sends nothing but a fishing boat out to work the
+   * shallows — and that boat is what a captain with a grudge in mind shoots at.
+   * Wild islands send neither: nobody lives there to care.
+   */
   private updateNatives(dt: number) {
     this.nativeTimer -= dt;
     if (this.nativeTimer > 0) return;
     this.nativeTimer = rand(12, 19);
-    const afloat = this.ships.filter((s) => s.def.native === true && s.sinking < 0).length;
-    // one war party on the water at a time is plenty: villages only launch
-    // another when the last has been seen off or paddled home
-    if (afloat > 0 && Math.random() < 0.8) return;
-    if (afloat >= 5) return;
+    const wars = this.ships.filter((s) => s.def.native === true && !s.peaceful && s.sinking < 0).length;
+    const boats = this.ships.filter((s) => s.def.native === true && s.peaceful && s.sinking < 0).length;
+
+    // one island acts per beat: the nearest village up in arms gets first call,
+    // and if none is angry the nearest peaceful village may send a boat out
+    let warIsland: Island | null = null;
+    let warD = Infinity;
+    let calmIsland: Island | null = null;
+    let calmD = Infinity;
     for (const is of this.islands) {
+      if (!is.settlement.inhabited) continue;
       const d = Math.hypot(is.x - this.player.x, is.y - this.player.y);
       if (d > 720 || d < is.maxR + 30) continue;
+      if (is.settlement.hostile) {
+        if (d < warD) {
+          warD = d;
+          warIsland = is;
+        }
+      } else if (d < calmD) {
+        calmD = d;
+        calmIsland = is;
+      }
+    }
+
+    if (warIsland && wars < 5 && !(wars > 0 && Math.random() < 0.8)) {
+      const is = warIsland;
+      const st = is.settlement;
       const toPlayer = Math.atan2(this.player.y - is.y, this.player.x - is.x);
-      const party = 2 + Math.min(1, Math.floor((this.wave - 1) / 5)) + (Math.random() < 0.25 ? 1 : 0);
+      // a fort island puts more canoes on the water, and bolder crews
+      const garrisoned = !!st.fortress && !st.fortress.ruined;
+      const party =
+        2 + Math.min(1, Math.floor((this.wave - 1) / 5)) + (Math.random() < 0.25 ? 1 : 0) + (garrisoned ? 1 : 0);
       let launched = 0;
-      for (let i = 0; i < party && afloat + launched < 5; i++) {
+      for (let i = 0; i < party && wars + launched < 5; i++) {
         const a = toPlayer + rand(-0.55, 0.55);
         const x = is.x + Math.cos(a) * (is.maxR + 22);
         const y = is.y + Math.sin(a) * (is.maxR + 22);
@@ -2052,12 +2116,216 @@ export class Engine {
         const kind = Math.random() < 0.75 ? 'warCanoe' : 'fishingCanoe';
         const canoe = this.makeShip(kind, x, y, a);
         // this beach is theirs — they will not follow a ship off its waters
-        this.anchorNative(canoe, is);
+        this.anchorNative(canoe, is, garrisoned ? 1.2 : 1);
         this.ships.push(canoe);
         launched++;
       }
-      break; // one island per beat keeps it readable
+      return;
     }
+
+    if (calmIsland && boats < 2 && Math.random() < 0.5) this.launchFishingBoat(calmIsland);
+  }
+
+  /** A peaceful village's boat: put her on the water off her own beach. */
+  private launchFishingBoat(is: Island) {
+    const a = rand(0, TAU);
+    const x = is.x + Math.cos(a) * (is.maxR + 20);
+    const y = is.y + Math.sin(a) * (is.maxR + 20);
+    if (this.pointInIsland(x, y, 8)) return;
+    const boat = this.makeShip('fishingCanoe', x, y, a);
+    this.anchorNative(boat, is, 1);
+    boat.peaceful = true;
+    boat.leash = Math.min(boat.leash, 260); // the fishing grounds, not the horizon
+    boat.hunt = rand(70, 130); // how long she fishes before heading in
+    boat.nativeState = 'home';
+    this.ships.push(boat);
+  }
+
+  /**
+   * The fishing grounds, a strange sail, and the way home. She fights nobody,
+   * runs from anything with guns, and beaches herself when the day is done.
+   */
+  private peacefulBoat(s: Ship, dt: number, dist: number): boolean {
+    const hx = s.homeX;
+    const hy = s.homeY;
+    const homeDist = Math.hypot(s.x - hx, s.y - hy);
+    s.hunt -= dt;
+    if (dist < 210) {
+      // oars out, straight away from the warship
+      s.beach = -1;
+      this.steer(s, Math.atan2(s.y - this.player.y, s.x - this.player.x), 1, false);
+      return true;
+    }
+    if (s.hunt > 0 && homeDist < 240) {
+      const bearing = Math.atan2(s.y - hy, s.x - hx);
+      this.steer(s, bearing + HALF_PI * s.aiWander + Math.sin(this.time * 0.45 + s.bob) * 0.5, 0.35, false);
+      return true;
+    }
+    if (homeDist > 120) {
+      this.steer(s, Math.atan2(hy - s.y, hx - s.x), 0.85, false);
+      return true;
+    }
+    // home: haul the boat up the sand and call it a day
+    if (s.beach < 0) s.beach = rand(1.5, 4);
+    else {
+      s.beach -= dt;
+      if (s.beach <= 0) {
+        s.dead = true;
+        this.fxSplash(s.x, s.y, 0.4);
+      }
+    }
+    s.sailTarget = 0.05;
+    return true;
+  }
+
+  /** Tempers cool, and a village that has stood down says so. */
+  private updateSettlements(dt: number) {
+    for (const is of this.islands) {
+      const st = is.settlement;
+      if (!st.inhabited) continue;
+      if (coolOff(st, dt)) this.addText(is.x, is.y - is.maxR - 20, `${st.name} stands down`, '#cfe8d0', 18);
+    }
+  }
+
+  // ------------------------------------------------------------ island peoples
+
+  /**
+   * A grievance against an island: a round into one of their boats, a boat sent
+   * to the bottom, a shell into the village. Cross their patience and the whole
+   * island is up in arms until tempers cool.
+   */
+  private provokeIsland(is: Island, points: number, kind: 'boats' | 'shell') {
+    const st = is.settlement;
+    if (!st.inhabited) return;
+    if (provoke(st, points)) this.onIslandRoused(is, kind);
+  }
+
+  /** Grievances over their boats: the gentlest villages let these pass. */
+  private provokeBoats(is: Island, points: number) {
+    const st = is.settlement;
+    if (provokeBoats(st, points)) this.onIslandRoused(is, 'boats');
+  }
+
+  private onIslandRoused(is: Island, kind: 'boats' | 'shell') {
+    const st = is.settlement;
+    const f = st.fortress;
+    this.addText(is.x, is.y - is.maxR - 26, `${st.name} is roused!`, '#ff9a5a', 24);
+    this.addText(
+      is.x,
+      is.y - is.maxR,
+      f && !f.ruined
+        ? 'The fort runs out its guns!'
+        : kind === 'shell'
+          ? 'War canoes put out!'
+          : 'They will not forget that!',
+      '#ffd8a8',
+      16,
+    );
+    this.fxSparkle(is.x, is.y, 8, '#ffb37a');
+    this.sfx.horn();
+    if (f && !f.ruined) f.timer = rand(0.6, 1.6);
+  }
+
+  /** A player's round landing on an island: a grievance, and a hit on the fort. */
+  private shellIsland(is: Island, b: Ball) {
+    const st = is.settlement;
+    if (!st.inhabited) return;
+    const f = st.fortress;
+    if (f && !f.ruined) {
+      const dmg = b.dmg * (b.mortar ? 1.5 : 1.1);
+      f.hp -= dmg;
+      this.fxHit(b.x, b.y, 0, 0.9);
+      this.addText(b.x, b.y - 14, `${Math.round(dmg)}`, '#ffe0a8', 14);
+      if (f.hp <= 0) this.razeFort(is, f);
+    }
+    this.provokeIsland(is, PROVOKE.shelling, 'shell');
+  }
+
+  /** The walls come down: the battery is silenced and the magazine pays out. */
+  private razeFort(is: Island, f: Fortress) {
+    f.ruined = true;
+    f.hp = 0;
+    // stamp the wreck into the island's own sprite — no repainting every frame
+    const ictx = is.canvas.getContext('2d');
+    if (ictx) {
+      const sc = is.canvas.width / (is.half * 2) || 1;
+      ictx.save();
+      ictx.scale(sc, sc);
+      ictx.translate(is.half, is.half);
+      drawFortRuin(ictx, is, is.r, f.angle);
+      ictx.restore();
+    }
+    const fr = islandRadiusAt(is, f.angle) * 0.8;
+    const fx = is.x + Math.cos(f.angle) * fr;
+    const fy = is.y + Math.sin(f.angle) * fr;
+    this.fxExplosion(fx, fy, 1.1);
+    this.fxSparkle(fx, fy, 14, '#ffd27a');
+    this.sfx.explosion(Math.max(0.55, this.volAt(fx, fy)), this.panAt(fx));
+    this.sfx.fanfare();
+    this.addTrauma(0.45);
+    const st = is.settlement;
+    this.addText(is.x, is.y - is.maxR - 24, `${st.name}: the fort is silenced!`, '#ffd863', 24);
+    for (let i = 0; i < 7; i++) {
+      const a = rand(0, TAU);
+      this.addPickup(
+        fx + rand(-12, 12),
+        fy + rand(-12, 12),
+        Math.cos(a) * rand(60, 170),
+        Math.sin(a) * rand(60, 170),
+        0,
+        20 + this.wave * 2,
+      );
+    }
+    this.addPickup(fx, fy, rand(-30, 30), rand(-30, 30), 1, 120 + this.wave * 12);
+    this.addScore(180 + this.wave * 12);
+  }
+
+  /** Fortress guns: a hostile battery fires on any sail inside its reach. */
+  private updateForts(dt: number) {
+    const p = this.player;
+    if (p.sinking >= 0) return;
+    for (const is of this.islands) {
+      const st = is.settlement;
+      const f = st.fortress;
+      if (!f || f.ruined || !st.hostile) continue;
+      if (Math.hypot(p.x - is.x, p.y - is.y) > f.range + is.maxR) continue;
+      f.timer -= dt;
+      if (f.timer > 0) continue;
+      f.timer = f.reload * rand(0.85, 1.2);
+      this.fortSalvo(is, f);
+    }
+  }
+
+  private fortSalvo(is: Island, f: Fortress) {
+    const p = this.player;
+    const shore = islandRadiusAt(is, f.angle) + 12;
+    const sx = is.x + Math.cos(f.angle) * shore;
+    const sy = is.y + Math.sin(f.angle) * shore;
+    const dist = Math.hypot(p.x - sx, p.y - sy);
+    const lead = Math.min(0.9, dist / f.ballSpeed);
+    const tx = p.x + p.vx * lead;
+    const ty = p.y + p.vy * lead;
+    const base = Math.atan2(ty - sy, tx - sx);
+    for (let i = 0; i < f.guns; i++) {
+      const a = base + (i - (f.guns - 1) / 2) * 0.05 + rand(-0.035, 0.035);
+      const life = dist / f.ballSpeed + 0.35;
+      this.balls.push({
+        x: sx,
+        y: sy,
+        vx: Math.cos(a) * f.ballSpeed,
+        vy: Math.sin(a) * f.ballSpeed,
+        life,
+        max: life,
+        team: 1,
+        dmg: f.damage,
+        chain: false,
+        small: false,
+        mortar: false,
+      });
+    }
+    this.fxMuzzle(sx, sy, base, false);
+    this.sfx.cannon(Math.max(0.35, this.volAt(sx, sy)), this.panAt(sx));
+    this.addTrauma(clamp(1 - dist / 900, 0, 1) * 0.22);
   }
 
   /** A big hull going down puts a boat over the side — crew rowing for it. */
@@ -2087,8 +2355,14 @@ export class Engine {
         }
         remove = true;
       } else if (falling && this.pointInIsland(b.x, b.y, -4)) {
-        if (b.mortar) this.mortarBlast(b);
-        else this.fxSand(b.x, b.y);
+        const hit = this.pointInIsland(b.x, b.y, -4);
+        if (b.mortar) {
+          this.mortarBlast(b);
+        } else {
+          this.fxSand(b.x, b.y);
+          // a round into the village itself: they will remember it
+          if (b.team === 0 && hit) this.shellIsland(hit, b);
+        }
         remove = true;
       } else if (falling) {
         for (const s of this.ships) {
@@ -2178,6 +2452,10 @@ export class Engine {
 
   private damageShip(s: Ship, dmg: number, byPlayer: boolean) {
     if (s.sinking >= 0 || s.captured || this.screen !== 'playing') return;
+    // putting a round into one of a village's boats is a grievance in itself
+    if (byPlayer && s.def.native && s.homeIsland && dmg > 0) {
+      this.provokeBoats(s.homeIsland, PROVOKE.boatHit);
+    }
     s.hp -= dmg;
     s.flash = 0.1;
     s.hitTimer = 0;
@@ -2195,6 +2473,8 @@ export class Engine {
 
   /** A mauled foe may strike her colours instead of fighting to the death. */
   private maybeSurrender(s: Ship) {
+    // a fisherman has no flag to strike: he just rows harder
+    if (s.peaceful) return;
     const base = surrenderChance(s.def.kind);
     if (base <= 0 || s.surrenderRolls >= 2) return;
     const ratio = s.hp / s.maxHp;
@@ -2222,6 +2502,11 @@ export class Engine {
     if (s.sinking >= 0) return;
     s.hp = 0;
     s.sinking = 0;
+    // sending one of their boats to the bottom is the grievance that counts
+    if (s.def.native && s.homeIsland && s.hitByPlayer) {
+      this.provokeBoats(s.homeIsland, PROVOKE.boatSunk);
+      if (s.peaceful) this.addText(s.x, s.y - 34, 'their fishing boat…', '#ffd8a8', 16);
+    }
     const big = s.def.length / 60;
     this.fxExplosion(s.x, s.y, big);
     this.sfx.explosion(Math.max(0.45, this.volAt(s.x, s.y)), this.panAt(s.x));
@@ -2270,6 +2555,11 @@ export class Engine {
   /** Mortar shell landing: area damage with falloff, plus a shove outward. */
   private mortarBlast(b: Ball) {
     const R = 58;
+    // a shell bursting over an island is a bombardment, not just a splash
+    if (b.team === 0) {
+      const hit = this.pointInIsland(b.x, b.y, 10);
+      if (hit) this.shellIsland(hit, b);
+    }
     this.fxExplosion(b.x, b.y, 0.8);
     this.emit(P_RING, b.x, b.y, 0, 0, 0.45, 8, R + 30, '#ffb347', 1, 0, 0, 0, 0.8);
     this.addTrauma(0.18);
@@ -3029,6 +3319,43 @@ export class Engine {
       ctx.lineWidth = 2 / sc;
       ctx.stroke(is.shore);
       ctx.restore();
+
+      const st = is.settlement;
+      if (st.inhabited && st.hostile) {
+        // red colours over the village: these people are up in arms
+        const top = is.y - Math.max(26, is.maxR * 0.5);
+        const flap = Math.sin(t * 5 + is.seed) * 2.5;
+        ctx.save();
+        ctx.globalAlpha = 0.95;
+        ctx.strokeStyle = '#3a2a18';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(is.x, top + 8);
+        ctx.lineTo(is.x, top - 20);
+        ctx.stroke();
+        ctx.fillStyle = '#c0392b';
+        ctx.beginPath();
+        ctx.moveTo(is.x, top - 20);
+        ctx.lineTo(is.x + 22 + flap, top - 13 + flap * 0.3);
+        ctx.lineTo(is.x, top - 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      const f = st.fortress;
+      if (f && !f.ruined && f.hp < f.maxHp) {
+        // the battery's walls, while they are still standing
+        const fr = islandRadiusAt(is, f.angle) * 0.8;
+        const bx = is.x + Math.cos(f.angle) * fr;
+        const by = is.y + Math.sin(f.angle) * fr;
+        const bw = 56;
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(bx - bw / 2, by - 34, bw, 7);
+        ctx.fillStyle = '#e8d9a8';
+        ctx.fillRect(bx - bw / 2 + 1, by - 33, (bw - 2) * clamp(f.hp / f.maxHp, 0, 1), 5);
+        ctx.restore();
+      }
     }
   }
 
