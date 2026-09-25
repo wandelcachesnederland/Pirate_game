@@ -182,6 +182,12 @@ function HelpOverlay({
           </button>
         </div>
 
+        <p className="mb-3 text-sm leading-snug text-parch/90">
+          Before naval cannon, your weapons are archers and pulley-drawn bolt launchers — same controls,
+          no cannonballs. Boarding takes prisoners. Inhabited islands may share a people or a defence
+          pact: anger one enough to start a fight, and all its kin and allies attack when you approach.
+          Island labels identify their people, alliance and hostility. Leave them alone and tempers cool.
+        </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <section>
             <h3 className="mb-1 flex items-center gap-2 font-pirate text-xl">
@@ -198,13 +204,13 @@ function HelpOverlay({
                   <b className="font-pirate text-lg">Right thumb:</b> tap or hold <b>FIRE</b> for a broadside at the
                   nearest foe.
                 </li>
-                <li>Cannons fire from the ship&apos;s <b>sides</b> — turn broadside to the enemy!</li>
+                <li>Weapons fire from the ship&apos;s <b>sides</b> — turn broadside to the enemy!</li>
                 <li>
                   Mauled foes may <b>strike their colours</b> — close in and tap <b>BOARD</b> for the full prize, her
                   crew and her flag!
                 </li>
                 <li>
-                  Buy <b>Grape &amp; Canister</b> and a <b>GRAPE</b> button appears — one tap sweeps canoes and
+                  Buy <b>Grape &amp; Canister</b> (or <b>Arrow Storm</b> in early eras) and a special-fire button appears — one tap sweeps canoes and
                   boarding parties off your hull. Island war canoes only fight near their own beach, so sail clear of
                   their waters to shake them off.
                 </li>
@@ -268,7 +274,7 @@ function HelpOverlay({
                       <KeyCap>R</KeyCap>
                     </>
                   }
-                  label="Grape & Canister — sweep the deck (once fitted)"
+                  label="Grapeshot / Arrow Storm — sweep the deck (once fitted)"
                 />
                 <Row
                   keys={

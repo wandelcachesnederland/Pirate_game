@@ -8,6 +8,7 @@
 // and the Heritage Seas (one heritage flagship per era — galleys, dhows,
 // junks and gun-castles from before and beyond the Age of Sail).
 
+import { armShipForEra } from '../../weapons';
 import type { EraId, RegionId, ShipDef } from '../../types';
 import { BLACK_GULL } from './blackGull';
 import { HMS_VENGEANCE } from './hmsVengeance';
@@ -272,30 +273,12 @@ export const ERA_SHIPS: EraShip[] = [
   },
 ];
 
-export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
-  golden: BLACK_GULL,
-  exploration: SANTA_BRISA,
-  napoleonic: HMS_VENGEANCE,
-  viking: SEA_WOLF,
-  ironclad: USS_REVENANT,
-  roman: ROMAN_QUINQUEREME,
-  greek: GREEK_TRIREME,
-  arab: ARAB_BOOM,
-  chinese: CHINESE_JUNK,
-  japanese: JAPANESE_ATAKEBUNE,
-  maori: MAORI_WAKA,
-  hawaii: HAWAII_WAA,
-  macedon: MACEDON_SIXTEEN,
-  maya: MAYA_TULUM,
-  inca: INCA_BALSA,
-  lepanto: LEPANTO_SULTANA,
-  korea: KOREA_TURTLE,
-  byzantium: BYZANTIUM_DROMON,
-  egypt: EGYPT_GALLEY,
-  chola: CHOLA_TIGER,
-  vietnam: VIETNAM_JUNK,
-  aztec: AZTEC_CANOE,
-};
+// Keep picker portraits and reports consistent with the era's actual weapons.
+for (const entry of ERA_SHIPS) entry.def = armShipForEra(entry.def, entry.id);
+
+export const ERA_FLAGSHIPS = Object.fromEntries(
+  ERA_SHIPS.map((entry) => [entry.id, entry.def]),
+) as Record<EraId, ShipDef>;
 
 /** The waters locked in with each era — derived from the squadron above. */
 export const ERA_REGION: Record<EraId, RegionId> = ERA_SHIPS.reduce(

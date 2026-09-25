@@ -86,7 +86,7 @@ export function buildHullSprite(def: ShipDef): HullSprite {
   ctx.restore();
 
   // ---- gun ports (def.decks rows per side) — not on paddled craft
-  if (!oared) {
+  if (!oared && def.weapon !== 'mechanical') {
     const decks = def.decks ?? 1;
     const ports = Math.max(2, Math.round(def.length / 13));
     for (let d = 0; d < decks; d++) {

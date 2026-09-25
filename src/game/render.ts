@@ -190,6 +190,7 @@ function drawHut(ctx: CanvasRenderingContext2D, x: number, y: number, s: number,
 
 /** What the painter should put on an island: a village, a fort, both or none. */
 export interface IslandLook {
+  mechanical?: boolean;
   /** Who lives here — decides the village, and the flag over it. */
   settlement?: Settlement;
   /** Colours flying over the village: red if these people start out hostile. */
@@ -262,7 +263,7 @@ export function buildIsland(
 
   // a stone battery on the shore, if this island is one of the fortified few
   if (look.settlement?.fortress) {
-    drawFort(ctx, base, r, look.settlement.fortress.angle, look.flag ?? 'white');
+    drawFort(ctx, base, r, look.settlement.fortress.angle, look.flag ?? 'white', look.mechanical ?? false);
   }
 
   const shore = poly(1, 1.5);
@@ -413,6 +414,7 @@ function drawFort(
   r: number,
   angle: number,
   flag: 'white' | 'red',
+  mechanical: boolean,
 ) {
   const d = islandRadiusAt(base, angle) * 0.8;
   const s = Math.max(10, Math.min(24, r * 0.2));
@@ -446,7 +448,21 @@ function drawFort(
   ctx.fill();
   // gun ports, facing the sea
   ctx.fillStyle = '#2b2925';
-  for (let i = -1; i <= 1; i++) ctx.fillRect(s * 0.34, i * s * 0.44 - s * 0.1, s * 0.24, s * 0.2);
+  for (let i = -1; i <= 1; i++) {
+    const y = i * s * 0.44;
+    if (mechanical) {
+      ctx.strokeStyle = '#704e2d'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(s * 0.3, y - s * 0.17);
+      ctx.quadraticCurveTo(s * 0.65, y, s * 0.3, y + s * 0.17);
+      ctx.moveTo(s * 0.15, y); ctx.lineTo(s * 0.75, y);
+      ctx.stroke();
+      ctx.strokeStyle = '#e6d4a3'; ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(s * 0.3, y - s * 0.17); ctx.lineTo(s * 0.15, y); ctx.lineTo(s * 0.3, y + s * 0.17);
+      ctx.stroke();
+    } else ctx.fillRect(s * 0.34, y - s * 0.1, s * 0.24, s * 0.2);
+  }
   // colours on the staff
   const fy = -s * 1.6;
   ctx.strokeStyle = '#5a4630';

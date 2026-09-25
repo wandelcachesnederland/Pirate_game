@@ -110,8 +110,8 @@ export function GameOverScreen({ stats, scores, rank, name, onRestart, onMenu, i
               {(stats.boarded ?? 0) > 0 && (
                 <Stat icon={<Flag className="h-5 w-5" />} label="Prizes boarded" value={`${stats.boarded}`} />
               )}
-              {(stats.slaves ?? 0) > 0 && (
-                <Stat icon={<Users className="h-5 w-5" />} label="Slaves in irons" value={`${stats.slaves}`} />
+              {(stats.prisoners ?? 0) > 0 && (
+                <Stat icon={<Users className="h-5 w-5" />} label="Prisoners in irons" value={`${stats.prisoners}`} />
               )}
               {(stats.flagsTaken ?? 0) > 0 && (
                 <Stat icon={<Star className="h-5 w-5" />} label="Colours taken" value={`${stats.flagsTaken}`} />
