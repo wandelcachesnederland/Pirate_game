@@ -215,8 +215,6 @@ and **read the era from the armament/blast tables** rather than hard-coding "no 
 
 - [`docs/gameplay-rules.md`](docs/gameplay-rules.md) — prisoners, weapons by era, fire, the blast rule,
   island politics, the steel navies and the Barbary shore.
-- `patches/` and `.github/workflows/apply-patch.yml` are a legacy one-shot patch mechanism, not part of
-  the game.
 
 ## Credits
 
