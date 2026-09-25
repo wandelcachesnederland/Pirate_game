@@ -4,6 +4,7 @@ import {
   Bomb,
   Crosshair,
   Flame,
+  Grape,
   Hammer,
   Link,
   Music,
@@ -33,6 +34,7 @@ export const UPGRADE_ICONS: Record<UpgradeId, LucideIcon> = {
   carpenter: Hammer,
   swivel: Zap,
   chain: Link,
+  grapeshot: Grape,
 };
 
 export function KeyCap({ children, className }: { children: ReactNode; className?: string }) {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Flag, Pause } from 'lucide-react';
+import { Flag, Grape, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
 import type { EraId, GameStats, RegionId, Screen, UpgradeId, UpgradeOffer } from './game/types';
@@ -21,6 +21,7 @@ import { PauseScreen } from './components/PauseScreen';
 import { UpgradeScreen } from './components/UpgradeScreen';
 import { GameOverScreen } from './components/GameOverScreen';
 import { TouchControls } from './components/TouchControls';
+import { cn } from './utils/cn';
 
 function detectTouch(): boolean {
   if (typeof window === 'undefined') return false;
@@ -50,6 +51,7 @@ export default function App() {
   const [region, setRegionState] = useState<RegionId>(() => loadRegion());
   const regionRef = useRef(region);
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
+  const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
   const gameOverAt = useRef(0);
   const upgradeAt = useRef(0);
 
@@ -135,6 +137,26 @@ export default function App() {
       const next = engineRef.current?.getBoardCandidate() ?? null;
       setBoardPrompt((prev) => (prev?.name === next?.name && prev?.crew === next?.crew ? prev : next));
     }, 200);
+    return () => window.clearInterval(id);
+  }, [screen]);
+
+  // ---- poll the deck-sweeper: is it fitted, loaded, and is anything in reach?
+  useEffect(() => {
+    if (screen !== 'playing') {
+      setGrape(null);
+      return;
+    }
+    const id = window.setInterval(() => {
+      const next = engineRef.current?.getGrapeshot() ?? null;
+      setGrape((prev) => {
+        if (!next) return prev ? null : prev;
+        // only re-render when something the button actually shows has changed
+        if (prev && prev.level === next.level && prev.targets === next.targets && Math.ceil(prev.cd) === Math.ceil(next.cd)) {
+          return prev;
+        }
+        return next;
+      });
+    }, 140);
     return () => window.clearInterval(id);
   }, [screen]);
 
@@ -282,6 +304,48 @@ export default function App() {
         >
           <Flag className="h-6 w-6" />
           BOARD! {boardPrompt.crew} men
+        </button>
+      )}
+
+      {screen === 'playing' && grape && (
+        <button
+          type="button"
+          tabIndex={-1}
+          disabled={grape.cd > 0}
+          onClick={(e) => {
+            e.currentTarget.blur();
+            engineRef.current?.fireGrapeshotFromUI();
+            setGrape(engineRef.current?.getGrapeshot() ?? null);
+          }}
+          aria-label="Grapeshot — sweep the deck"
+          className={cn(
+            'absolute z-10 flex items-center gap-2 px-4 py-2 leading-none',
+            grape.cd > 0 ? 'btn-wood opacity-70' : 'btn-seal cursor-pointer',
+            grape.cd <= 0 && grape.targets > 0 && 'anim-pulse',
+          )}
+          style={{
+            right: 'max(18px, env(safe-area-inset-right))',
+            bottom: isTouch
+              ? `calc(max(26px, env(safe-area-inset-bottom)) + ${boardPrompt ? 186 : 122}px)`
+              : 'calc(max(14px, env(safe-area-inset-bottom)) + 58px)',
+          }}
+        >
+          <Grape className="h-6 w-6" />
+          <span className="flex flex-col items-start">
+            <span className="text-2xl">GRAPE</span>
+            <span className="text-xs italic tracking-wide opacity-90">
+              {grape.cd > 0
+                ? `loading… ${Math.ceil(grape.cd)}s`
+                : isTouch
+                  ? `ready · ${grape.targets} in reach`
+                  : `R · ${grape.targets} in reach`}
+            </span>
+          </span>
+          <span className="flex flex-col gap-0.5">
+            {Array.from({ length: grape.level }).map((_, k) => (
+              <span key={k} className="h-1.5 w-1.5 rotate-45 bg-gold" />
+            ))}
+          </span>
         </button>
       )}
 

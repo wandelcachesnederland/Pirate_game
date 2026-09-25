@@ -211,6 +211,11 @@ export interface ShipDef {
   styleKey?: string;
   /** Paddled/oared craft: no sails, immune to the wind, draws moving oars. */
   oared?: boolean;
+  /**
+   * Islander craft: paddles out from an island beach, fights only so far and so
+   * long from it, then gives up and paddles home (see `Ship.leash`/`Ship.hunt`).
+   */
+  native?: boolean;
   /** Ship's company at full strength. Casualties mount as the hull takes damage. */
   crew?: number;
   /** Wave boss: gets the boss bar, fanfare treatment and a captain's chest. */
@@ -268,6 +273,30 @@ export interface Ship {
   /** Cooldown for the war canoe's melee bite. */
   biteTimer: number;
   /**
+   * Home beach of a paddled raider — the island they came from. 0/0 with
+   * `leash` 0 means an open-sea craft with no beach to run back to.
+   */
+  homeX: number;
+  homeY: number;
+  /**
+   * How far from home a raider will stray (world units). Past it they break off
+   * whatever they were chasing and paddle back to their own beach.
+   */
+  leash: number;
+  /**
+   * Seconds of aggression left in this war party. Each canoe rolls its own,
+   * so a pack breaks off raggedly instead of all at once. <= 0 = spent: they
+   * only fight inside their own lagoon after that.
+   */
+  hunt: number;
+  /** Countdown to beaching once a spent party is loitering off home (-1 idle). */
+  beach: number;
+  /**
+   * What the war party is about: 'hunt' — pressing the attack; 'home' — paddling
+   * for the beach and ignoring everything else; 'lurk' — circling its own shore.
+   */
+  nativeState: 'hunt' | 'home' | 'lurk';
+  /**
    * Faction flown at the masthead instead of the ship's own — false colours.
    * Nothing sets this yet; `seesThroughDisguise` hulls would ignore it.
    */
@@ -316,7 +345,8 @@ export type UpgradeId =
   | 'magnet'
   | 'carpenter'
   | 'swivel'
-  | 'chain';
+  | 'chain'
+  | 'grapeshot';
 
 export interface UpgradeDef {
   id: UpgradeId;

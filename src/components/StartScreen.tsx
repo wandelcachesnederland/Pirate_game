@@ -110,6 +110,11 @@ export function StartScreen({
                     Mauled foes may <b>strike their colours</b> — close in and tap <b>BOARD</b> for the full prize,
                     her crew and her flag!
                   </li>
+                  <li>
+                    Buy <b>Grape &amp; Canister</b> and a <b>GRAPE</b> button appears — one tap sweeps canoes and boarding parties
+                    off your hull. Island war canoes only fight near their own beach, so sail clear of their waters to
+                    shake them off.
+                  </li>
                 </ul>
               ) : (
                 <ul className="divide-y divide-ink/10">
@@ -163,6 +168,14 @@ export function StartScreen({
                       </>
                     }
                     label="Board a surrendered ship"
+                  />
+                  <Row
+                    keys={
+                      <>
+                        <KeyCap>R</KeyCap>
+                      </>
+                    }
+                    label="Grape & Canister — sweep the deck (once fitted)"
                   />
                   <Row
                     keys={

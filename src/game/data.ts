@@ -371,6 +371,7 @@ export const SHIP_DEFS: Record<ShipKind, ShipDef> = {
     sailShade: '#5a3f20',
     hullStyle: 'canoe',
     oared: true,
+    native: true,
   },
   // ── SMALL CRAFT · kind='fishingCanoe' · Fishing Canoe ────────────────────
   // Islanders working the shallows. Unarmed, bolts for cover, worth a few coins.
@@ -400,6 +401,7 @@ export const SHIP_DEFS: Record<ShipKind, ShipDef> = {
     sailShade: '#6b5230',
     hullStyle: 'canoe',
     oared: true,
+    native: true,
   },
   // ── SMALL CRAFT · kind='rowboat' · Ship's Rowboat ────────────────────────
   // Crew escaping a sinking hull, or a tender running errands. Oared, unarmed,
@@ -2200,6 +2202,12 @@ export const UPGRADES: UpgradeDef[] = [
   { id: 'carpenter', name: "Ship's Carpenter", desc: 'Repair 1.5 hull every second', max: 3 },
   { id: 'swivel', name: 'Swivel Guns', desc: 'Deck guns auto-fire at close foes', max: 3 },
   { id: 'chain', name: 'Chain Shot', desc: 'Your hits slow enemy ships', max: 1 },
+  {
+    id: 'grapeshot',
+    name: 'Grape & Canister',
+    desc: 'R: a point-blank blast all round — death to open boats',
+    max: 3,
+  },
 ];
 
 export function waveTitle(n: number): string {
