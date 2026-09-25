@@ -92,18 +92,21 @@ export function HighScoreTable({
   scores,
   highlight = -1,
   limit = 10,
+  dark = false,
 }: {
   scores: ScoreEntry[];
   highlight?: number;
   limit?: number;
+  /** Painted for a cabinet-style dark panel instead of a parchment log. */
+  dark?: boolean;
 }) {
   const list = scores.slice(0, limit);
   return (
     <div>
       <div className="mb-2 flex items-center justify-center gap-2">
-        <Trophy className="h-5 w-5 text-gold-deep" />
-        <h3 className="font-pirate text-2xl sm:text-3xl">Hall of Legends</h3>
-        <Trophy className="h-5 w-5 text-gold-deep" />
+        <Trophy className={cn('h-5 w-5', dark ? 'text-gold' : 'text-gold-deep')} />
+        <h3 className={cn('font-pirate text-2xl sm:text-3xl', dark && 'arcade-marquee')}>Hall of Legends</h3>
+        <Trophy className={cn('h-5 w-5', dark ? 'text-gold' : 'text-gold-deep')} />
       </div>
       {list.length === 0 ? (
         <p className="py-6 text-center italic opacity-70">
@@ -116,14 +119,14 @@ export function HighScoreTable({
               key={`${s.date}-${i}`}
               className={cn(
                 'grid grid-cols-[1.9rem_1fr_auto_auto] items-center gap-2 rounded-md px-2 py-0.5',
-                i % 2 === 0 && 'bg-ink/[0.06]',
+                i % 2 === 0 && (dark ? 'bg-parch/[0.07]' : 'bg-ink/[0.06]'),
                 i === highlight && 'bg-gold/70 ring-2 ring-blood anim-pulse',
               )}
             >
               <span
                 className={cn(
                   'grid h-6 w-6 place-items-center rounded-full border font-pirate text-sm',
-                  RANK_STYLE[i] ?? 'border-ink/30 text-ink/70',
+                  RANK_STYLE[i] ?? (dark ? 'border-parch/40 text-parch/75' : 'border-ink/30 text-ink/70'),
                 )}
               >
                 {i + 1}
@@ -143,4 +146,3 @@ export function HighScoreTable({
   );
 }
 
-export { EraPicker } from './EraPicker';
