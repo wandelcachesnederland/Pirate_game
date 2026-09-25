@@ -1,4 +1,4 @@
-// Heritage collection: playable flagships from five seafaring cultures.
+// Heritage collection: playable flagships from seven seafaring cultures.
 //
 // Each hull sails as the hero of its own era (see `era/index.ts`) — one
 // heritage ship per era. Every entry is a `kind: 'player'` ShipDef with a
@@ -10,6 +10,8 @@ import { GREEK_TRIREME } from './greek';
 import { ARAB_BOOM } from './arab';
 import { CHINESE_JUNK } from './chinese';
 import { JAPANESE_ATAKEBUNE } from './japanese';
+import { MAORI_WAKA } from './maori';
+import { HAWAII_WAA } from './hawaii';
 
 export interface HeritageShip {
   id: string;
@@ -62,6 +64,30 @@ export const HERITAGE_SHIPS: HeritageShip[] = [
     blurb: 'Sengoku atakebune: black lacquer, iron gun castle.',
     def: JAPANESE_ATAKEBUNE,
   },
+  {
+    id: 'maori',
+    culture: 'Māori',
+    waters: 'Bay of Islands',
+    year: '1820',
+    blurb: 'Musket Wars waka taua: great carved war canoe, swift paddles.',
+    def: MAORI_WAKA,
+  },
+  {
+    id: 'hawaii',
+    culture: 'Hawaiian',
+    waters: 'Kona Coast',
+    year: '1795',
+    blurb: 'Unification Wars peleleu: swift double-hulled war canoe.',
+    def: HAWAII_WAA,
+  },
 ];
 
-export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, JAPANESE_ATAKEBUNE, ROMAN_QUINQUEREME };
+export {
+  ARAB_BOOM,
+  CHINESE_JUNK,
+  GREEK_TRIREME,
+  HAWAII_WAA,
+  JAPANESE_ATAKEBUNE,
+  MAORI_WAKA,
+  ROMAN_QUINQUEREME,
+};

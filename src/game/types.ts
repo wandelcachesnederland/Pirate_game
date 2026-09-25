@@ -17,9 +17,61 @@ export type ShipKind =
   // small craft — paddled, unarmed, they live around the islands
   | 'warCanoe'
   | 'fishingCanoe'
-  | 'rowboat';
+  | 'rowboat'
+  // Age of Sail additions — corsairs and coastal craft
+  | 'xebec'
+  | 'lugger'
+  | 'gunboat'
+  // Punic Wars — Carthage and the Cilician pirates
+  | 'carthGalley'
+  | 'carthTrader'
+  | 'carthSeven'
+  | 'cilician'
+  // Persian Wars — the Great King's Phoenician fleet
+  | 'phoenTrireme'
+  | 'persTransport'
+  | 'ionianGalley'
+  | 'sidonianRoyal'
+  // Monsoon Seas — dhows and baghlahs of the Indian Ocean
+  | 'warDhow'
+  | 'ghurab'
+  | 'baghlah'
+  | 'sultanFlagship'
+  // Ming waters — warlords and wokou pirates
+  | 'warlordJunk'
+  | 'wokouJunk'
+  | 'grainJunk'
+  | 'pirateKing'
+  // Sengoku Japan — the M\u014dri and their scouts
+  | 'sekiBune'
+  | 'kobaya'
+  | 'riceBune'
+  | 'moriFlagship'
+  // Aotearoa — rival iwi and flax traders
+  | 'rivalWaka'
+  | 'arikiWaka'
+  | 'flaxTrader'
+  // Hawai\u02bbi — rival ali\u02bbi and sandalwood traders
+  | 'rivalWaa'
+  | 'kauaiFlagship'
+  | 'sandTrader';
 
-export type Faction = 'pirate' | 'spain' | 'england' | 'france' | 'merchant' | 'fire' | 'native';
+export type Faction =
+  | 'pirate'
+  | 'spain'
+  | 'england'
+  | 'france'
+  | 'merchant'
+  | 'fire'
+  | 'native'
+  // heritage waters
+  | 'carthage'
+  | 'persia'
+  | 'arab'
+  | 'china'
+  | 'japan'
+  | 'maori'
+  | 'hawaii';
 
 export type HullStyle =
   | 'default'
@@ -46,7 +98,10 @@ export type EraId =
   | 'greek'
   | 'arab'
   | 'chinese'
-  | 'japanese';
+  | 'japanese'
+  // Polynesia — waka and wa\u02bba waters
+  | 'maori'
+  | 'hawaii';
 
 export interface ShipDef {
   kind: ShipKind;
@@ -85,6 +140,12 @@ export interface ShipDef {
   oared?: boolean;
   /** Ship's company at full strength. Casualties mount as the hull takes damage. */
   crew?: number;
+  /** Wave boss: gets the boss bar, fanfare treatment and a captain's chest. */
+  boss?: boolean;
+  /** Fat prize ship: always carries a captain's chest (galleons, tribute fleets). */
+  treasure?: boolean;
+  /** Trader: sometimes carries a captain's chest, pointed out as a prize. */
+  trader?: boolean;
 }
 
 export interface Ship {

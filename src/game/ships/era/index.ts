@@ -18,7 +18,9 @@ import {
   ARAB_BOOM,
   CHINESE_JUNK,
   GREEK_TRIREME,
+  HAWAII_WAA,
   JAPANESE_ATAKEBUNE,
+  MAORI_WAKA,
   ROMAN_QUINQUEREME,
 } from '../heritage';
 
@@ -122,6 +124,24 @@ export const ERA_SHIPS: EraShip[] = [
     group: 'Heritage Seas',
     homeWaters: 'the Straits of Singapore',
   },
+  {
+    id: 'maori',
+    era: 'Māori Musket Wars',
+    year: '1820',
+    blurb: 'Waka taua: great war canoe — swift paddles, captured guns.',
+    def: MAORI_WAKA,
+    group: 'Heritage Seas',
+    homeWaters: 'the Bay of Islands',
+  },
+  {
+    id: 'hawaii',
+    era: 'Hawaiian Unification',
+    year: '1795',
+    blurb: "Peleleu wa'a: swift war canoe of Kamehameha's fleet.",
+    def: HAWAII_WAA,
+    group: 'Heritage Seas',
+    homeWaters: 'the Kona Coast',
+  },
 ];
 
 export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
@@ -135,6 +155,8 @@ export const ERA_FLAGSHIPS: Record<EraId, ShipDef> = {
   arab: ARAB_BOOM,
   chinese: CHINESE_JUNK,
   japanese: JAPANESE_ATAKEBUNE,
+  maori: MAORI_WAKA,
+  hawaii: HAWAII_WAA,
 };
 
 export const DEFAULT_ERA: EraId = 'golden';
@@ -144,4 +166,4 @@ export function eraShip(id: EraId): EraShip {
 }
 
 export { BLACK_GULL, HMS_VENGEANCE, SANTA_BRISA, SEA_WOLF, USS_REVENANT };
-export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, JAPANESE_ATAKEBUNE, ROMAN_QUINQUEREME };
+export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, JAPANESE_ATAKEBUNE, MAORI_WAKA, ROMAN_QUINQUEREME };

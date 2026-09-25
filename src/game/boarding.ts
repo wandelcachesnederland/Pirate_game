@@ -48,6 +48,64 @@ export function surrenderChance(kind: ShipKind): number {
       return 0.2;
     case 'manowar':
       return 0.15;
+    case 'xebec':
+      return 0.35;
+    case 'lugger':
+      return 0.5;
+    case 'gunboat':
+      return 0.45;
+    case 'carthGalley':
+      return 0.35;
+    case 'carthTrader':
+      return 0.75;
+    case 'carthSeven':
+      return 0.15;
+    case 'cilician':
+      return 0.4;
+    case 'phoenTrireme':
+      return 0.35;
+    case 'persTransport':
+      return 0.75;
+    case 'ionianGalley':
+      return 0.45;
+    case 'sidonianRoyal':
+      return 0.15;
+    case 'warDhow':
+      return 0.35;
+    case 'ghurab':
+      return 0.4;
+    case 'baghlah':
+      return 0.7;
+    case 'sultanFlagship':
+      return 0.15;
+    case 'warlordJunk':
+      return 0.3;
+    case 'wokouJunk':
+      return 0.35;
+    case 'grainJunk':
+      return 0.75;
+    case 'pirateKing':
+      return 0.15;
+    case 'sekiBune':
+      return 0.3;
+    case 'kobaya':
+      return 0.45;
+    case 'riceBune':
+      return 0.75;
+    case 'moriFlagship':
+      return 0.15;
+    case 'rivalWaka':
+      return 0.35;
+    case 'arikiWaka':
+      return 0.15;
+    case 'flaxTrader':
+      return 0.75;
+    case 'rivalWaa':
+      return 0.35;
+    case 'kauaiFlagship':
+      return 0.15;
+    case 'sandTrader':
+      return 0.75;
     default:
       return 0; // player, fireship, warCanoe
   }

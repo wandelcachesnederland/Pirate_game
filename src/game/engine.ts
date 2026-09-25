@@ -12,7 +12,7 @@ import type {
   UpgradeId,
   UpgradeOffer,
 } from './types';
-import { SHIP_DEFS, UPGRADES, waveComposition, waveTitle } from './data';
+import { SHIP_DEFS, UPGRADES, waveCompositionFor, waveTitleFor } from './data';
 import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
 import { DEFAULT_REGION, regionById } from './worlds';
 import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from './boarding';
@@ -722,7 +722,7 @@ export class Engine {
       wakeTimer: 0,
       bob: rand(0, TAU),
       hitByPlayer: false,
-      isBoss: kind === 'manowar',
+      isBoss: def.boss === true,
       biteTimer: 0,
     };
   }
@@ -745,12 +745,12 @@ export class Engine {
   // ================================================================ waves
   private startWave(n: number) {
     this.wave = n;
-    this.waveQueue = waveComposition(n);
+    this.waveQueue = waveCompositionFor(this.eraId, n);
     this.spawnTimer = n === 1 ? 2.4 : 1.0;
     this.waveClearing = false;
     this.magnetAll = false;
     this.waveDamage = 0;
-    this.banner = { title: `Wave ${n}`, sub: waveTitle(n), t: 0, dur: 3.2, gold: false };
+    this.banner = { title: `Wave ${n}`, sub: waveTitleFor(this.eraId, n), t: 0, dur: 3.2, gold: false };
     this.sfx.horn();
     this.sfx.setTempo(n);
     this.sfx.insertRandomCassette(n > 1);
@@ -782,13 +782,13 @@ export class Engine {
       }
       x = clamp(p.x + Math.cos(a) * d, -WORLD + 160, WORLD - 160);
       y = clamp(p.y + Math.sin(a) * d, -WORLD + 160, WORLD - 160);
-      if (!this.pointInIsland(x, y, kind === 'manowar' ? 110 : 75) && Math.hypot(x - p.x, y - p.y) > 330) break;
+      if (!this.pointInIsland(x, y, SHIP_DEFS[kind].boss ? 110 : 75) && Math.hypot(x - p.x, y - p.y) > 330) break;
     }
     const toP = Math.atan2(p.y - y, p.x - x);
     let heading = toP + rand(-0.6, 0.6);
-    if (kind === 'merchant') heading = toP + (Math.random() < 0.5 ? 1 : -1) * rand(1.3, 1.8);
+    if (SHIP_DEFS[kind].trader) heading = toP + (Math.random() < 0.5 ? 1 : -1) * rand(1.3, 1.8);
     const s = this.makeShip(kind, x, y, heading);
-    if (kind === 'merchant') s.sail = s.sailTarget = 0.6;
+    if (s.def.trader) s.sail = s.sailTarget = 0.6;
     this.ships.push(s);
     if (s.isBoss) {
       this.addTrauma(0.25);
@@ -815,7 +815,7 @@ export class Engine {
       const cap = Math.min(10, 3 + Math.floor(this.wave * 0.7));
       if ((this.spawnTimer <= 0 && alive < cap) || alive === 0) {
         const kind = this.waveQueue.shift()!;
-        const mode = this.wave === 1 ? (kind === 'merchant' ? 'near' : 'ring') : alive === 0 ? 'near' : 'ring';
+        const mode = this.wave === 1 ? (SHIP_DEFS[kind].trader ? 'near' : 'ring') : alive === 0 ? 'near' : 'ring';
         this.spawnEnemy(kind, mode);
         this.spawnTimer = this.wave === 1 ? 2.8 : rand(1.5, 2.8);
       }
@@ -1485,7 +1485,8 @@ export class Engine {
     let desired = s.angle;
     let sail = 1;
     s.aiTimer -= dt;
-    switch (s.def.kind) {
+    const aiKind = s.def.trader === true ? 'merchant' : s.def.kind;
+    switch (aiKind) {
       case 'merchant': {
         if (dist < 270 || s.hitByPlayer) {
           desired = toP + Math.PI + Math.sin(this.time * 0.6 + s.bob) * 0.55;
@@ -1952,6 +1953,20 @@ export class Engine {
         return 'French';
       case 'merchant':
         return 'merchant';
+      case 'carthage':
+        return 'Carthaginian';
+      case 'persia':
+        return 'Persian';
+      case 'arab':
+        return 'Arab';
+      case 'china':
+        return 'Chinese';
+      case 'japan':
+        return 'Japanese';
+      case 'maori':
+        return 'Māori';
+      case 'hawaii':
+        return 'Hawaiian';
       case 'native':
         return 'native';
       case 'fire':
@@ -2075,11 +2090,11 @@ export class Engine {
       const sp = rand(50, 210) * (0.7 + s.def.length / 140);
       this.addPickup(s.x + rand(-8, 8), s.y + rand(-8, 8), Math.cos(a) * sp + s.vx * 0.3, Math.sin(a) * sp + s.vy * 0.3, 0, per);
     }
-    // treasure galleons always pay out; merchants and frigates sometimes do
+    // bosses and treasure hulls always pay out; traders and frigates sometimes do
     if (
       s.isBoss ||
-      s.def.kind === 'galleon' ||
-      (s.def.kind === 'merchant' && Math.random() < 0.35) ||
+      s.def.treasure === true ||
+      (s.def.trader === true && Math.random() < 0.35) ||
       (s.def.kind === 'frigate' && Math.random() < 0.35)
     ) {
       const a = rand(0, TAU);
@@ -2922,7 +2937,7 @@ export class Engine {
     let best: Ship | null = null;
     let bd = Infinity;
     for (const s of this.ships) {
-      if (s.def.kind !== 'merchant' || s.sinking >= 0) continue;
+      if (s.def.trader !== true || s.sinking >= 0) continue;
       const d = Math.hypot(s.x - p.x, s.y - p.y);
       if (d < bd) {
         bd = d;
@@ -2985,7 +3000,7 @@ export class Engine {
         ? '#ffffff'
         : e.def.kind === 'fireship'
           ? '#ff8a2a'
-          : e.def.kind === 'merchant'
+          : e.def.trader === true
             ? '#ffd84d'
             : '#ff4b3a';
       ctx.strokeStyle = 'rgba(25,10,3,0.9)';
@@ -3131,7 +3146,7 @@ export class Engine {
       const byy = y0 + (narrow ? 118 : 62) * u;
       ctx.font = `${Math.round(15 * u)}px ${FONT}`;
       ctx.textAlign = 'center';
-      this.outlined(ctx, "☠ Man-o'-War ☠", W / 2, byy - 10 * u, '#ff9a8a', 3);
+      this.outlined(ctx, `☠ ${boss.def.name} ☠`, W / 2, byy - 10 * u, '#ff9a8a', 3);
       ctx.fillStyle = 'rgba(20,10,4,0.85)';
       ctx.fillRect(bxx - 3, byy - 3, bw + 6, bh + 6);
       ctx.fillStyle = '#f7e3a1';

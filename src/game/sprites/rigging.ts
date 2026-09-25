@@ -127,6 +127,69 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.fillRect(cx - 1.8, 2.5, 3.2, 4.5);
       ctx.fillRect(cx - 1.4, -7, 2.8, 3.2);
       break;
+    case 'carthage':
+      ctx.fillStyle = '#c9a227';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, 0, TAU);
+      ctx.fill();
+      break;
+    case 'persia':
+      ctx.strokeStyle = '#c9a227';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.7, 0, TAU);
+      ctx.stroke();
+      ctx.fillStyle = '#c9a227';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 0.9, 0, TAU);
+      ctx.fill();
+      break;
+    case 'arab':
+      ctx.fillStyle = '#0f6f6a';
+      ctx.beginPath();
+      ctx.moveTo(cx, -3.2);
+      ctx.lineTo(cx + 2.2, 0);
+      ctx.lineTo(cx, 3.2);
+      ctx.lineTo(cx - 2.2, 0);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'china':
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.6, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'japan':
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.8, 0, TAU);
+      ctx.fill();
+      break;
+    case 'maori':
+      ctx.strokeStyle = '#b5352c';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.2, -1);
+      ctx.lineTo(cx, 1);
+      ctx.lineTo(cx + 2.2, -1);
+      ctx.moveTo(cx - 2.2, 2.4);
+      ctx.lineTo(cx, 4.4);
+      ctx.lineTo(cx + 2.2, 2.4);
+      ctx.stroke();
+      break;
+    case 'hawaii':
+      ctx.fillStyle = '#2e5e8c';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.5, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(cx - 2.5, -0.6, 5, 1.2);
+      break;
   }
   ctx.restore();
 }
@@ -221,6 +284,89 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       ctx.fillRect(0, h / 3, w, h / 3);
       ctx.fillStyle = '#2e5e8c';
       ctx.fillRect(0, (h * 2) / 3, w, h / 3);
+      break;
+    }
+    case 'carthage': {
+      ctx.fillStyle = '#7a1f2b';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(0, 0, w * 0.12, h);
+      ctx.beginPath();
+      ctx.arc(w * 0.56, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#7a1f2b';
+      ctx.beginPath();
+      ctx.arc(w * 0.56, h * 0.5, Math.min(w, h) * 0.12, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'persia': {
+      ctx.fillStyle = '#1f3a5f';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(w * 0.14, h * 0.42, w * 0.72, h * 0.16);
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.26, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#1f3a5f';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.11, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'arab': {
+      ctx.fillStyle = '#0f6f6a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(0, h * 0.32, w, h * 0.36);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, h * 0.38, w, h * 0.24);
+      break;
+    }
+    case 'china': {
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'japan': {
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'maori': {
+      ctx.fillStyle = '#141414';
+      ctx.fillRect(0, 0, w, h * 0.44);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, h * 0.44, w, h * 0.12);
+      ctx.fillStyle = '#b5352c';
+      ctx.fillRect(0, h * 0.56, w, h * 0.44);
+      break;
+    }
+    case 'hawaii': {
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9403b';
+      ctx.fillRect(0, 0, w, h * 0.2);
+      ctx.fillRect(0, h * 0.4, w, h * 0.2);
+      ctx.fillRect(0, h * 0.8, w, h * 0.2);
+      ctx.fillStyle = '#1f3a5f';
+      ctx.fillRect(0, 0, w * 0.42, h * 0.6);
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = Math.max(0.5, h * 0.07);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(w * 0.42, h * 0.6);
+      ctx.moveTo(w * 0.42, 0);
+      ctx.lineTo(0, h * 0.6);
+      ctx.stroke();
       break;
     }
     case 'fire': {
