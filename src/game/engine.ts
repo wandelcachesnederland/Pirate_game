@@ -18,6 +18,7 @@ import { DEFAULT_REGION, regionById } from './worlds';
 import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from './boarding';
 import { Input } from './input';
 import { Sfx } from './audio';
+import { BOSS_CASSETTE, type MusicMode } from './music';
 import {
   buildIsland,
   drawChest,
@@ -188,6 +189,7 @@ export class Engine {
   private cb: EngineCallbacks;
   readonly input = new Input();
   readonly sfx = new Sfx();
+  private musicMode: MusicMode = 1;
   screen: Screen = 'menu';
 
   private w = 1;
@@ -470,6 +472,8 @@ export class Engine {
     this.sfx.stopMusic();
     this.sfx.startMusic();
     this.sfx.duck(false);
+    this.musicMode = 1;
+    this.sfx.setMode(1);
   }
 
   pause() {
@@ -754,7 +758,12 @@ export class Engine {
     this.banner = { title: `Wave ${n}`, sub: waveTitleFor(this.eraId, n), t: 0, dur: 3.2, gold: false };
     this.sfx.horn();
     this.sfx.setTempo(n);
-    this.sfx.insertRandomCassette(n > 1);
+    if (this.waveQueue.some((k) => SHIP_DEFS[k].boss)) {
+      // a warship is coming: the deck falls silent to the boss theme
+      this.sfx.insertCassette(BOSS_CASSETTE);
+    } else {
+      this.sfx.insertRandomCassette(n > 1);
+    }
     if (n === 1) {
       const k = this.waveQueue.shift();
       if (k) this.spawnEnemy(k, 'ahead');
@@ -806,6 +815,18 @@ export class Engine {
   private findBoss(): Ship | null {
     for (const s of this.ships) if (s.isBoss && s.sinking < 0 && !s.captured) return s;
     return null;
+  }
+
+  /** Let the band respond to the state of the fight. */
+  private updateMusicMode() {
+    if (this.screen !== 'playing' || this.playerDeadTimer >= 0) return;
+    const hpFrac = this.player.maxHp > 0 ? this.player.hp / this.player.maxHp : 1;
+    let mode: MusicMode = this.countEnemies() > 0 ? 1 : 0;
+    if (hpFrac < 0.35) mode = 2;
+    if (mode !== this.musicMode) {
+      this.musicMode = mode;
+      this.sfx.setMode(mode);
+    }
   }
 
   private updateWave(dt: number, rdt: number) {
@@ -972,6 +993,7 @@ export class Engine {
     this.updateStreaks(dt);
     this.updateCamera(rdt);
     if (playing) this.updateWave(dt, rdt);
+    if (playing) this.updateMusicMode();
 
     if (this.streakTimer > 0) {
       this.streakTimer -= dt;

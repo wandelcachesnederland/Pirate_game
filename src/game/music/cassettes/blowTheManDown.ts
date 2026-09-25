@@ -1,5 +1,7 @@
 // "Blow the Man Down" (traditional halyard shanty).
-// Arrangement: oom-pah-pah waltz with a concertina-like lead.
+// Arrangement: oom-pah-pah waltz with a reedy lead. The bass walks
+// root - fifth - root with an octave pop on the "and" of three; the odd
+// phrases drop the kick, and the last four bars get a crew harmony.
 import type { Cassette } from '../cassette';
 import { abc, chords, stepTable } from '../notation';
 
@@ -12,6 +14,7 @@ const MELODY = abc(
   { key: 'C', stepsPerUnit: 4 },
 );
 const LOOP_STEPS = 192;
+const STEPS_PER_BAR = 12;
 const MEL_AT = stepTable(MELODY, LOOP_STEPS, 'Blow the Man Down');
 
 // one chord per bar (12 steps)
@@ -25,25 +28,50 @@ export const blowTheManDown: Cassette = {
     return Math.max(0.075, 0.098 - (wave - 1) * 0.002);
   },
 
-  playStep(deck, step, t, sd) {
-    // lead: triangle doubled by a quiet square
+  playStep(deck, step, t, sd, mode) {
+    const bar = Math.floor(step / STEPS_PER_BAR);
+    const inBar = step % STEPS_PER_BAR;
+    const c = CHORDS[bar % CHORDS.length];
+    const phrase = Math.floor(bar / 4) % 2; // 0 = full, 1 = kick drops out
+    const isLastBar = step + STEPS_PER_BAR >= LOOP_STEPS;
+
+    // lead: reed with a whisper of a crew harmony in the last four bars
     const m = MEL_AT[step];
     if (m) {
-      deck.note('triangle', m[0], t, m[1] * sd * 0.9, 0.13, 2500);
-      deck.note('square', m[0], t, m[1] * sd * 0.85, 0.05, 1200);
+      deck.reed(m[0], t, m[1] * sd * 0.9, 0.12, 0, 0, 2200);
+      if (bar >= 12) deck.reed(m[0] + 4, t, m[1] * sd * 0.8, 0.04, 0.3);
     }
-    const inBar = step % 12;
-    const c = CHORDS[Math.floor(step / 12) % CHORDS.length];
-    // oom ...
-    if (inBar === 0) deck.note('triangle', c.root, t, sd * 4, 0.34, 900);
-    // ... pah pah
-    if (inBar === 4 || inBar === 8) {
-      deck.note('square', c.third + 12, t, sd * 1.8, 0.035, 1400);
-      deck.note('square', c.fifth + 12, t, sd * 1.8, 0.03, 1400);
+
+    // oom ... pah ... pah, with a fifth on beat 3 and an octave pop
+    if (inBar === 0) deck.bass(c.root, t, sd * 6, 0.34);
+    if (inBar === 8) deck.bass(c.fifth - 12, t, sd * 3, 0.24);
+    if (inBar === 10) deck.bass(c.root + 12, t, sd, 0.16);
+
+    if (mode === 2) {
+      // danger: heartbeat and a dark drone under the waltz
+      if (inBar === 0) deck.drum('sine', 55, 28, t, 0.25, 0.5);
+      if (inBar === 8) deck.drum('sine', 50, 26, t, 0.18, 0.32);
+      if (inBar === 0) deck.note('sawtooth', c.root - 12, t, sd * 12, 0.04, 400);
+      return;
     }
-    // kick + tambourine
-    if (inBar === 0) deck.drum('sine', 120, 45, t, 0.12, 0.45);
-    if (inBar === 4 || inBar === 8) deck.noise(t, 0.05, 0.07, 6000);
-    if (inBar === 2 || inBar === 6 || inBar === 10) deck.noise(t, 0.03, 0.03, 8000);
+
+    if (mode !== 0) {
+      if (inBar === 4) deck.stab(c.third + 12, c.fifth + 12, t, sd * 1.6, 0.04);
+      if (inBar === 8) deck.stab(c.third + 12, c.fifth + 12, t, sd * 1.6, 0.035);
+    }
+
+    if (mode === 1) {
+      // kick on 1 (dropped in the odd phrases), soft military snare on 2 & 3
+      if (inBar === 0 && phrase === 0) deck.drum('sine', 120, 45, t, 0.12, 0.45);
+      if (inBar === 4 || inBar === 8) deck.snare(t, 0.06);
+      if (inBar === 2 || inBar === 6 || inBar === 10) deck.noise(t, 0.03, 0.03, 8000);
+      // last bar: snare fill runs into the crash on the seam
+      if (isLastBar && inBar >= 4 && inBar % 2 === 0) deck.snare(t, 0.04 + 0.012 * inBar);
+    } else if (mode === 0) {
+      // calm: a faint tambourine marks the waltz
+      if (inBar === 2 || inBar === 6 || inBar === 10) deck.noise(t, 0.03, 0.02, 8000);
+    }
+
+    if (mode === 1 && step === 0) deck.crash(t, 0.09);
   },
 };
