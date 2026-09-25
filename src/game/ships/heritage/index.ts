@@ -1,9 +1,8 @@
-// Heritage collection: museum pieces from five seafaring cultures.
+// Heritage collection: playable flagships from five seafaring cultures.
 //
-// These hulls live in the shipwright's collection on the start screen but are
-// NOT used in gameplay yet — no spawns, no picker selection. Each is a
-// `kind: 'player'` ShipDef with a unique `styleKey`, so when a culture's seas
-// open up they can sail as heroes without touching the enemy roster.
+// Each hull sails as the hero of its own era (see `era/index.ts`) — one
+// heritage ship per era. Every entry is a `kind: 'player'` ShipDef with a
+// unique `styleKey`, so they sail as heroes without touching the enemy roster.
 
 import type { ShipDef } from '../../types';
 import { ROMAN_QUINQUEREME } from './roman';
@@ -28,7 +27,7 @@ export const HERITAGE_SHIPS: HeritageShip[] = [
     culture: 'Roman',
     waters: 'Mare Nostrum',
     year: '260 BC',
-    blurb: 'Quinquereme: bronze ram, red sail, endless oars.',
+    blurb: 'First Punic War quinquereme: bronze ram, red sail, endless oars.',
     def: ROMAN_QUINQUEREME,
   },
   {
@@ -36,31 +35,31 @@ export const HERITAGE_SHIPS: HeritageShip[] = [
     culture: 'Greek',
     waters: 'Aegean Sea',
     year: '480 BC',
-    blurb: 'Trireme: the fastest ram at Salamis.',
+    blurb: 'Persian Wars trireme: the fastest ram at Salamis.',
     def: GREEK_TRIREME,
   },
   {
     id: 'arab',
     culture: 'Arab',
-    waters: 'Indian Ocean',
-    year: '1500',
-    blurb: 'Boom: lateen sail, monsoon runner.',
+    waters: 'Western Indian Ocean',
+    year: '1200',
+    blurb: 'Monsoon Seas boom: lateen sail, swift monsoon runner.',
     def: ARAB_BOOM,
   },
   {
     id: 'chinese',
     culture: 'Chinese',
     waters: 'South China Sea',
-    year: '1400',
-    blurb: 'War junk: battened sails, floating fortress.',
+    year: '1405',
+    blurb: 'Ming treasure fleet war junk: battened sails, floating fortress.',
     def: CHINESE_JUNK,
   },
   {
     id: 'japanese',
     culture: 'Japanese',
     waters: 'Seto Inland Sea',
-    year: '1600',
-    blurb: 'Atakebune: black lacquer, iron castle.',
+    year: '1575',
+    blurb: 'Sengoku atakebune: black lacquer, iron gun castle.',
     def: JAPANESE_ATAKEBUNE,
   },
 ];

@@ -1,6 +1,6 @@
 // HERITAGE: CHINA (c. 1400) — war junk.
 //
-// Museum piece — not sailed in gameplay yet. Flat-bottomed, bulkheaded,
+// Playable heritage flagship — sails as the Chinese era hero. Flat-bottomed, bulkheaded,
 // with battened lug sails — a floating fortress of the treasure fleets.
 
 import type { ShipDef } from '../../types';

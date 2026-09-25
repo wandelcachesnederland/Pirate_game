@@ -3069,7 +3069,7 @@ export class Engine {
     ctx.fillRect(gx, gy + gh * (1 - p.sail), gw, gh * p.sail);
     ctx.font = `${Math.round(11 * u)}px ${FONT}`;
     ctx.textAlign = 'center';
-    this.outlined(ctx, 'SAIL', gx + gw / 2, ccy + cr + 9 * u, '#f3e2b3', 3);
+    this.outlined(ctx, p.def.oared ? 'OARS' : 'SAIL', gx + gw / 2, ccy + cr + 9 * u, '#f3e2b3', 3);
     const kn = Math.round(Math.hypot(p.vx, p.vy) / 14);
     ctx.textAlign = 'left';
     ctx.font = `${Math.round(13 * u)}px ${FONT}`;
@@ -3341,7 +3341,7 @@ export class Engine {
     ctx.fillText('S', 0, r * 0.57);
     ctx.fillText('E', r * 0.56, 0);
     ctx.fillText('W', -r * 0.55, 0);
-    const good = (this.windFactor(p.angle) - 0.46) / 0.54;
+    const good = (this.windFactor(p.angle, !!p.def.oared) - 0.46) / 0.54;
     ctx.save();
     ctx.rotate(p.angle);
     ctx.fillStyle = good > 0.72 ? '#2f9e44' : good > 0.4 ? '#e0a32a' : '#c0392b';

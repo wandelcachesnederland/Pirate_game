@@ -1,6 +1,6 @@
 // HERITAGE: ROME (c. 260 BC) — quinquereme.
 //
-// Museum piece — not sailed in gameplay yet. Oar-driven war galley with a
+// Playable heritage flagship — sails as the Roman era hero. Oar-driven war galley with a
 // bronze ram and a blood-red sail bearing the golden eagle.
 
 import type { ShipDef } from '../../types';

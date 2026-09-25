@@ -1,6 +1,6 @@
 // HERITAGE: GREECE (c. 480 BC) — trireme.
 //
-// Museum piece — not sailed in gameplay yet. The Athenian greyhound: three
+// Playable heritage flagship — sails as the Greek era hero. The Athenian greyhound: three
 // banks of oars, an all-seeing eye on the bow, built to ram at Salamis.
 
 import type { ShipDef } from '../../types';

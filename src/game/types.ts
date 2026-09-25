@@ -34,7 +34,19 @@ export type HullStyle =
   | 'atakebune';
 
 /** Playable hero hulls — each is a `player`-kind ShipDef with its own styleKey. */
-export type EraId = 'golden' | 'exploration' | 'napoleonic' | 'viking' | 'ironclad';
+export type EraId =
+  // Age of Sail
+  | 'golden'
+  | 'exploration'
+  | 'napoleonic'
+  | 'viking'
+  | 'ironclad'
+  // Heritage Seas — the museum fleets, now playable
+  | 'roman'
+  | 'greek'
+  | 'arab'
+  | 'chinese'
+  | 'japanese';
 
 export interface ShipDef {
   kind: ShipKind;

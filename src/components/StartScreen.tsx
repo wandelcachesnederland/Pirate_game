@@ -4,7 +4,7 @@ import type { EraId, RegionId } from '../game/types';
 import type { ScoreEntry, Settings } from '../game/storage';
 import { HighScoreTable, HullPicker, KeyCap, SoundToggles } from './ui';
 import { RegionPicker } from './RegionPicker';
-import { HeritageCollection } from './HeritageCollection';
+import { ERA_FLAGSHIPS } from '../game/ships/era';
 
 interface Props {
   name: string;
@@ -89,8 +89,6 @@ export function StartScreen({
             <HullPicker era={era} onEra={onEra} />
 
             <RegionPicker region={region} onRegion={onRegion} />
-
-            <HeritageCollection />
 
             <div className="mt-3 border-t-2 border-dashed border-ink/30 pt-3">
               <h3 className="mb-1.5 flex items-center gap-2 font-pirate text-xl">
@@ -187,10 +185,17 @@ export function StartScreen({
             <div className="mt-3 rounded-lg border border-ink/20 bg-ink/[0.06] p-2.5 text-[0.9rem] italic leading-snug">
               <p className="flex items-start gap-2">
                 <Wind className="mt-0.5 h-4 w-4 shrink-0" />
-                <span>
-                  Sail <b>with the wind</b> for top speed — watch the compass. Sink ships in quick succession to build
-                  a <b>plunder streak</b> multiplier!
-                </span>
+                {ERA_FLAGSHIPS[era].oared ? (
+                  <span>
+                    An <b>oared hull</b> — the wind means nothing to her. Row straight at them and sink ships in
+                    quick succession to build a <b>plunder streak</b> multiplier!
+                  </span>
+                ) : (
+                  <span>
+                    Sail <b>with the wind</b> for top speed — watch the compass. Sink ships in quick succession to
+                    build a <b>plunder streak</b> multiplier!
+                  </span>
+                )}
               </p>
             </div>
             <div className="mt-2 rounded-lg border border-ink/20 bg-ink/[0.06] p-2.5 text-[0.9rem] italic leading-snug">

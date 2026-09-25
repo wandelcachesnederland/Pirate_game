@@ -1,6 +1,6 @@
 // HERITAGE: ARABIA (c. 1500) — ocean-going boom.
 //
-// Museum piece — not sailed in gameplay yet. Sewn-plank dhow with a great
+// Playable heritage flagship — sails as the Arab era hero. Sewn-plank dhow with a great
 // lateen sail, built to run the monsoon routes of the Indian Ocean.
 
 import type { ShipDef } from '../../types';

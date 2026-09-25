@@ -1,6 +1,6 @@
 // HERITAGE: JAPAN (c. 1600) — atakebune.
 //
-// Museum piece — not sailed in gameplay yet. Black-lacquered floating
+// Playable heritage flagship — sails as the Japanese era hero. Black-lacquered floating
 // castle with iron plating and a bristling gun deck — the shogun's hammer.
 
 import type { ShipDef } from '../../types';
