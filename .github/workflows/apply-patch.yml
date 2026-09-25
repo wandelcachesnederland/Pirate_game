@@ -1,0 +1,22 @@
+name: Apply patch
+on:
+  workflow_dispatch:   # lets you run it manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply patch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git apply patches/my-changes.patch
+          git rm patches/my-changes.patch
+          git add .
+          git commit -m "Apply patch"
+          git push
