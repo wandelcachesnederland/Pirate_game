@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import type { EraId } from '../game/types';
 import { ERA_SHIPS, type EraShip } from '../game/ships/era';
 import { shipScores, shipTraits } from '../game/ships/traits';
+import { armamentFor, usesGunpowder } from '../game/weapons';
 import { regionById } from '../game/worlds';
 import { bossCassette, cassettesForEra } from '../game/music';
 import { makeCanvas } from '../game/canvas';
@@ -199,8 +200,10 @@ function StatBar({ label, v, tint }: { label: string; v: number; tint: string })
 
 /** The hero hull card: portrait art, her numbers, and what she is good and bad at. */
 function HullCard({ e }: { e: EraShip }) {
-  const { strengths, weaknesses } = shipTraits(e.def);
+  const { strengths, weaknesses } = shipTraits(e.def, e.id);
   const sc = shipScores(e.def);
+  const arm = armamentFor(e.id);
+  const gunpowder = usesGunpowder(e.id);
   return (
     <div className="rounded-xl border-2 border-gold/45 bg-black/35 p-2 sm:p-3">
       <div className="flex items-baseline justify-between gap-2">
@@ -215,7 +218,7 @@ function HullCard({ e }: { e: EraShip }) {
           <div className="mt-1.5 space-y-1">
             <StatBar label="Hull" v={sc.hull} tint="linear-gradient(90deg,#e07a4a,#b3261e)" />
             <StatBar label="Speed" v={sc.speed} tint="linear-gradient(90deg,#77e0c0,#1b7898)" />
-            <StatBar label={e.def.weapon === 'mechanical' ? "Bows" : "Guns"} v={sc.guns} tint="linear-gradient(90deg,#ffd863,#c8912a)" />
+            <StatBar label={gunpowder ? 'Guns' : arm.heavy === 'greekFire' ? 'Fire' : arm.heavy === 'stone' ? 'Stones' : 'Bows'} v={sc.guns} tint="linear-gradient(90deg,#ffd863,#c8912a)" />
             <StatBar label="Helm" v={sc.helm} tint="linear-gradient(90deg,#b9c7f0,#3d55a8)" />
           </div>
         </div>
@@ -223,8 +226,13 @@ function HullCard({ e }: { e: EraShip }) {
           <div>
             <div className="font-pirate text-2xl leading-none sm:text-3xl">{e.def.name}</div>
             <div className="mt-1 text-xs text-gold">
-              {e.def.weapon === 'mechanical' ? 'Archery & pulley-drawn bolt launchers' : 'Gunpowder broadsides'}
+              {gunpowder ? 'Gunpowder broadsides' : arm.summary}
             </div>
+            {!gunpowder && (
+              <div className="text-[0.62rem] italic opacity-70">
+                No powder in these waters: hulls burn and go down by fire — nothing explodes.
+              </div>
+            )}
             <div className="text-[0.62rem] uppercase tracking-[0.16em] opacity-65">
               {e.era} · {e.year}
             </div>
