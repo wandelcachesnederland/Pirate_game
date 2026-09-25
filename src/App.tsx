@@ -68,6 +68,8 @@ export default function App() {
     saveEra(id);
     engineRef.current?.setEra(id);
     engineRef.current?.setRegion(eraRegion(id));
+    // hear the waters you are picking: the era's own tape starts on the menu
+    engineRef.current?.previewEraMusic();
   }, []);
 
   // ---- engine lifecycle
@@ -371,6 +373,7 @@ export default function App() {
           settings={settings}
           onSettings={updateSettings}
           isTouch={isTouch}
+          nowPlaying={engineRef.current?.sfx.nowPlaying ?? ''}
         />
       )}
 

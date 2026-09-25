@@ -4,6 +4,7 @@ import type { EraId } from '../game/types';
 import { ERA_SHIPS, type EraShip } from '../game/ships/era';
 import { shipScores, shipTraits } from '../game/ships/traits';
 import { regionById } from '../game/worlds';
+import { bossCassette, cassettesForEra } from '../game/music';
 import { makeCanvas } from '../game/canvas';
 import { drawPortraitShip, paintWater, paintWatersPostcard } from '../game/portrait';
 
@@ -389,6 +390,17 @@ export function EraCarousel({ era, onEra }: Props) {
         {shown.blurb}
         {shown.homeWaters ? ` — the ${shown.homeWaters}.` : ''}
       </p>
+      <div className="mt-1.5 rounded-md border border-gold/35 bg-black/30 px-2 py-1">
+        <span className="arcade-tag text-[0.5rem] opacity-90">Songs of this sea</span>
+        <div className="text-[0.72rem] leading-snug opacity-90">
+          {cassettesForEra(shown.id)
+            .map((c) => c.title)
+            .join(' · ')}
+        </div>
+        <div className="text-[0.6rem] italic opacity-60">
+          When a warship closes: {bossCassette(shown.id).title}
+        </div>
+      </div>
 
       {/* ---- transport strip: every era as a numbered plate ---- */}
       <div

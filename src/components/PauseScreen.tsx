@@ -9,10 +9,12 @@ interface Props {
   settings: Settings;
   onSettings: (s: Settings) => void;
   isTouch: boolean;
+  /** The song the deck is playing — the era's own tape. */
+  nowPlaying: string;
 }
 
 /** Pause overlay — P / Esc resumes, R restarts instantly. */
-export function PauseScreen({ onResume, onRestart, onMenu, settings, onSettings, isTouch }: Props) {
+export function PauseScreen({ onResume, onRestart, onMenu, settings, onSettings, isTouch, nowPlaying }: Props) {
   return (
     <div className="anim-fade absolute inset-0 overflow-y-auto bg-[#03101f]/60 backdrop-blur-[2px]">
       <div className="flex min-h-full items-center justify-center p-4">
@@ -46,6 +48,9 @@ export function PauseScreen({ onResume, onRestart, onMenu, settings, onSettings,
             </button>
           </div>
           <div className="mt-5 border-t-2 border-dashed border-ink/25 pt-4">
+            <p className="mb-3 text-[0.8rem] italic opacity-75">
+              On the deck: <span className="not-italic opacity-90">{nowPlaying}</span>
+            </p>
             <SoundToggles settings={settings} onChange={onSettings} />
           </div>
         </div>
