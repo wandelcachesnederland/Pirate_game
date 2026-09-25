@@ -1,8 +1,11 @@
 import { makeCanvas } from './canvas';
 import { mulberry32, TAU } from './math';
 import { wildIsland } from './settlements';
+import { type Harmonic, islandRadiusAt, paintTerrainIsland, terrainHarmonics } from './terrain';
 import type { Island, Settlement } from './types';
 import { CARIBBEAN_ISLANDS, type IslandTheme } from './worlds';
+
+export { islandRadiusAt };
 
 export function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const rad = Math.min(r, w / 2, h / 2);
@@ -99,15 +102,6 @@ export function makeVignette(r: number, g: number, b: number, strength: number):
 }
 
 // ---------------------------------------------------------------- islands
-export function islandRadiusAt(is: { r: number; harm: { amp: number; freq: number; phase: number }[] }, a: number) {
-  let k = 1;
-  for (let i = 0; i < is.harm.length; i++) {
-    const h = is.harm[i];
-    k += h.amp * Math.sin(h.freq * a + h.phase);
-  }
-  return is.r * k;
-}
-
 function drawPalm(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -212,12 +206,17 @@ export function buildIsland(
   look: IslandLook = {},
 ): Island {
   const rnd = mulberry32(seed);
-  const harm = [
-    { amp: 0.09 + rnd() * 0.08, freq: 2, phase: rnd() * TAU },
-    { amp: 0.05 + rnd() * 0.06, freq: 3, phase: rnd() * TAU },
-    { amp: 0.03 + rnd() * 0.03, freq: 5, phase: rnd() * TAU },
-    { amp: 0.012 + rnd() * 0.015, freq: 9, phase: rnd() * TAU },
-  ];
+  // tropical seas use the palm-island painter below; every other sea carries a
+  // terrain recipe of its own (see terrain.ts) — coastline included
+  const terrain = theme.terrain;
+  const harm = terrain
+    ? terrainHarmonics(terrain.shape, rnd)
+    : [
+        { amp: 0.09 + rnd() * 0.08, freq: 2, phase: rnd() * TAU },
+        { amp: 0.05 + rnd() * 0.06, freq: 3, phase: rnd() * TAU },
+        { amp: 0.03 + rnd() * 0.03, freq: 5, phase: rnd() * TAU },
+        { amp: 0.012 + rnd() * 0.015, freq: 9, phase: rnd() * TAU },
+      ];
   const ampSum = harm.reduce((s, h) => s + h.amp, 0);
   const maxR = r * (1 + ampSum);
   const halo = 58;
@@ -226,7 +225,8 @@ export function buildIsland(
   ctx.scale(res, res);
   ctx.translate(half, half);
   const base = { r, harm };
-  const N = 84;
+  // craggier coastlines need more samples to keep their notches
+  const N = terrain ? 160 : 84;
   const poly = (mul: number, add: number, wobble = 0, ws = 0): Path2D => {
     const p = new Path2D();
     for (let i = 0; i <= N; i++) {
@@ -242,6 +242,45 @@ export function buildIsland(
     return p;
   };
 
+  if (terrain) {
+    paintTerrainIsland({
+      ctx,
+      base,
+      r,
+      maxR,
+      seed,
+      rnd,
+      theme,
+      terrain,
+      poly,
+      inhabited: look.settlement ? look.settlement.inhabited : true,
+      fortAngle: look.settlement?.fortress?.angle ?? null,
+    });
+  } else {
+    paintTropicalIsland(ctx, base, r, maxR, seed, rnd, theme, poly, look);
+  }
+
+  // a stone battery on the shore, if this island is one of the fortified few
+  if (look.settlement?.fortress) {
+    drawFort(ctx, base, r, look.settlement.fortress.angle, look.flag ?? 'white');
+  }
+
+  const shore = poly(1, 1.5);
+  return { x, y, r, maxR, harm, canvas: c, half, shore, seed, settlement: look.settlement ?? wildIsland() };
+}
+
+/** The tropical seas' palm island: a sand ring, a jungle heart, palms on the beach. */
+function paintTropicalIsland(
+  ctx: CanvasRenderingContext2D,
+  base: { r: number; harm: Harmonic[] },
+  r: number,
+  maxR: number,
+  seed: number,
+  rnd: () => number,
+  theme: IslandTheme,
+  poly: (mul: number, add: number, wobble?: number, ws?: number) => Path2D,
+  look: IslandLook,
+) {
   // shallows
   ctx.fillStyle = theme.shallowFar;
   ctx.fill(poly(1, 52, 5, 1));
@@ -365,14 +404,6 @@ export function buildIsland(
     ctx.fill();
     ctx.restore();
   }
-
-  // a stone battery on the shore, if this island is one of the fortified few
-  if (look.settlement?.fortress) {
-    drawFort(ctx, base, r, look.settlement.fortress.angle, look.flag ?? 'white');
-  }
-
-  const shore = poly(1, 1.5);
-  return { x, y, r, maxR, harm, canvas: c, half, shore, seed, settlement: look.settlement ?? wildIsland() };
 }
 
 /** A stone battery: curtain wall, keep and guns looking out to sea. */

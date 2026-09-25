@@ -1,11 +1,15 @@
 // Sailing regions — the waters each era is fought in.
 //
 // A region re-skins the same sea (water, shallows, sand, jungle, palms, peaks)
-// for a different look and feel; gameplay is identical everywhere. Which waters
+// for a different look and feel; gameplay is identical everywhere. Tropical
+// seas get palm islands; every other sea carries a `terrain` recipe (see
+// terrain.ts) that shapes its islands — chalk cliffs and bocage in Biscay,
+// heather and skerries in the North Sea, dunes and oases off Arabia. Which waters
 // you sail is decided by the era you pick on the start screen (`ERA_REGION`),
 // so every age fights in its proper sea — the Caribbean for the pirates, the
 // Aegean for Salamis, Lake Texcoco for the fall of Tenochtitlan.
 
+import type { Terrain } from './terrain';
 import type { PeopleSpec, RegionId } from './types';
 
 /** Water tints. `light`/`dark` are "r,g,b," prefixes for the mottling tile. */
@@ -35,6 +39,12 @@ export interface IslandTheme {
   palmLine: string;
   palmShade: string;
   palmTrunk: string;
+  /**
+   * What the islands here are made of — coastline, shore, ground cover, trees,
+   * summit, buildings and landmarks. Left out, an island is a tropical palm
+   * island; every sea outside the tropics has one (see terrain.ts).
+   */
+  terrain?: Terrain;
 }
 
 export interface RegionDef {
@@ -77,8 +87,10 @@ interface SeaSpec {
   foliage: [base: string, greens: string[]];
   /** Rock and summits, dark to bleached. */
   peaks: [string, string, string];
-  /** Palm/leaf pair and trunk. */
+  /** Palm/leaf pair and trunk — the leaf pair colours whatever trees grow. */
   palm: [dark: string, light: string, trunk: string];
+  /** The islands' own make-up; tropical palm islands when left out. */
+  terrain?: Terrain;
 }
 
 function sea(spec: SeaSpec): { water: WaterTheme; islands: IslandTheme } {
@@ -107,6 +119,7 @@ function sea(spec: SeaSpec): { water: WaterTheme; islands: IslandTheme } {
       palmLine: rgba(foliage, 0.65),
       palmShade: 'rgba(0, 20, 12, 0.22)',
       palmTrunk,
+      terrain: spec.terrain,
     },
   };
 }
@@ -194,6 +207,19 @@ export const MEDITERRANEAN_ISLANDS: IslandTheme = {
   palmLine: 'rgba(50,70,30,0.65)',
   palmShade: 'rgba(30,30,5,0.22)',
   palmTrunk: '#7a5a30',
+  terrain: {
+    // olive groves and cypress over garrigue, limestone crowns, tiled roofs
+    shape: 'round',
+    shore: 'sand',
+    ground: 'scrub',
+    groundColor: '#7f874a',
+    trees: [['olive', 0.7], ['cypress', 0.35]],
+    peak: 'limestone',
+    village: 'terracotta',
+    landmarks: ['vineyard', 'watchtower', 'temple'],
+    offshore: 'rocks',
+    stone: '#c2b89c',
+  },
 };
 
 export const ARABIAN_WATER: WaterTheme = {
@@ -221,6 +247,19 @@ export const ARABIAN_ISLANDS: IslandTheme = {
   palmLine: 'rgba(30,65,20,0.65)',
   palmShade: 'rgba(35,25,0,0.22)',
   palmTrunk: '#6b4a28',
+  terrain: {
+    // dunes, a jebel of bare rock, an oasis of date palms, mud-brick towers
+    shape: 'round',
+    shore: 'sand',
+    ground: 'dunes',
+    trees: [['date', 0.25]],
+    peak: 'jebel',
+    village: 'mudbrick',
+    landmarks: ['oasis', 'oasis', 'watchtower'],
+    offshore: 'rocks',
+    stone: '#c9a878',
+    pool: '#2f8f86',
+  },
 };
 
 export const SINGAPORE_WATER: WaterTheme = {
@@ -315,6 +354,18 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#3f6b3a', ['#4a7a42', '#5c8b4a', '#2f5c30', '#6b9a52', '#3f6b3a', '#548045']],
       peaks: ['#b9bcb4', '#d9dcd4', '#f2f4ee'],
       palm: ['#3a6b35', '#5c8b45', '#6b5238'],
+      terrain: {
+        // chalk cliffs over a hedged patchwork, a light on every headland
+        shape: 'craggy',
+        shore: 'chalk',
+        ground: 'bocage',
+        trees: [['oak', 0.55]],
+        peak: 'none',
+        village: 'stone',
+        landmarks: ['lighthouse', 'lighthouse', 'watchtower'],
+        offshore: 'stacks',
+        stone: '#a9a79c',
+      },
     },
     people(0.62, [5, 85], 0.16, ['Brest', 'A Coruña', 'Belle-Île', 'Ouessant', 'Ré', 'Oléron', 'Saint-Malo']),
   ),
@@ -325,6 +376,19 @@ export const REGIONS: RegionDef[] = [
     foliage: ['#2b4a2f', ['#31543a', '#3d6642', '#243d28', '#48734a', '#2f5233', '#3a5f3d']],
     peaks: ['#6b7078', '#8a8f94', '#adb2b5'],
     palm: ['#2f5233', '#48734a', '#5a4630'],
+    terrain: {
+      // fjord-notched rock, heather moor and black pine; skerries offshore
+      shape: 'fjord',
+      shore: 'rock',
+      ground: 'moor',
+      groundColor: '#4d5a3b',
+      trees: [['pine', 0.8]],
+      peak: 'snowcap',
+      village: 'longhouse',
+      landmarks: ['standingStones'],
+      offshore: 'skerries',
+      stone: '#8a8f94',
+    },
   },
   people(0.66, [0, 78], 0.18, ['Kaupang', 'Hedeby', 'Ribe', 'Birka', 'Jorvik', 'Orkney', 'Nidaros']),
   ),
@@ -340,6 +404,18 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#4a6b32', ['#557a38', '#6b8a42', '#3d5c2b', '#7d9a4a', '#4a6b32', '#5f8040']],
       peaks: ['#7a7560', '#918c74', '#a8a289'],
       palm: ['#3f5f2c', '#5f8040', '#6b5238'],
+      terrain: {
+        // low mud islands, tidal creeks, reed beds and screwpile lights
+        shape: 'low',
+        shore: 'mud',
+        ground: 'marsh',
+        trees: [['reeds', 1.6], ['pine', 0.3]],
+        peak: 'none',
+        village: 'clapboard',
+        landmarks: ['screwpile'],
+        offshore: 'stakes',
+        pool: '#4f7466',
+      },
     },
     people(0.6, [10, 88], 0.1, ['Norfolk', 'Hampton', 'Yorktown', 'Sewell’s Point', 'Craney Island', 'Old Point', 'Willoughby']),
   ),
@@ -357,6 +433,19 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#7a7d4a', ['#8a8b52', '#9c9c60', '#6b6b3d', '#a8a86b', '#7a7d4a', '#8f9058']],
       peaks: ['#c9c4b4', '#e2ddd0', '#f7f4ea'],
       palm: ['#6b6b3d', '#8a8b52', '#7a5a30'],
+      terrain: {
+        // bare white rock, gold scrub, cube villages and a hilltop temple
+        shape: 'craggy',
+        shore: 'rock',
+        ground: 'scrub',
+        groundColor: '#b0a266',
+        trees: [['olive', 0.3]],
+        peak: 'limestone',
+        village: 'whitewash',
+        landmarks: ['temple', 'temple', 'windmill'],
+        offshore: 'rocks',
+        stone: '#d8d2c0',
+      },
     },
     people(0.8, [0, 85], 0.18, ['Salamis', 'Delos', 'Naxos', 'Aegina', 'Paros', 'Samos', 'Sigeion']),
   ),
@@ -372,6 +461,18 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#2f4f2a', ['#35592f', '#436b38', '#26401f', '#527a42', '#2f4f2a', '#3d6134']],
       peaks: ['#7d7a68', '#9c9884', '#bcb8a2'],
       palm: ['#35592f', '#527a42', '#6b5238'],
+      terrain: {
+        // long strait-side islands under cypress, a domed church, sea walls
+        shape: 'long',
+        shore: 'sand',
+        ground: 'forest',
+        trees: [['cypress', 1.3], ['oak', 0.35]],
+        peak: 'none',
+        village: 'terracotta',
+        landmarks: ['church', 'seaWall'],
+        offshore: 'rocks',
+        stone: '#b8ab8e',
+      },
     },
     people(0.82, [0, 75], 0.22, ['Chrysopolis', 'Hieria', 'Chalkedon', 'Sosthenion', 'Damalis', 'Bithynia', 'Galata']),
   ),
@@ -387,6 +488,18 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#5f7340', ['#6b8046', '#7d9252', '#51632f', '#8ba25c', '#5f7340', '#708547']],
       peaks: ['#a09a80', '#bcb69c', '#d6d1b8'],
       palm: ['#4f6334', '#708547', '#6b5238'],
+      terrain: {
+        // olive terraces climbing to a limestone crown, windmills on the ridge
+        shape: 'round',
+        shore: 'sand',
+        ground: 'terraces',
+        trees: [['olive', 1.0], ['cypress', 0.3]],
+        peak: 'limestone',
+        village: 'terracotta',
+        landmarks: ['windmill', 'windmill', 'watchtower'],
+        offshore: 'rocks',
+        stone: '#c4b89a',
+      },
     },
     people(0.74, [0, 80], 0.22, ['Naupaktos', 'Patras', 'Corfu', 'Cephalonia', 'Zante', 'Lepanto', 'Missolonghi']),
   ),
@@ -402,6 +515,19 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#4f7a34', ['#5c8a3c', '#6f9a46', '#3f6b2b', '#82a852', '#54803a', '#628c40']],
       peaks: ['#a89a70', '#c2b48a', '#d8cca2'],
       palm: ['#3f6b2b', '#628c40', '#8a6a3a'],
+      terrain: {
+        // flat mud banks, irrigated fields, papyrus, date palms, obelisks
+        shape: 'low',
+        shore: 'mud',
+        ground: 'fields',
+        trees: [['date', 0.55], ['papyrus', 1.0]],
+        peak: 'none',
+        village: 'mudbrick',
+        landmarks: ['obelisk'],
+        offshore: 'reeds',
+        pool: '#3f8478',
+        stone: '#cdb88a',
+      },
     },
     people(0.85, [0, 70], 0.18, ['Per-Amun', 'Sais', 'Buto', 'Kanopus', 'Tamiathis', 'Rosetta', 'Mendes']),
   ),
@@ -444,6 +570,18 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#2b5230', ['#315c34', '#3d6b3d', '#22411f', '#487a46', '#2b5230', '#355f36']],
       peaks: ['#787c74', '#969a90', '#b4b8ae'],
       palm: ['#2b5230', '#487a46', '#6b5238'],
+      terrain: {
+        // steep stone islets, terraced slopes under crooked black pine, a torii in the water
+        shape: 'cone',
+        shore: 'sand',
+        ground: 'terraces',
+        trees: [['blackPine', 0.9]],
+        peak: 'granite',
+        village: 'japanese',
+        landmarks: ['torii'],
+        offshore: 'rocks',
+        stone: '#a4a49c',
+      },
     },
     people(0.78, [0, 75], 0.18, ['Miyajima', 'Itsukushima', 'Innosima', 'Shiwaku', 'Naoshima', 'Awaji', 'Tomogashima']),
   ),
@@ -459,6 +597,18 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#356032', ['#3c6b38', '#4a7a40', '#2a4d28', '#578a4a', '#356032', '#41703a']],
       peaks: ['#7a7a70', '#98988c', '#b6b6a8'],
       palm: ['#356032', '#578a4a', '#6b5238'],
+      terrain: {
+        // ragged rock and pine over wide tidal flats, a beacon on the hill
+        shape: 'craggy',
+        shore: 'rock',
+        ground: 'grass',
+        trees: [['pine', 0.75]],
+        peak: 'granite',
+        village: 'hanok',
+        landmarks: ['beacon'],
+        offshore: 'flats',
+        stone: '#9c9a8e',
+      },
     },
     people(0.72, [0, 70], 0.18, ['Hansan', 'Jindo', 'Uldolmok', 'Noryang', 'Yeosu', 'Kojedo', 'Myeongnyang']),
   ),
@@ -476,6 +626,17 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#2f6b3a', ['#357a40', '#468c4a', '#265a2f', '#5aa055', '#2f6b3a', '#3d8244']],
       peaks: ['#4a5a52', '#6b7a6f', '#96a49a'],
       palm: ['#2f6b3a', '#5aa055', '#7a5530'],
+      terrain: {
+        // green volcanic cones crowned by a pā, pōhutukawa along the beach
+        shape: 'cone',
+        shore: 'sand',
+        ground: 'grass',
+        trees: [['pohutukawa', 0.55], ['fern', 0.6]],
+        peak: 'volcano',
+        village: 'whare',
+        landmarks: ['pa'],
+        offshore: 'rocks',
+      },
     },
     people(0.58, [30, 95], 0.05, ['Kororāreka', 'Waitangi', 'Kerikeri', 'Paihia', 'Moturoa', 'Urupukapuka', 'Rangihoua']),
   ),
@@ -506,6 +667,19 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#6b6b3a', ['#7a7a44', '#8a8a50', '#5c5c30', '#9a9a5c', '#6b6b3a', '#767644']],
       peaks: ['#8a7a62', '#a89a80', '#cdbfa4'],
       palm: ['#5c5c30', '#8a8a50', '#7a5530'],
+      terrain: {
+        // bare desert rock, guano-white shores, sea lions and an adobe huaca
+        shape: 'craggy',
+        shore: 'guano',
+        ground: 'barren',
+        groundColor: '#a58c68',
+        trees: [['cactus', 0.35]],
+        peak: 'jebel',
+        village: 'adobe',
+        landmarks: ['huaca'],
+        offshore: 'sealions',
+        stone: '#b8a07a',
+      },
     },
     people(0.55, [20, 92], 0.07, ['Tumbes', 'Puná', 'Santa Clara', 'Chanduy', 'Jambelí', 'Salango', 'Manta']),
   ),
@@ -521,6 +695,19 @@ export const REGIONS: RegionDef[] = [
       foliage: ['#4a7a2c', ['#547f34', '#638f3c', '#3a6323', '#729e46', '#4a7a2c', '#5c8a36']],
       peaks: ['#8a8470', '#a89e88', '#c6bca4'],
       palm: ['#3a6323', '#729e46', '#8a6a3a'],
+      terrain: {
+        // chinampa gardens between canals, reed shores, the great pyramid
+        shape: 'low',
+        shore: 'reed',
+        ground: 'chinampas',
+        trees: [],
+        peak: 'none',
+        village: 'stucco',
+        landmarks: ['pyramid', 'pyramid', 'causeway'],
+        offshore: 'reeds',
+        pool: '#4f8a7c',
+        stone: '#c9c0aa',
+      },
     },
     people(0.92, [0, 60], 0.24, ['Tenochtitlan', 'Tlatelolco', 'Xochimilco', 'Tacuba', 'Chapultepec', 'Iztapalapa', 'Coyoacan']),
   ),
