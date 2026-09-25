@@ -229,6 +229,32 @@ export class Sfx {
     this.tone(d, t, 'triangle', 380, 120, 0.1, 0.25 * vol);
   }
 
+  /** A chase gun: one sharp crack over the bow or the stern, lighter than a broadside. */
+  chaser(vol = 1, pan = 0) {
+    if (!this.ok() || !this.gate('chaser', 0.05)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    const v = vol * (0.85 + Math.random() * 0.3);
+    this.noise(d, t, 0.42, 0.45 * v, 'lowpass', 2200, 240, 0.8, 0.002);
+    this.tone(d, t, 'triangle', 520, 140, 0.16, 0.3 * v, 0.002);
+    this.noise(d, t, 0.06, 0.22 * v, 'highpass', 2800, 1800, 0.7, 0.001);
+  }
+
+  /** Grapeshot: one heavy thump, then a long metal-and-shot hiss sweeping out. */
+  grapeshot(vol = 1, pan = 0) {
+    if (!this.ok() || !this.gate('grape', 0.08)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    this.tone(d, t, 'sine', 92, 26, 0.55, 1.05 * vol, 0.003);
+    this.noise(d, t, 1.05, 0.55 * vol, 'bandpass', 1500, 320, 0.6, 0.006);
+    this.noise(d, t, 0.35, 0.4 * vol, 'highpass', 3400, 1800, 0.7, 0.002);
+    // spent shot tinkling off the deck and into the water
+    for (let i = 0; i < 5; i++) {
+      const tt = t + 0.05 + Math.random() * 0.3;
+      this.tone(d, tt, 'triangle', 900 + Math.random() * 900, 320, 0.07, 0.09 * vol, 0.001);
+    }
+  }
+
   splash(vol = 1, pan = 0) {
     if (!this.ok() || vol < 0.04 || !this.gate('splash', 0.035)) return;
     const t = this.ctx!.currentTime;

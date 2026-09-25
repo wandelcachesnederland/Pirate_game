@@ -15,6 +15,7 @@ const GAME_KEYS = new Set([
   'KeyL',
   'KeyF',
   'KeyB',
+  'KeyR',
 ]);
 
 export function isTypingTarget(t: EventTarget | null): boolean {
@@ -31,6 +32,8 @@ export class Input {
   smartQueued = false;
   /** Boarding party away — serviced when a prize lies alongside. */
   boardQueued = false;
+  /** Grapeshot: touch off a canister blast (only if the ship is fitted for it). */
+  grapeQueued = false;
   touchFireHeld = false;
   joyActive = false;
   joyX = 0;
@@ -50,6 +53,7 @@ export class Input {
     else if (c === 'KeyE' || c === 'KeyL') this.starQueued = true;
     else if (c === 'Space' || c === 'KeyK') this.smartQueued = true;
     else if (c === 'KeyF' || c === 'KeyB') this.boardQueued = true;
+    else if (c === 'KeyR') this.grapeQueued = true;
   };
 
   private onUp = (e: KeyboardEvent) => {
@@ -64,6 +68,7 @@ export class Input {
     this.starQueued = false;
     this.smartQueued = false;
     this.boardQueued = false;
+    this.grapeQueued = false;
     this.touchFireHeld = false;
     this.joyActive = false;
     this.joyMag = 0;
@@ -128,5 +133,6 @@ export class Input {
     this.starQueued = false;
     this.smartQueued = false;
     this.boardQueued = false;
+    this.grapeQueued = false;
   }
 }

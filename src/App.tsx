@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Flag, Pause } from 'lucide-react';
+import { Flag, Grape, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
-import type { EraId, GameStats, RegionId, Screen, UpgradeId, UpgradeOffer } from './game/types';
-import { DEFAULT_ERA } from './game/ships/era';
+import type { EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
+import { DEFAULT_ERA, eraRegion } from './game/ships/era';
 import {
   addScore,
+  loadEra,
   loadName,
-  loadRegion,
   loadScores,
   loadSettings,
+  saveEra,
   saveName,
-  saveRegion,
   saveSettings,
   type ScoreEntry,
   type Settings,
@@ -21,6 +21,7 @@ import { PauseScreen } from './components/PauseScreen';
 import { UpgradeScreen } from './components/UpgradeScreen';
 import { GameOverScreen } from './components/GameOverScreen';
 import { TouchControls } from './components/TouchControls';
+import { cn } from './utils/cn';
 
 function detectTouch(): boolean {
   if (typeof window === 'undefined') return false;
@@ -45,11 +46,10 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const settingsRef = useRef(settings);
   const [isTouch, setIsTouch] = useState(() => detectTouch());
-  const [era, setEra] = useState<EraId>(DEFAULT_ERA);
+  const [era, setEra] = useState<EraId>(() => loadEra() ?? DEFAULT_ERA);
   const eraRef = useRef(era);
-  const [region, setRegionState] = useState<RegionId>(() => loadRegion());
-  const regionRef = useRef(region);
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
+  const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
   const gameOverAt = useRef(0);
   const upgradeAt = useRef(0);
 
@@ -61,22 +61,13 @@ export default function App() {
     eraRef.current = era;
   }, [era]);
 
-  useEffect(() => {
-    regionRef.current = region;
-  }, [region]);
-
-  // swapping hulls in port updates the ship on the menu at once
+  // the era is the first choice of the game: it swaps the flagship AND charts
+  // the era's own waters on the menu at once
   const pickEra = useCallback((id: EraId) => {
     setEra(id);
+    saveEra(id);
     engineRef.current?.setEra(id);
-  }, []);
-
-  // swapping waters in port re-charts the menu seas at once
-  const pickRegion = useCallback((id: RegionId) => {
-    setRegionState(id);
-    regionRef.current = id;
-    saveRegion(id);
-    engineRef.current?.setRegion(id);
+    engineRef.current?.setRegion(eraRegion(id));
   }, []);
 
   // ---- engine lifecycle
@@ -108,7 +99,7 @@ export default function App() {
       },
     });
     eng.setAudio(settingsRef.current.sfx, settingsRef.current.music);
-    eng.setRegion(regionRef.current);
+    eng.setRegion(eraRegion(eraRef.current));
     engineRef.current = eng;
     setEngine(eng);
     return () => {
@@ -138,6 +129,26 @@ export default function App() {
     return () => window.clearInterval(id);
   }, [screen]);
 
+  // ---- poll the deck-sweeper: is it fitted, loaded, and is anything in reach?
+  useEffect(() => {
+    if (screen !== 'playing') {
+      setGrape(null);
+      return;
+    }
+    const id = window.setInterval(() => {
+      const next = engineRef.current?.getGrapeshot() ?? null;
+      setGrape((prev) => {
+        if (!next) return prev ? null : prev;
+        // only re-render when something the button actually shows has changed
+        if (prev && prev.level === next.level && prev.targets === next.targets && Math.ceil(prev.cd) === Math.ceil(next.cd)) {
+          return prev;
+        }
+        return next;
+      });
+    }, 140);
+    return () => window.clearInterval(id);
+  }, [screen]);
+
   // ---- actions
   const start = useCallback(() => {
     const e = engineRef.current;
@@ -149,7 +160,7 @@ export default function App() {
     setRank(-1);
     setBoardPrompt(null);
     e.setEra(eraRef.current);
-    e.setRegion(regionRef.current);
+    e.setRegion(eraRegion(eraRef.current));
     e.startGame();
   }, []);
 
@@ -186,12 +197,7 @@ export default function App() {
         return;
       }
       switch (s) {
-        case 'menu':
-          if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'Space' && !typing)) {
-            e.preventDefault();
-            start();
-          }
-          break;
+        // the menu drives its own Enter/Space: it has steps to walk through
         case 'playing':
           if (e.code === 'KeyP' || e.code === 'Escape') {
             e.preventDefault();
@@ -285,6 +291,48 @@ export default function App() {
         </button>
       )}
 
+      {screen === 'playing' && grape && (
+        <button
+          type="button"
+          tabIndex={-1}
+          disabled={grape.cd > 0}
+          onClick={(e) => {
+            e.currentTarget.blur();
+            engineRef.current?.fireGrapeshotFromUI();
+            setGrape(engineRef.current?.getGrapeshot() ?? null);
+          }}
+          aria-label="Grapeshot — sweep the deck"
+          className={cn(
+            'absolute z-10 flex items-center gap-2 px-4 py-2 leading-none',
+            grape.cd > 0 ? 'btn-wood opacity-70' : 'btn-seal cursor-pointer',
+            grape.cd <= 0 && grape.targets > 0 && 'anim-pulse',
+          )}
+          style={{
+            right: 'max(18px, env(safe-area-inset-right))',
+            bottom: isTouch
+              ? `calc(max(26px, env(safe-area-inset-bottom)) + ${boardPrompt ? 186 : 122}px)`
+              : 'calc(max(14px, env(safe-area-inset-bottom)) + 58px)',
+          }}
+        >
+          <Grape className="h-6 w-6" />
+          <span className="flex flex-col items-start">
+            <span className="text-2xl">GRAPE</span>
+            <span className="text-xs italic tracking-wide opacity-90">
+              {grape.cd > 0
+                ? `loading… ${Math.ceil(grape.cd)}s`
+                : isTouch
+                  ? `ready · ${grape.targets} in reach`
+                  : `R · ${grape.targets} in reach`}
+            </span>
+          </span>
+          <span className="flex flex-col gap-0.5">
+            {Array.from({ length: grape.level }).map((_, k) => (
+              <span key={k} className="h-1.5 w-1.5 rotate-45 bg-gold" />
+            ))}
+          </span>
+        </button>
+      )}
+
       {screen === 'playing' && (
         <button
           type="button"
@@ -312,8 +360,6 @@ export default function App() {
           isTouch={isTouch}
           era={era}
           onEra={pickEra}
-          region={region}
-          onRegion={pickRegion}
         />
       )}
 
