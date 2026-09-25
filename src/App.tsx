@@ -197,12 +197,7 @@ export default function App() {
         return;
       }
       switch (s) {
-        case 'menu':
-          if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'Space' && !typing)) {
-            e.preventDefault();
-            start();
-          }
-          break;
+        // the menu drives its own Enter/Space: it has steps to walk through
         case 'playing':
           if (e.code === 'KeyP' || e.code === 'Escape') {
             e.preventDefault();

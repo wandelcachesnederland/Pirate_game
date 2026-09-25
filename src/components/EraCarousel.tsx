@@ -201,12 +201,12 @@ function HullCard({ e }: { e: EraShip }) {
   const { strengths, weaknesses } = shipTraits(e.def);
   const sc = shipScores(e.def);
   return (
-    <div className="mt-2 rounded-xl border-2 border-gold/45 bg-black/35 p-2 sm:p-3">
+    <div className="rounded-xl border-2 border-gold/45 bg-black/35 p-2 sm:p-3">
       <div className="flex items-baseline justify-between gap-2">
         <span className="arcade-tag text-[0.58rem] sm:text-[0.65rem]">Hero Ship</span>
         <span className="text-[0.58rem] italic opacity-60">her numbers against the whole fleet</span>
       </div>
-      <div className="mt-1.5 grid gap-2.5 sm:grid-cols-[9.5rem_1fr]">
+      <div className="mt-1.5 grid gap-2.5 sm:grid-cols-[10.5rem_1fr] lg:grid-cols-1 xl:grid-cols-[10.5rem_1fr]">
         <div>
           <div className="arcade-frame mx-auto w-[62%] max-w-[13rem] sm:w-full sm:max-w-none">
             <HeroPortrait e={e} />
@@ -314,16 +314,9 @@ export function EraCarousel({ era, onEra }: Props) {
         }
       }}
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <h2 className="arcade-marquee text-2xl sm:text-3xl">Step 2 · Choose Your Era</h2>
-        <span className="anim-blink arcade-tag text-[0.58rem] sm:text-[0.65rem]">Insert Coin</span>
-      </div>
-      <p className="mb-2 text-[0.72rem] italic opacity-70">
-        Scroll the charts — drag the picture, tap the arrows, or use ← →. Your flagship and her waters
-        follow your choice.
-      </p>
-
+      <div className="grid gap-3 lg:grid-cols-[1.32fr_1fr]">
       {/* ---- the chart screen ---- */}
+      <div>
       <div
         className="arcade-frame cursor-grab active:cursor-grabbing"
         style={{ touchAction: 'pan-y' }}
@@ -408,8 +401,10 @@ export function EraCarousel({ era, onEra }: Props) {
           <Slot key={e.id} e={e} i={i} on={e.id === era} onPick={onEra} />
         ))}
       </div>
+      </div>
 
       <HullCard e={shown} />
+      </div>
     </section>
   );
 }
