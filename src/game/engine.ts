@@ -324,7 +324,7 @@ export class Engine {
     document.body.appendChild(this.safeProbe);
     this.isTouch =
       (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) ||
-      'ontouchstart' in window;
+      (navigator.maxTouchPoints > 0 && 'ontouchstart' in window);
     this.input.attach();
     this.resize();
     window.addEventListener('resize', this.onResize);
@@ -502,6 +502,7 @@ export class Engine {
     if (this.screen !== 'upgrade') return;
     const def = UPGRADES.find((u) => u.id === id);
     if (!def) return;
+    if ((this.levels[id] ?? 0) >= def.max) return;
     this.levels[id] = (this.levels[id] ?? 0) + 1;
     const ps = this.pstats;
     const p = this.player;
@@ -848,6 +849,9 @@ export class Engine {
     const p = this.player;
     const heal = Math.round(p.maxHp * 0.25);
     p.hp = Math.min(p.maxHp, p.hp + heal);
+    // Tortuga press gang: crew below boarding strength can never recover at sea
+    // (only prizes bring new hands), so never leave port that shorthanded
+    p.crew = Math.min(p.maxCrew, Math.max(p.crew, BOARD_MIN_CREW + 4));
     this.balls = [];
     this.volleys = [];
     this.banner.t = 99;
@@ -863,6 +867,19 @@ export class Engine {
       pool[j] = t;
     }
     const offers: UpgradeOffer[] = pool.slice(0, 3).map((def) => ({ def, level: this.levels[def.id] ?? 0 }));
+    if (offers.length === 0) {
+      // every refit already taken — stay at sea instead of stranding the
+      // player on an upgrade screen with nothing to choose
+      this.screen = 'playing';
+      this.input.clear();
+      this.input.enabled = true;
+      this.last = performance.now();
+      this.sfx.duck(false);
+      this.cb.onScreen('playing');
+      this.addText(p.x, p.y - 44, 'Ship fully upgraded — onward!', '#9fe7ff', 22);
+      this.startWave(this.wave + 1);
+      return;
+    }
     this.cb.onScreen('upgrade');
     this.cb.onUpgrade(offers, this.wave);
   }
@@ -1229,6 +1246,7 @@ export class Engine {
       s.reloadL = Math.max(0, s.reloadL - dt);
       s.reloadR = Math.max(0, s.reloadR - dt);
       s.slowTimer = Math.max(0, s.slowTimer - dt);
+      s.biteTimer = Math.max(0, s.biteTimer - dt);
       if (s !== p || !playing) {
         if (s.team === 1 && playing && p.sinking < 0) this.aiCombat(s, dt);
         else this.aiWander(s, dt);
@@ -1250,7 +1268,7 @@ export class Engine {
   private shipPhysics(s: Ship, dt: number) {
     s.sail += (s.sailTarget - s.sail) * Math.min(1, dt * 2.5);
     const slow = s.slowTimer > 0 ? 0.55 : 1;
-    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared) * slow;
+    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared || s.def.hullStyle === 'ironclad') * slow;
     const c = Math.cos(s.angle);
     const sn = Math.sin(s.angle);
     let fwd = s.vx * c + s.vy * sn;
@@ -2735,10 +2753,10 @@ export class Engine {
   private drawParticles(ctx: CanvasRenderingContext2D, layer: number) {
     const parts = this.parts;
     const n = this.pCount;
-    const x0 = this.vx0 - 30;
-    const x1 = this.vx1 + 30;
-    const y0 = this.vy0 - 30;
-    const y1 = this.vy1 + 30;
+    const vx0 = this.vx0;
+    const vx1 = this.vx1;
+    const vy0 = this.vy0;
+    const vy1 = this.vy1;
     ctx.lineCap = 'round';
     for (let pass = 0; pass < 2; pass++) {
       const additive = pass === 1;
@@ -2746,9 +2764,12 @@ export class Engine {
       for (let i = 0; i < n; i++) {
         const p = parts[i];
         if (p.layer !== layer || ADDITIVE[p.type] !== additive) continue;
-        if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
         const k = p.life / p.max;
         const size = Math.max(0.1, p.size + p.grow * (1 - k));
+        // cull against the particle's own reach — a fixed margin clips big
+        // explosion glows and shockwave rings at the screen edge
+        const m = 34 + size;
+        if (p.x < vx0 - m || p.x > vx1 + m || p.y < vy0 - m || p.y > vy1 + m) continue;
         switch (p.type) {
           case P_SMOKE:
           case P_FOAM:
@@ -3116,7 +3137,14 @@ export class Engine {
     ctx.fillRect(gx, gy + gh * (1 - p.sail), gw, gh * p.sail);
     ctx.font = `${Math.round(11 * u)}px ${FONT}`;
     ctx.textAlign = 'center';
-    this.outlined(ctx, p.def.oared ? 'OARS' : 'SAIL', gx + gw / 2, ccy + cr + 9 * u, '#f3e2b3', 3);
+    this.outlined(
+      ctx,
+      p.def.oared ? 'OARS' : p.def.hullStyle === 'ironclad' ? 'STEAM' : 'SAIL',
+      gx + gw / 2,
+      ccy + cr + 9 * u,
+      '#f3e2b3',
+      3,
+    );
     const kn = Math.round(Math.hypot(p.vx, p.vy) / 14);
     ctx.textAlign = 'left';
     ctx.font = `${Math.round(13 * u)}px ${FONT}`;
@@ -3319,14 +3347,16 @@ export class Engine {
       : `Press F to BOARD for ~${prize.toLocaleString('en-US')} gold + her colours`;
     const l3 = 'Full cargo… if her crew plays fair. Beware treachery, scuttling & fever!';
     ctx.font = `${Math.round(17 * u)}px ${FONT}`;
-    const bw = Math.min(
-      W - 16,
-      Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width, ctx.measureText(l3).width) + 44 * u,
-    );
-    const bh = 74 * u;
+    const need =
+      Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width, ctx.measureText(l3).width) + 44 * u;
+    // narrow screens: shrink the panel's type to fit instead of spilling past the box
+    const su = need > W - 16 ? Math.max(0.5 * u, (u * (W - 16)) / need) : u;
+    ctx.font = `${Math.round(17 * su)}px ${FONT}`;
+    const bw = Math.min(W - 16, need * (su / u));
+    const bh = 74 * su;
     const bx = W / 2;
     const by = H - this.safe.b - (touch ? 330 : 168) * u;
-    rr(ctx, bx - bw / 2, by - bh / 2, bw, bh, 12 * u);
+    rr(ctx, bx - bw / 2, by - bh / 2, bw, bh, 12 * su);
     ctx.fillStyle = 'rgba(20,10,4,0.78)';
     ctx.fill();
     ctx.strokeStyle = '#7dff9a';
@@ -3335,12 +3365,12 @@ export class Engine {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#7dff9a';
-    ctx.fillText(l1, bx, by - 22 * u);
+    ctx.fillText(l1, bx, by - 22 * su);
     ctx.fillStyle = '#ffd84d';
-    ctx.fillText(l2, bx, by + 1 * u);
-    ctx.font = `italic ${Math.round(13 * u)}px ${FELL}`;
+    ctx.fillText(l2, bx, by + 1 * su);
+    ctx.font = `italic ${Math.round(13 * su)}px ${FELL}`;
     ctx.fillStyle = '#e6d3a3';
-    ctx.fillText(l3, bx, by + 22 * u);
+    ctx.fillText(l3, bx, by + 22 * su);
   }
 
   private drawReloadBar(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, label: string, r: number, total: number) {
@@ -3388,7 +3418,7 @@ export class Engine {
     ctx.fillText('S', 0, r * 0.57);
     ctx.fillText('E', r * 0.56, 0);
     ctx.fillText('W', -r * 0.55, 0);
-    const good = (this.windFactor(p.angle, !!p.def.oared) - 0.46) / 0.54;
+    const good = (this.windFactor(p.angle, !!p.def.oared || p.def.hullStyle === 'ironclad') - 0.46) / 0.54;
     ctx.save();
     ctx.rotate(p.angle);
     ctx.fillStyle = good > 0.72 ? '#2f9e44' : good > 0.4 ? '#e0a32a' : '#c0392b';
@@ -3478,10 +3508,13 @@ export class Engine {
     const H = this.h;
     const y = H - this.safe.b - (touch ? 200 : 64) * u;
     ctx.font = `${Math.round(17 * u)}px ${FONT}`;
-    const bw = Math.min(W - 16, Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 40 * u);
-    const bh = 56 * u;
+    const need = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 40 * u;
+    const su = need > W - 16 ? Math.max(0.5 * u, (u * (W - 16)) / need) : u;
+    ctx.font = `${Math.round(17 * su)}px ${FONT}`;
+    const bw = Math.min(W - 16, need * (su / u));
+    const bh = 56 * su;
     ctx.globalAlpha = a;
-    rr(ctx, W / 2 - bw / 2, y - bh / 2, bw, bh, 12 * u);
+    rr(ctx, W / 2 - bw / 2, y - bh / 2, bw, bh, 12 * su);
     ctx.fillStyle = 'rgba(20,10,4,0.72)';
     ctx.fill();
     ctx.strokeStyle = 'rgba(217,164,65,0.85)';
@@ -3490,9 +3523,9 @@ export class Engine {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#f3e2b3';
-    ctx.fillText(l1, W / 2, y - 12 * u);
+    ctx.fillText(l1, W / 2, y - 12 * su);
     ctx.fillStyle = '#ffd84d';
-    ctx.fillText(l2, W / 2, y + 13 * u);
+    ctx.fillText(l2, W / 2, y + 13 * su);
     ctx.globalAlpha = 1;
   }
 }

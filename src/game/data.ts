@@ -2229,6 +2229,7 @@ export function waveCompositionFor(era: EraId, n: number): ShipKind[] {
   list.push(r.trader);
   let budget = 6 + (n - 5) * 1.7;
   const pool = r.pool.filter((p) => n >= (p.minWave ?? 0) && !(n % 5 === 0 && p.noBossWave));
+  if (pool.length === 0) return list;
   const totalW = pool.reduce((a, p) => a + p.weight, 0);
   let guard = 0;
   while (budget > 0 && guard++ < 60) {

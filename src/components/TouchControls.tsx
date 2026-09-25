@@ -24,6 +24,21 @@ export function TouchControls({ input }: { input: Input }) {
     };
   }, [input]);
 
+  useEffect(() => {
+    // focus lost mid-touch (alt-tab, notification): drop all held state so the
+    // stick and FIRE can never latch onto a pointer that is already gone
+    const onBlur = () => {
+      joyId.current = null;
+      fireIds.current.clear();
+      input.releaseJoy();
+      input.touchFireHeld = false;
+      setActive(false);
+      setFiring(false);
+    };
+    window.addEventListener('blur', onBlur);
+    return () => window.removeEventListener('blur', onBlur);
+  }, [input]);
+
   const placeBase = (x: number, y: number) => {
     const b = baseRef.current;
     if (b) b.style.transform = `translate3d(${x - R}px, ${y - R}px, 0)`;
@@ -65,6 +80,7 @@ export function TouchControls({ input }: { input: Input }) {
     }
     placeKnob(dx, dy);
     if (d > DEAD) input.setJoy(dx / R, dy / R);
+    else input.releaseJoy(); // back in the dead zone — stop steering, don't hold the last heading
   };
 
   const onJoyUp = (e: RPointerEvent<HTMLDivElement>) => {
