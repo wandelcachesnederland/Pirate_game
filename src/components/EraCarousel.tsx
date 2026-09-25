@@ -329,6 +329,8 @@ export function EraCarousel({ era, onEra }: Props) {
         style={{ touchAction: 'pan-y' }}
         onPointerDown={(ev) => {
           if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+          // never let the drag steal the arrow buttons' click
+          if ((ev.target as HTMLElement).closest('button')) return;
           drag.current = { x: ev.clientX, id: ev.pointerId };
           ev.currentTarget.setPointerCapture(ev.pointerId);
         }}
