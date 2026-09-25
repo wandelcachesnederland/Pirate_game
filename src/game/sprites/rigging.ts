@@ -55,6 +55,20 @@ function fleurDeLis(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: nu
   ctx.fillRect(cx - s * 0.62, cy + s * 0.34, s * 1.24, s * 0.24);
 }
 
+/** A 5-pointed star path about (cx, cy) with outer radius `r` (caller fills). */
+function star5(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rr = i % 2 === 0 ? r : r * 0.42;
+    const a = (i / 10) * TAU - Math.PI / 2;
+    const px = cx + Math.cos(a) * rr;
+    const py = cy + Math.sin(a) * rr;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
 export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number, bulge: number, yard: number) {
   if (f === 'fire') return;
   ctx.save();
@@ -126,6 +140,234 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.fillStyle = 'rgba(150,120,70,0.55)';
       ctx.fillRect(cx - 1.8, 2.5, 3.2, 4.5);
       ctx.fillRect(cx - 1.4, -7, 2.8, 3.2);
+      break;
+    case 'carthage':
+      ctx.fillStyle = '#c9a227';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, 0, TAU);
+      ctx.fill();
+      break;
+    case 'persia':
+      ctx.strokeStyle = '#c9a227';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.7, 0, TAU);
+      ctx.stroke();
+      ctx.fillStyle = '#c9a227';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 0.9, 0, TAU);
+      ctx.fill();
+      break;
+    case 'arab':
+      ctx.fillStyle = '#0f6f6a';
+      ctx.beginPath();
+      ctx.moveTo(cx, -3.2);
+      ctx.lineTo(cx + 2.2, 0);
+      ctx.lineTo(cx, 3.2);
+      ctx.lineTo(cx - 2.2, 0);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'china':
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.6, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'japan':
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.8, 0, TAU);
+      ctx.fill();
+      break;
+    case 'maori':
+      ctx.strokeStyle = '#b5352c';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.2, -1);
+      ctx.lineTo(cx, 1);
+      ctx.lineTo(cx + 2.2, -1);
+      ctx.moveTo(cx - 2.2, 2.4);
+      ctx.lineTo(cx, 4.4);
+      ctx.lineTo(cx + 2.2, 2.4);
+      ctx.stroke();
+      break;
+    case 'hawaii':
+      ctx.fillStyle = '#2e5e8c';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.5, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(cx - 2.5, -0.6, 5, 1.2);
+      break;
+    case 'macedon':
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.6, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#e8b830';
+      ctx.lineWidth = 1.0;
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * TAU;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * 2.2, Math.sin(a) * 2.2);
+        ctx.lineTo(cx + Math.cos(a) * 3.4, Math.sin(a) * 3.4);
+        ctx.stroke();
+      }
+      break;
+    case 'rhodes':
+      ctx.fillStyle = '#f4f1e6';
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * TAU;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(a) * 1.7, Math.sin(a) * 1.7, 1.1, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c94a6a';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'ptolemy':
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 3.0, 0, TAU);
+      ctx.stroke();
+      break;
+    case 'maya':
+      ctx.fillStyle = '#2e8a6a';
+      ctx.fillRect(cx - 2.4, 1.6, 4.8, 1.4);
+      ctx.fillRect(cx - 1.6, 0.2, 3.2, 1.4);
+      ctx.fillRect(cx - 0.8, -1.2, 1.6, 1.4);
+      ctx.fillStyle = '#b5352c';
+      ctx.beginPath();
+      ctx.arc(cx, -2.4, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'inca':
+      ctx.fillStyle = '#c9403b';
+      ctx.fillRect(cx - 2.2, -2.6, 4.4, 1.2);
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(cx - 2.2, -1.4, 4.4, 1.2);
+      ctx.fillStyle = '#3f7f4a';
+      ctx.fillRect(cx - 2.2, -0.2, 4.4, 1.2);
+      ctx.fillStyle = '#2e5e8c';
+      ctx.fillRect(cx - 2.2, 1.0, 4.4, 1.2);
+      break;
+    case 'puna':
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.4, -0.6);
+      ctx.lineTo(cx, -2.4);
+      ctx.lineTo(cx + 2.4, -0.6);
+      ctx.moveTo(cx - 2.4, 2.2);
+      ctx.lineTo(cx, 0.4);
+      ctx.lineTo(cx + 2.4, 2.2);
+      ctx.stroke();
+      break;
+    case 'ottoman':
+      ctx.strokeStyle = '#b3261e';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, Math.PI * 0.35, Math.PI * 1.65);
+      ctx.stroke();
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(cx + 1.2, 0, 0.7, 0, TAU);
+      ctx.fill();
+      break;
+    case 'venice':
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.5, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(cx - 3.0, -0.7, 1.8, 1.4);
+      ctx.fillRect(cx + 1.2, -0.7, 1.8, 1.4);
+      break;
+    case 'korea':
+      ctx.fillStyle = '#2e5e8c';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, Math.PI, TAU);
+      ctx.fill();
+      break;
+    case 'byzantium':
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(cx - 0.7, -3.2, 1.4, 6.4);
+      ctx.fillRect(cx - 2.2, -1.2, 4.4, 1.4);
+      break;
+    case 'egypt':
+      ctx.fillStyle = '#274a7a';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.4, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 1.0, 0, TAU);
+      ctx.fill();
+      break;
+    case 'sherden':
+      ctx.strokeStyle = '#2e2e34';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(cx - 1.1, 0, 1.9, Math.PI * 0.4, Math.PI * 1.6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx + 1.1, 0, 1.9, Math.PI * 1.4, Math.PI * 0.6);
+      ctx.stroke();
+      break;
+    case 'chola':
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(cx - 2.4, -2.6, 4.8, 5.2);
+      ctx.fillStyle = '#2a1a10';
+      ctx.fillRect(cx - 1.5, -2.6, 0.9, 5.2);
+      ctx.fillRect(cx - 0.45, -2.6, 0.9, 5.2);
+      ctx.fillRect(cx + 0.6, -2.6, 0.9, 5.2);
+      break;
+    case 'srivijaya':
+      ctx.fillStyle = '#1f5a3a';
+      ctx.beginPath();
+      ctx.moveTo(cx, 2.6);
+      ctx.lineTo(cx - 2.4, -1.6);
+      ctx.lineTo(cx - 0.8, -1.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, 2.6);
+      ctx.lineTo(cx + 2.4, -1.6);
+      ctx.lineTo(cx + 0.8, -1.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(cx - 0.7, -2.6, 1.4, 5.2);
+      break;
+    case 'daiviet':
+      ctx.fillStyle = '#b3261e';
+      star5(ctx, cx, 0, 2.6);
+      ctx.fill();
+      break;
+    case 'aztec':
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#b3261e';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
+      ctx.stroke();
       break;
   }
   ctx.restore();
@@ -223,6 +465,335 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       ctx.fillRect(0, (h * 2) / 3, w, h / 3);
       break;
     }
+    case 'carthage': {
+      ctx.fillStyle = '#7a1f2b';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(0, 0, w * 0.12, h);
+      ctx.beginPath();
+      ctx.arc(w * 0.56, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#7a1f2b';
+      ctx.beginPath();
+      ctx.arc(w * 0.56, h * 0.5, Math.min(w, h) * 0.12, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'persia': {
+      ctx.fillStyle = '#1f3a5f';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(w * 0.14, h * 0.42, w * 0.72, h * 0.16);
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.26, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#1f3a5f';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.11, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'arab': {
+      ctx.fillStyle = '#0f6f6a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(0, h * 0.32, w, h * 0.36);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, h * 0.38, w, h * 0.24);
+      break;
+    }
+    case 'china': {
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'japan': {
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'maori': {
+      ctx.fillStyle = '#141414';
+      ctx.fillRect(0, 0, w, h * 0.44);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, h * 0.44, w, h * 0.12);
+      ctx.fillStyle = '#b5352c';
+      ctx.fillRect(0, h * 0.56, w, h * 0.44);
+      break;
+    }
+    case 'hawaii': {
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#c9403b';
+      ctx.fillRect(0, 0, w, h * 0.2);
+      ctx.fillRect(0, h * 0.4, w, h * 0.2);
+      ctx.fillRect(0, h * 0.8, w, h * 0.2);
+      ctx.fillStyle = '#1f3a5f';
+      ctx.fillRect(0, 0, w * 0.42, h * 0.6);
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = Math.max(0.5, h * 0.07);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(w * 0.42, h * 0.6);
+      ctx.moveTo(w * 0.42, 0);
+      ctx.lineTo(0, h * 0.6);
+      ctx.stroke();
+      break;
+    }
+    case 'macedon': {
+      ctx.fillStyle = '#1f3a7a';
+      ctx.fillRect(0, 0, w, h);
+      const mx = w * 0.5;
+      const my = h * 0.5;
+      const mr = Math.min(w, h) * 0.14;
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(mx, my, mr, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#e8b830';
+      ctx.lineWidth = Math.max(0.5, h * 0.05);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * TAU;
+        ctx.beginPath();
+        ctx.moveTo(mx + Math.cos(a) * mr * 1.5, my + Math.sin(a) * mr * 1.5);
+        ctx.lineTo(mx + Math.cos(a) * mr * 2.9, my + Math.sin(a) * mr * 2.9);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'rhodes': {
+      ctx.fillStyle = '#4a6a9a';
+      ctx.fillRect(0, 0, w, h);
+      const rx = w * 0.5;
+      const ry = h * 0.5;
+      const rr = Math.min(w, h) * 0.26;
+      ctx.fillStyle = '#f4f1e6';
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * TAU;
+        ctx.beginPath();
+        ctx.arc(rx + Math.cos(a) * rr * 0.62, ry + Math.sin(a) * rr * 0.62, rr * 0.42, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c94a6a';
+      ctx.beginPath();
+      ctx.arc(rx, ry, rr * 0.34, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'ptolemy': {
+      ctx.fillStyle = '#3a1a5a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.21, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'maya': {
+      ctx.fillStyle = '#2e8a6a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8e0cc';
+      ctx.fillRect(w * 0.14, h * 0.62, w * 0.72, h * 0.16);
+      ctx.fillRect(w * 0.24, h * 0.46, w * 0.52, h * 0.16);
+      ctx.fillRect(w * 0.34, h * 0.3, w * 0.32, h * 0.16);
+      ctx.fillStyle = '#b5352c';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.2, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'inca': {
+      const cols = ['#c9403b', '#e67e22', '#e8b830', '#3f7f4a', '#2e5e8c'];
+      for (let i = 0; i < cols.length; i++) {
+        ctx.fillStyle = cols[i];
+        ctx.fillRect(0, (h * i) / cols.length, w, h / cols.length + 0.5);
+      }
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.2, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#7a2d5a';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'puna': {
+      ctx.fillStyle = '#1f4a7a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#f4f1e6';
+      ctx.lineWidth = Math.max(0.5, h * 0.08);
+      for (let i = 0; i < 2; i++) {
+        const yy = h * (0.32 + i * 0.28);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1, yy);
+        ctx.lineTo(w * 0.5, yy - h * 0.12);
+        ctx.lineTo(w * 0.9, yy);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.78, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'ottoman': {
+      ctx.fillStyle = '#b3261e';
+      ctx.fillRect(0, 0, w, h);
+      const ox = w * 0.44;
+      const oy = h * 0.5;
+      const orr = Math.min(w, h) * 0.3;
+      ctx.fillStyle = '#f4f1e6';
+      ctx.beginPath();
+      ctx.arc(ox, oy, orr, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath();
+      ctx.arc(ox + orr * 0.45, oy, orr * 0.82, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#f4f1e6';
+      star5(ctx, ox + orr * 1.05, oy, Math.min(w, h) * 0.11);
+      ctx.fill();
+      break;
+    }
+    case 'venice': {
+      ctx.fillStyle = '#d4a72c';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#a02323';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.18, 0, TAU);
+      ctx.fill();
+      ctx.fillRect(w * 0.12, h * 0.42, w * 0.24, h * 0.16);
+      ctx.fillRect(w * 0.64, h * 0.42, w * 0.24, h * 0.16);
+      break;
+    }
+    case 'korea': {
+      ctx.fillStyle = '#f4f1e6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2e5e8c';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.26, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.26, Math.PI, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#1a1a1a';
+      const bw = w * 0.07;
+      const bh = h * 0.09;
+      const bars: Array<[number, number]> = [
+        [0.08, 0.12],
+        [0.85, 0.12],
+        [0.08, 0.79],
+        [0.85, 0.79],
+      ];
+      for (const [bx, by] of bars) {
+        for (let i = 0; i < 3; i++) ctx.fillRect(w * bx, h * by + i * bh * 1.4, bw, bh);
+      }
+      break;
+    }
+    case 'byzantium': {
+      ctx.fillStyle = '#a52a2a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(w * 0.44, h * 0.12, w * 0.12, h * 0.76);
+      ctx.fillRect(w * 0.24, h * 0.32, w * 0.52, h * 0.14);
+      break;
+    }
+    case 'egypt': {
+      ctx.fillStyle = '#e8c14a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#f4f1e6';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.3, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#274a7a';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.22, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'sherden': {
+      ctx.fillStyle = '#2e2e34';
+      ctx.fillRect(0, 0, w, h);
+      const sr = Math.min(w, h) * 0.26;
+      for (const sxx of [w * 0.32, w * 0.68]) {
+        ctx.fillStyle = '#f4f1e6';
+        ctx.beginPath();
+        ctx.arc(sxx, h * 0.5, sr, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = '#2e2e34';
+        ctx.beginPath();
+        ctx.arc(sxx + (sxx < w * 0.5 ? sr * 0.5 : -sr * 0.5), h * 0.5, sr * 0.85, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.08, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'chola': {
+      ctx.fillStyle = '#e8b830';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2a1a10';
+      for (let i = 0; i < 3; i++) ctx.fillRect(w * (0.2 + i * 0.22), 0, w * 0.11, h);
+      break;
+    }
+    case 'srivijaya': {
+      ctx.fillStyle = '#1f5a3a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#f4f1e6';
+      const lx = w * 0.5;
+      const ly = h * 0.72;
+      for (let i = -2; i <= 2; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(lx + i * w * 0.09 - w * 0.045, h * 0.24);
+        ctx.lineTo(lx + i * w * 0.09 + w * 0.045, h * 0.24);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(lx, ly - h * 0.06, Math.min(w, h) * 0.09, 0, TAU);
+      ctx.fill();
+      break;
+    }
+    case 'daiviet': {
+      ctx.fillStyle = '#7a1a1a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8b830';
+      star5(ctx, w * 0.5, h * 0.5, Math.min(w, h) * 0.3);
+      ctx.fill();
+      break;
+    }
+    case 'aztec': {
+      ctx.fillStyle = '#1f8a8a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8b830';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#b3261e';
+      ctx.lineWidth = Math.max(0.5, h * 0.07);
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
+      ctx.stroke();
+      break;
+    }
     case 'fire': {
       ctx.fillStyle = '#51403a';
       ctx.fillRect(0, 0, w, h);
@@ -287,6 +858,126 @@ export function drawEnsign(
   ctx.strokeStyle = 'rgba(0,0,0,0.3)';
   ctx.lineWidth = 0.4;
   ctx.strokeRect(0, -H / 2, L, H);
+  ctx.restore();
+}
+
+let whiteTile: HTMLCanvasElement | null = null;
+
+function surrenderTile(): HTMLCanvasElement {
+  if (!whiteTile) {
+    const [cv, cx] = makeCanvas(48, 24);
+    cx.fillStyle = '#f2f0e8';
+    cx.fillRect(0, 0, 48, 24);
+    // soft folds so the white reads as cloth, not a hole in the world
+    const g = cx.createLinearGradient(0, 0, 0, 24);
+    g.addColorStop(0, 'rgba(255,255,255,0.5)');
+    g.addColorStop(0.5, 'rgba(255,255,255,0)');
+    g.addColorStop(1, 'rgba(120,120,120,0.35)');
+    cx.fillStyle = g;
+    cx.fillRect(0, 0, 48, 24);
+    cx.strokeStyle = 'rgba(90,90,90,0.6)';
+    cx.lineWidth = 1;
+    cx.strokeRect(0.5, 0.5, 47, 23);
+    whiteTile = cv;
+  }
+  return whiteTile;
+}
+
+/**
+ * The white flag: flown at the masthead instead of the ensign once a ship
+ * strikes her colours. Same ripple as the ensigns, so it reads instantly.
+ */
+export function drawSurrenderFlag(
+  ctx: CanvasRenderingContext2D,
+  mx: number,
+  rel: number,
+  t: number,
+  scale = 1,
+) {
+  const L = 15 * scale;
+  const H = 8 * scale;
+  ctx.save();
+  ctx.translate(mx, 0);
+  ctx.rotate(rel);
+  ctx.strokeStyle = 'rgba(30,20,10,0.7)'; // halyard
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -H * 0.5);
+  ctx.lineTo(0, H * 0.5);
+  ctx.stroke();
+  const tile = surrenderTile();
+  const STRIPS = 8;
+  const sw = tile.width / STRIPS;
+  for (let i = 0; i < STRIPS; i++) {
+    const t0 = i / STRIPS;
+    const t1 = (i + 1) / STRIPS;
+    const off = Math.sin(t * 9 - t0 * 3.4) * 1.5 * scale * (0.25 + t0);
+    const h0 = H * (1 - t0 * 0.12);
+    ctx.drawImage(tile, i * sw, 0, sw + 0.6, tile.height, L * t0, -h0 / 2 + off, L * (t1 - t0) + 0.4, h0);
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 0.4;
+  ctx.strokeRect(0, -H / 2, L, H);
+  ctx.restore();
+}
+
+/**
+ * Lateen sail for the dhow: a great triangular sheet slung fore-and-aft.
+ * Seen top-down it reads as a long curved triangle off the mast.
+ */
+export function drawLateenSail(
+  ctx: CanvasRenderingContext2D,
+  mx: number,
+  hl: number,
+  hw: number,
+  bulge: number,
+  col: string,
+  shade: string,
+  rel: number,
+) {
+  const side = Math.sin(rel) >= 0 ? 1 : -1;
+  ctx.save();
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.moveTo(mx - hl * 0.62, 0);
+  ctx.quadraticCurveTo(mx + hl * 0.1, side * (hw * 0.9 + bulge * 0.5), mx + hl * 0.68, side * hw * 0.18);
+  ctx.lineTo(mx - hl * 0.62, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = shade;
+  ctx.lineWidth = 0.7;
+  ctx.stroke();
+  // the long sloping yard
+  ctx.strokeStyle = '#3b2412';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(mx - hl * 0.66, 0);
+  ctx.lineTo(mx + hl * 0.72, side * hw * 0.2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Bamboo battens across a junk's lug sail — drawn right after `drawSail`. */
+export function drawJunkBattens(
+  ctx: CanvasRenderingContext2D,
+  mx: number,
+  w: number,
+  bulge: number,
+  yard: number,
+) {
+  ctx.save();
+  ctx.translate(mx, 0);
+  ctx.rotate(yard);
+  const h = w / 2;
+  ctx.strokeStyle = 'rgba(74,48,24,0.85)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let k = -2; k <= 2; k++) {
+    const yy = (k * h) / 2.4;
+    ctx.moveTo(-4.5, yy);
+    ctx.quadraticCurveTo(bulge * 1.4 - 3, yy, bulge * 2.2 - 2, yy * 0.94);
+  }
+  ctx.stroke();
   ctx.restore();
 }
 

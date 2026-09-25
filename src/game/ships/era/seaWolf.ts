@@ -20,6 +20,7 @@ export const SEA_WOLF: ShipDef = {
   range: 360,
   ballSpeed: 560,
   masts: 1,
+  crew: 38,
   value: 0,
   coins: 0,
   hull: '#4a3116',

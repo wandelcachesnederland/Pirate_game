@@ -1,4 +1,6 @@
 /** Local high-score table + settings persisted in localStorage. */
+import type { RegionId } from './types';
+
 export interface ScoreEntry {
   name: string;
   score: number;
@@ -89,4 +91,17 @@ export function loadSettings(): Settings {
 
 export function saveSettings(s: Settings) {
   safeSet(SETTINGS_KEY, JSON.stringify(s));
+}
+
+const REGION_KEY = 'broadside.region.v1';
+
+export function loadRegion(): RegionId {
+  const raw = safeGet(REGION_KEY);
+  return raw === 'mediterranean' || raw === 'arabian' || raw === 'singapore' || raw === 'caribbean'
+    ? raw
+    : 'caribbean';
+}
+
+export function saveRegion(id: RegionId) {
+  safeSet(REGION_KEY, id);
 }

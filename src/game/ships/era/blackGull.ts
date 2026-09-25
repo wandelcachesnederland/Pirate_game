@@ -19,6 +19,7 @@ export const BLACK_GULL: ShipDef = {
   range: 430,
   ballSpeed: 580,
   masts: 2,
+  crew: 45,
   value: 0,
   coins: 0,
   hull: '#3b2314',

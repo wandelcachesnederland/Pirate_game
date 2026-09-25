@@ -1,5 +1,18 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Anchor, Coins, Crosshair, Flame, House, RotateCcw, Skull, Timer, WavesHorizontal } from 'lucide-react';
+import {
+  Anchor,
+  Coins,
+  Crosshair,
+  Flag,
+  Flame,
+  House,
+  RotateCcw,
+  Skull,
+  Star,
+  Timer,
+  Users,
+  WavesHorizontal,
+} from 'lucide-react';
 import type { GameStats } from '../game/types';
 import type { ScoreEntry } from '../game/storage';
 import { HighScoreTable, KeyCap } from './ui';
@@ -51,9 +64,10 @@ function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: s
 
 export function GameOverScreen({ stats, scores, rank, name, onRestart, onMenu, isTouch }: Props) {
   const shown = useCountUp(stats.score);
+  const waters = stats.regionName ?? 'the Caribbean';
   const verdict =
     stats.wave >= 10
-      ? 'A legend of the Caribbean!'
+      ? `A legend of ${waters}!`
       : stats.wave >= 6
         ? 'The Crown will sing of your deeds.'
         : stats.wave >= 3
@@ -93,7 +107,19 @@ export function GameOverScreen({ stats, scores, rank, name, onRestart, onMenu, i
               />
               <Stat icon={<Flame className="h-5 w-5" />} label="Best streak" value={`x${stats.maxStreak}`} />
               <Stat icon={<Timer className="h-5 w-5" />} label="Time at sea" value={fmtTime(stats.time)} />
+              {(stats.boarded ?? 0) > 0 && (
+                <Stat icon={<Flag className="h-5 w-5" />} label="Prizes boarded" value={`${stats.boarded}`} />
+              )}
+              {(stats.slaves ?? 0) > 0 && (
+                <Stat icon={<Users className="h-5 w-5" />} label="Slaves in irons" value={`${stats.slaves}`} />
+              )}
+              {(stats.flagsTaken ?? 0) > 0 && (
+                <Stat icon={<Star className="h-5 w-5" />} label="Colours taken" value={`${stats.flagsTaken}`} />
+              )}
             </div>
+            {stats.regionName && (
+              <p className="mt-2 text-sm italic opacity-70">Sailed the {stats.regionName}</p>
+            )}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"

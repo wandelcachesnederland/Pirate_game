@@ -421,6 +421,95 @@ export function buildHullSprite(def: ShipDef): HullSprite {
     ctx.arc(hl * 0.82, -hw * 0.45, 0.9, 0, TAU);
     ctx.arc(hl * 0.82, hw * 0.45, 0.9, 0, TAU);
     ctx.fill();
+  } else if (def.hullStyle === 'trireme') {
+    /* ---- PER-SHIP EXTRA: TRIREME bronze ram + oar ports + bow eye ------ */
+    ctx.fillStyle = '#c8a44e'; // the ram that wins battles
+    ctx.beginPath();
+    ctx.moveTo(hl * 1.16, 0);
+    ctx.lineTo(hl * 0.99, -hw * 0.28);
+    ctx.lineTo(hl * 0.99, hw * 0.28);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#100a05'; // three banks of oar ports
+    for (let bank = 0; bank < 3; bank++) {
+      const yy = hw * (0.55 - bank * 0.16);
+      for (let i = 0; i < 9; i++) {
+        const px = -hl * 0.72 + (i / 8) * hl * 1.35;
+        ctx.beginPath();
+        ctx.arc(px, -yy, 0.75, 0, TAU);
+        ctx.arc(px, yy, 0.75, 0, TAU);
+        ctx.fill();
+      }
+    }
+    ctx.fillStyle = '#f4f1e6'; // apotropaic eye on the bow
+    ctx.beginPath();
+    ctx.arc(hl * 0.8, -hw * 0.5, 1.4, 0, TAU);
+    ctx.arc(hl * 0.8, hw * 0.5, 1.4, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    ctx.arc(hl * 0.8, -hw * 0.5, 0.6, 0, TAU);
+    ctx.arc(hl * 0.8, hw * 0.5, 0.6, 0, TAU);
+    ctx.fill();
+  } else if (def.hullStyle === 'dhow') {
+    /* ---- PER-SHIP EXTRA: DHOW sewn strakes + stern post ---------------- */
+    ctx.strokeStyle = 'rgba(60,38,16,0.5)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 1.6]);
+    ctx.beginPath();
+    for (const sgn of [-1, 1]) {
+      ctx.moveTo(hl * 0.7, sgn * hw * 0.5);
+      ctx.lineTo(-hl * 0.7, sgn * hw * 0.6);
+      ctx.moveTo(hl * 0.7, sgn * hw * 0.78);
+      ctx.lineTo(-hl * 0.7, sgn * hw * 0.85);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#4a3018'; // tall rudder post
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-hl * 0.85, 0);
+    ctx.lineTo(-hl * 1.0, 0);
+    ctx.stroke();
+  } else if (def.hullStyle === 'junk') {
+    /* ---- PER-SHIP EXTRA: JUNK bulkheads + red stern board --------------- */
+    ctx.strokeStyle = 'rgba(50,28,12,0.6)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 1; i <= 3; i++) {
+      const bx = -hl * 0.6 + (i / 4) * hl * 1.2;
+      ctx.moveTo(bx, -hw * 0.8);
+      ctx.lineTo(bx, hw * 0.8);
+    }
+    ctx.stroke();
+    ctx.fillStyle = '#c9403b'; // ocellus stern board
+    ctx.fillRect(-hl * 0.95, -hw * 0.5, hl * 0.16, hw);
+    ctx.fillStyle = '#f4e3b0';
+    ctx.beginPath();
+    ctx.arc(-hl * 0.87, 0, hw * 0.16, 0, TAU);
+    ctx.fill();
+  } else if (def.hullStyle === 'atakebune') {
+    /* ---- PER-SHIP EXTRA: ATakebune iron plates + gold corners ----------- */
+    ctx.strokeStyle = 'rgba(15,15,20,0.7)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    for (let i = 0; i <= 6; i++) {
+      const px = -hl * 0.8 + (i / 6) * hl * 1.35;
+      ctx.moveTo(px, -hw * 0.85);
+      ctx.lineTo(px, hw * 0.85);
+    }
+    ctx.moveTo(-hl * 0.8, 0);
+    ctx.lineTo(hl * 0.55, 0);
+    ctx.stroke();
+    ctx.fillStyle = '#c9a227';
+    for (const [cx, cy] of [
+      [-hl * 0.8, -hw * 0.85],
+      [-hl * 0.8, hw * 0.85],
+      [hl * 0.55, -hw * 0.85],
+      [hl * 0.55, hw * 0.85],
+    ]) {
+      ctx.fillRect(cx - 0.8, cy - 0.8, 1.6, 1.6);
+    }
   }
 
   const sprite: HullSprite = { canvas: cv, ox, oy, w, h };

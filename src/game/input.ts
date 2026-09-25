@@ -13,6 +13,8 @@ const GAME_KEYS = new Set([
   'KeyJ',
   'KeyK',
   'KeyL',
+  'KeyF',
+  'KeyB',
 ]);
 
 export function isTypingTarget(t: EventTarget | null): boolean {
@@ -27,6 +29,8 @@ export class Input {
   portQueued = false;
   starQueued = false;
   smartQueued = false;
+  /** Boarding party away — serviced when a prize lies alongside. */
+  boardQueued = false;
   touchFireHeld = false;
   joyActive = false;
   joyX = 0;
@@ -45,6 +49,7 @@ export class Input {
     if (c === 'KeyQ' || c === 'KeyJ') this.portQueued = true;
     else if (c === 'KeyE' || c === 'KeyL') this.starQueued = true;
     else if (c === 'Space' || c === 'KeyK') this.smartQueued = true;
+    else if (c === 'KeyF' || c === 'KeyB') this.boardQueued = true;
   };
 
   private onUp = (e: KeyboardEvent) => {
@@ -58,6 +63,7 @@ export class Input {
     this.portQueued = false;
     this.starQueued = false;
     this.smartQueued = false;
+    this.boardQueued = false;
     this.touchFireHeld = false;
     this.joyActive = false;
     this.joyMag = 0;
@@ -121,5 +127,6 @@ export class Input {
     this.portQueued = false;
     this.starQueued = false;
     this.smartQueued = false;
+    this.boardQueued = false;
   }
 }

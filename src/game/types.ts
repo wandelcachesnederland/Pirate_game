@@ -17,14 +17,164 @@ export type ShipKind =
   // small craft — paddled, unarmed, they live around the islands
   | 'warCanoe'
   | 'fishingCanoe'
-  | 'rowboat';
+  | 'rowboat'
+  // Age of Sail additions — corsairs and coastal craft
+  | 'xebec'
+  | 'lugger'
+  | 'gunboat'
+  // Punic Wars — Carthage and the Cilician pirates
+  | 'carthGalley'
+  | 'carthTrader'
+  | 'carthSeven'
+  | 'cilician'
+  // Persian Wars — the Great King's Phoenician fleet
+  | 'phoenTrireme'
+  | 'persTransport'
+  | 'ionianGalley'
+  | 'sidonianRoyal'
+  // Monsoon Seas — dhows and baghlahs of the Indian Ocean
+  | 'warDhow'
+  | 'ghurab'
+  | 'baghlah'
+  | 'sultanFlagship'
+  // Ming waters — warlords and wokou pirates
+  | 'warlordJunk'
+  | 'wokouJunk'
+  | 'grainJunk'
+  | 'pirateKing'
+  // Sengoku Japan — the M\u014dri and their scouts
+  | 'sekiBune'
+  | 'kobaya'
+  | 'riceBune'
+  | 'moriFlagship'
+  // Aotearoa — rival iwi and flax traders
+  | 'rivalWaka'
+  | 'arikiWaka'
+  | 'flaxTrader'
+  // Hawai\u02bbi — rival ali\u02bbi and sandalwood traders
+  | 'rivalWaa'
+  | 'kauaiFlagship'
+  | 'sandTrader'
+  // Successor Wars — Rhodians and Ptolemies
+  | 'rhodesTrieres'
+  | 'ptolemGalley'
+  | 'alexGrain'
+  | 'ptolemFlagship'
+  // First Contact — rival Maya and the strangers
+  | 'mayaRival'
+  | 'cacaoTrader'
+  | 'conqCaravel'
+  | 'conqCapitana'
+  // Pacific balsas — Puná islanders and rival traders
+  | 'rivalBalsa'
+  | 'punaBalsa'
+  | 'spondylusTrader'
+  | 'punaArmada'
+  // Lepanto — galleys of the Holy League
+  | 'venetianGalley'
+  | 'spanishGalley'
+  | 'venetianTrader'
+  | 'laReal'
+  // Imjin War — Hideyoshi's flagship
+  | 'japanFlagship'
+  // Constantinople — the Caliph's galleys
+  | 'umayyadGalley'
+  | 'shalandi'
+  | 'umayyadSupply'
+  | 'maslamaFlagship'
+  // Sea Peoples — Sherden raiders
+  | 'sherdenGalley'
+  | 'sherdenRaider'
+  | 'clanShip'
+  | 'sherdenArmada'
+  // Bay of Bengal — Srivijayan jongs
+  | 'srivJong'
+  | 'srivScout'
+  | 'spiceTrader'
+  | 'royalJong'
+  // Bach Dang — the Khan's fleet
+  | 'yuanScout'
+  | 'yuanFlagship'
+  // Lake Texcoco — brigantines and allies
+  | 'spanBrigantine'
+  | 'tlaxCanoe'
+  | 'supplyBrig'
+  | 'cortesCapitana';
 
-export type Faction = 'pirate' | 'spain' | 'england' | 'france' | 'merchant' | 'fire' | 'native';
+export type Faction =
+  | 'pirate'
+  | 'spain'
+  | 'england'
+  | 'france'
+  | 'merchant'
+  | 'fire'
+  | 'native'
+  // heritage waters
+  | 'carthage'
+  | 'persia'
+  | 'arab'
+  | 'china'
+  | 'japan'
+  | 'maori'
+  | 'hawaii'
+  | 'macedon'
+  | 'rhodes'
+  | 'ptolemy'
+  | 'maya'
+  | 'inca'
+  | 'puna'
+  | 'ottoman'
+  | 'venice'
+  | 'korea'
+  | 'byzantium'
+  | 'egypt'
+  | 'sherden'
+  | 'chola'
+  | 'srivijaya'
+  | 'daiviet'
+  | 'aztec';
 
-export type HullStyle = 'default' | 'longship' | 'ironclad' | 'caravel' | 'canoe';
+export type HullStyle =
+  | 'default'
+  | 'longship'
+  | 'ironclad'
+  | 'caravel'
+  | 'canoe'
+  // heritage silhouettes (museum pieces — not sailed in gameplay yet)
+  | 'trireme'
+  | 'dhow'
+  | 'junk'
+  | 'atakebune';
 
 /** Playable hero hulls — each is a `player`-kind ShipDef with its own styleKey. */
-export type EraId = 'golden' | 'exploration' | 'napoleonic' | 'viking' | 'ironclad';
+export type EraId =
+  // Age of Sail
+  | 'golden'
+  | 'exploration'
+  | 'napoleonic'
+  | 'viking'
+  | 'ironclad'
+  // Heritage Seas — the museum fleets, now playable
+  | 'roman'
+  | 'greek'
+  | 'arab'
+  | 'chinese'
+  | 'japanese'
+  // Polynesia — waka and wa\u02bba waters
+  | 'maori'
+  | 'hawaii'
+  // Successors and the Americas
+  | 'macedon'
+  | 'maya'
+  | 'inca'
+  // Galleys, turtles and lakes
+  | 'lepanto'
+  | 'korea'
+  | 'byzantium'
+  | 'egypt'
+  | 'chola'
+  | 'vietnam'
+  | 'aztec';
 
 export interface ShipDef {
   kind: ShipKind;
@@ -61,6 +211,14 @@ export interface ShipDef {
   styleKey?: string;
   /** Paddled/oared craft: no sails, immune to the wind, draws moving oars. */
   oared?: boolean;
+  /** Ship's company at full strength. Casualties mount as the hull takes damage. */
+  crew?: number;
+  /** Wave boss: gets the boss bar, fanfare treatment and a captain's chest. */
+  boss?: boolean;
+  /** Fat prize ship: always carries a captain's chest (galleons, tribute fleets). */
+  treasure?: boolean;
+  /** Trader: sometimes carries a captain's chest, pointed out as a prize. */
+  trader?: boolean;
 }
 
 export interface Ship {
@@ -114,6 +272,37 @@ export interface Ship {
    * Nothing sets this yet; `seesThroughDisguise` hulls would ignore it.
    */
   falseFlag?: Faction;
+  /** Hands still standing (fractional internally — casualties accrue with damage). */
+  crew: number;
+  maxCrew: number;
+  /** Struck her colours: drifting under a white flag, silent guns, ready to board. */
+  surrendered: boolean;
+  /** Surrender rolls spent — a ship only gets so many chances to strike. */
+  surrenderRolls: number;
+  /** Taken as a prize: prize crew aboard, counts as cleared like a sinking. */
+  captured: boolean;
+}
+
+/** Where in the world the game is played — each has its own waters and islands. */
+export type RegionId = 'caribbean' | 'mediterranean' | 'arabian' | 'singapore';
+
+/** An enemy's colours, struck and carried home after a boarding. */
+export interface CapturedFlag {
+  faction: Faction;
+  ship: string;
+  wave: number;
+}
+
+/** Everything the player's ship carries — always visible in the HUD. */
+export interface ShipInventory {
+  crew: number;
+  maxCrew: number;
+  water: number;
+  maxWater: number;
+  food: number;
+  maxFood: number;
+  slaves: number;
+  flags: CapturedFlag[];
 }
 
 export type UpgradeId =
@@ -149,6 +338,15 @@ export interface GameStats {
   accuracy: number;
   maxStreak: number;
   time: number;
+  /** Prizes taken by boarding (never counted as sunk). */
+  boarded?: number;
+  /** Souls in irons below decks. */
+  slaves?: number;
+  /** Enemy colours struck and carried home. */
+  flagsTaken?: number;
+  /** Waters sailed, for the epitaph. */
+  region?: RegionId;
+  regionName?: string;
 }
 
 export interface Island {
