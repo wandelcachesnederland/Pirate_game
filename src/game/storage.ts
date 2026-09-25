@@ -1,5 +1,6 @@
 /** Local high-score table + settings persisted in localStorage. */
-import type { RegionId } from './types';
+import type { EraId } from './types';
+import { ERA_REGION } from './ships/era';
 
 export interface ScoreEntry {
   name: string;
@@ -93,15 +94,14 @@ export function saveSettings(s: Settings) {
   safeSet(SETTINGS_KEY, JSON.stringify(s));
 }
 
-const REGION_KEY = 'broadside.region.v1';
+const ERA_KEY = 'broadside.era.v1';
 
-export function loadRegion(): RegionId {
-  const raw = safeGet(REGION_KEY);
-  return raw === 'mediterranean' || raw === 'arabian' || raw === 'singapore' || raw === 'caribbean'
-    ? raw
-    : 'caribbean';
+/** Remember the last era sailed — the pick a captain makes first every time. */
+export function loadEra(): EraId | null {
+  const raw = safeGet(ERA_KEY);
+  return raw && raw in ERA_REGION ? (raw as EraId) : null;
 }
 
-export function saveRegion(id: RegionId) {
-  safeSet(REGION_KEY, id);
+export function saveEra(id: EraId) {
+  safeSet(ERA_KEY, id);
 }

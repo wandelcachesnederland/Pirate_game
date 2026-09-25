@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Flag, Hand, Keyboard, Sailboat, Skull, Wind } from 'lucide-react';
-import type { EraId, RegionId } from '../game/types';
+import type { EraId } from '../game/types';
 import type { ScoreEntry, Settings } from '../game/storage';
-import { HighScoreTable, HullPicker, KeyCap, SoundToggles } from './ui';
-import { RegionPicker } from './RegionPicker';
+import { HighScoreTable, KeyCap, SoundToggles } from './ui';
+import { EraPicker } from './EraPicker';
 import { ERA_FLAGSHIPS } from '../game/ships/era';
 
 interface Props {
@@ -16,8 +16,6 @@ interface Props {
   isTouch: boolean;
   era: EraId;
   onEra: (id: EraId) => void;
-  region: RegionId;
-  onRegion: (id: RegionId) => void;
 }
 
 function Row({ keys, label }: { keys: ReactNode; label: string }) {
@@ -39,8 +37,6 @@ export function StartScreen({
   isTouch,
   era,
   onEra,
-  region,
-  onRegion,
 }: Props) {
   return (
     <div className="absolute inset-0 overflow-y-auto no-scrollbar anim-fade">
@@ -57,9 +53,15 @@ export function StartScreen({
           <h1 className="title-gold text-[4.2rem] leading-[0.95] sm:text-8xl md:text-[8.5rem]">Broadside!</h1>
         </header>
 
+        {/* Step 1 — the era, which locks in the flagship and the waters */}
+        <section className="parchment w-full max-w-4xl p-4 sm:p-6">
+          <EraPicker era={era} onEra={onEra} />
+        </section>
+
         <div className="grid w-full max-w-4xl gap-3 sm:gap-5 md:grid-cols-[1.1fr_1fr]">
           {/* Orders */}
           <section className="parchment p-4 sm:p-6">
+            <h2 className="mb-1 font-pirate text-2xl sm:text-3xl">Step 2 · Sign On</h2>
             <label htmlFor="captain" className="mb-1 block font-pirate text-xl">
               Captain&apos;s Name
             </label>
@@ -85,10 +87,6 @@ export function StartScreen({
             <p className="mt-1.5 text-center text-sm italic opacity-70">
               {isTouch ? 'Tap to hoist the Jolly Roger' : 'or press Enter to hoist the Jolly Roger'}
             </p>
-
-            <HullPicker era={era} onEra={onEra} />
-
-            <RegionPicker region={region} onRegion={onRegion} />
 
             <div className="mt-3 border-t-2 border-dashed border-ink/30 pt-3">
               <h3 className="mb-1.5 flex items-center gap-2 font-pirate text-xl">

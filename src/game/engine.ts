@@ -54,6 +54,20 @@ const GRAPE = [
   { range: 240, cd: 8.5, small: 62, big: 15, shove: 250 },
   { range: 275, cd: 7, small: 82, big: 19, shove: 290 },
 ];
+/**
+ * Chase Guns — the bow and stern chasers. Two light guns that fire by
+ * themselves at whatever is ahead or astern, which is exactly where a hunting
+ * canoe (or a ship running you down) tends to be. Small calibre: they punish
+ * open boats, but barely scratch a ship-of-the-line's timbers.
+ * Index 0 is level 1.
+ */
+const CHASER = [
+  { range: 360, reload: 3.4, dmg: 20 },
+  { range: 420, reload: 3.0, dmg: 26 },
+  { range: 480, reload: 2.5, dmg: 34 },
+];
+/** Damage multiplier when a chase gun lands on something bigger than a boat. */
+const CHASER_BIG = 0.45;
 /** Island raiders hunt for a while, then break off and go home. */
 const NATIVE_HUNT = [15, 30];
 /** How far a war party is willing to stray from its own beach. */
@@ -121,6 +135,8 @@ interface Ball {
   small: boolean;
   /** Mortar shell: arcs overhead, then explodes on landing. */
   mortar: boolean;
+  /** Chase gun: fired fore or aft; hits boats hard and real timbers lightly. */
+  chaser?: boolean;
 }
 interface Pickup {
   x: number;
@@ -180,6 +196,8 @@ interface PlayerStats {
   chain: boolean;
   /** Levels of Grape & Canister fitted (0 = no such gun on deck). */
   grapeshot: number;
+  /** Levels of bow/stern chase guns fitted (0 = none shipped). */
+  chase: number;
 }
 
 function defaultStats(def: ShipDef): PlayerStats {
@@ -196,6 +214,7 @@ function defaultStats(def: ShipDef): PlayerStats {
     swivel: 0,
     chain: false,
     grapeshot: 0,
+    chase: 0,
   };
 }
 
@@ -303,6 +322,9 @@ export class Engine {
   private swivelTimer = 0;
   /** Cooling of the Grape & Canister gun; 0 = ready to fire. */
   private grapeCd = 0;
+  /** Reload clocks of the bow chaser and the stern chaser — they fire unasked. */
+  private bowTimer = 0;
+  private sternTimer = 0;
   /** Throttles the "they've given up" call so a breaking pack doesn't spam it. */
   private nativeCallTimer = 0;
   private nativeTimer = rand(4, 8);
@@ -492,6 +514,8 @@ export class Engine {
     this.pstats = defaultStats(this.playerDef);
     this.swivelTimer = 0;
     this.grapeCd = 0;
+    this.bowTimer = 0;
+    this.sternTimer = 0;
     this.nativeCallTimer = 0;
     this.goldPopup = 0;
     this.goldPopupTimer = 0;
@@ -598,6 +622,9 @@ export class Engine {
         break;
       case 'grapeshot':
         ps.grapeshot += 1;
+        break;
+      case 'chaser':
+        ps.chase += 1;
         break;
     }
     this.applyPlayerStats();
@@ -1049,6 +1076,7 @@ export class Engine {
     if (playing) {
       this.updateNatives(dt);
       this.updateSwivel(dt);
+      this.updateChasers(dt);
       this.updateBoarding();
       this.updateSupplies(dt);
     }
@@ -1298,6 +1326,84 @@ export class Engine {
       this.emit(P_SMOKE, ox, oy, Math.cos(a) * 40 + rand(-10, 10), Math.sin(a) * 40 + rand(-10, 10), rand(0.5, 0.8), 3, 8, pick(SMOKE_LIGHT), 1, 2.5, 0, 0, 0.5);
     }
     this.sfx.swivel(0.8, 0);
+  }
+
+  /**
+   * Chase Guns: a bow chaser and a stern chaser, each laid and fired by its own
+   * crew the moment something enemy is dead ahead or dead astern. No key to
+   * press — which is the point, because the boat you want them for is behind
+   * you with its crew paddling hard.
+   */
+  private updateChasers(dt: number) {
+    const p = this.player;
+    const lvl = Math.min(CHASER.length, this.pstats.chase);
+    if (lvl <= 0 || p.sinking >= 0) return;
+    const g = CHASER[lvl - 1];
+    this.bowTimer -= dt;
+    this.sternTimer -= dt;
+    if (this.bowTimer <= 0 && this.fireChaser(1, g)) this.bowTimer = g.reload;
+    if (this.sternTimer <= 0 && this.fireChaser(-1, g)) this.sternTimer = g.reload;
+  }
+
+  /** Nearest enemy in an end's arc — boats ahead of a big sail get first call. */
+  private findChaseTarget(s: Ship, end: 1 | -1, range: number): Ship | null {
+    const axis = end > 0 ? s.angle : s.angle + Math.PI;
+    let best: Ship | null = null;
+    let bestScore = Infinity;
+    for (const e of this.ships) {
+      if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered) continue;
+      const dx = e.x - s.x;
+      const dy = e.y - s.y;
+      const d = Math.hypot(dx, dy);
+      if (d > range + e.def.length * 0.5) continue;
+      if (d < 12) continue; // alongside: that is the broadsides' business
+      if (Math.abs(angDiff(axis, Math.atan2(dy, dx))) > 0.6) continue;
+      // open boats are what these guns are shipped for: a canoe half again
+      // further off than a big hull still gets the gun crew's attention first
+      const score = d * (e.def.oared === true && e.def.length <= 60 ? 0.45 : 1);
+      if (score < bestScore) {
+        bestScore = score;
+        best = e;
+      }
+    }
+    return best;
+  }
+
+  /** Fire one chase gun out of the bow (`end` 1) or the stern (`end` -1). */
+  private fireChaser(end: 1 | -1, g: (typeof CHASER)[number]): boolean {
+    const p = this.player;
+    const target = this.findChaseTarget(p, end, g.range);
+    if (!target) return false;
+    const spd = 620;
+    // the gun stands at the bow or the stern, so the shot is laid from there —
+    // aiming from the mast would throw it wide of anything off the centreline
+    const off = p.def.length * 0.46 * end;
+    const ox = p.x + Math.cos(p.angle) * off;
+    const oy = p.y + Math.sin(p.angle) * off;
+    const t = Math.hypot(target.x - ox, target.y - oy) / spd;
+    const tx = target.x + target.vx * t * 0.9;
+    const ty = target.y + target.vy * t * 0.9;
+    const a = Math.atan2(ty - oy, tx - ox) + rand(-0.03, 0.03);
+    const life = (g.range + 60) / spd;
+    this.balls.push({
+      x: ox, y: oy,
+      vx: Math.cos(a) * spd + p.vx * 0.35, vy: Math.sin(a) * spd + p.vy * 0.35,
+      life, max: life, team: 0, dmg: g.dmg, chain: this.pstats.chain, small: true, mortar: false, chaser: true,
+    });
+    // a light gun: flash, a wisp of smoke and a hard crack
+    this.emit(P_FLASH, ox, oy, 0, 0, 0.08, 8, 10, '', 1, 0);
+    for (let i = 0; i < 3; i++) {
+      const fa = a + rand(-0.4, 0.4);
+      const fs = rand(80, 200);
+      this.emit(P_FIRE, ox, oy, Math.cos(fa) * fs, Math.sin(fa) * fs, rand(0.08, 0.16), rand(2.5, 4), -3, pick(FIRE_COLORS), 1, 5);
+    }
+    for (let i = 0; i < 3; i++) {
+      const sa = a + rand(-0.5, 0.5);
+      const ss = rand(20, 90);
+      this.emit(P_SMOKE, ox, oy, Math.cos(sa) * ss + this.windX * 12, Math.sin(sa) * ss + this.windY * 12, rand(0.6, 1.1), rand(4, 6.5), rand(10, 16), pick(SMOKE_LIGHT), 1, 2.4, 0, 0, 0.5);
+    }
+    this.sfx.chaser(0.8, this.panAt(ox));
+    return true;
   }
 
   /**
@@ -2020,16 +2126,21 @@ export class Engine {
 
   private onBallHit(b: Ball, s: Ship) {
     const dir = Math.atan2(b.vy, b.vx);
-    let dmg = b.dmg * rand(0.85, 1.15);
+    // a chase gun is small calibre: it guts an open boat and bounces off a hull
+    const openBoat = s.def.oared === true && s.def.length <= 60;
+    let dmg = b.dmg * rand(0.85, 1.15) * (b.chaser && !openBoat ? CHASER_BIG : 1);
     let crit = false;
     if (b.team === 0 && !b.small && Math.random() < 0.1) {
       dmg *= 2;
       crit = true;
     }
     this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1);
-    s.vx += Math.cos(dir) * (b.small ? 4 : 10);
-    s.vy += Math.sin(dir) * (b.small ? 4 : 10);
+    // a chase gun hit knocks a canoe off its stroke and back down the wake
+    const knock = b.chaser ? (openBoat ? 70 : 12) : b.small ? 4 : 10;
+    s.vx += Math.cos(dir) * knock;
+    s.vy += Math.sin(dir) * knock;
     s.angVel += rand(-0.15, 0.15);
+    if (b.chaser && openBoat) s.slowTimer = Math.max(s.slowTimer, 1.4);
     if (b.team === 0) {
       if (!b.small) this.stats.hits++;
       this.firstHit = true;
@@ -2969,6 +3080,29 @@ export class Engine {
     const x1 = hl * 0.45;
     const len = x1 - x0;
     ctx.lineCap = 'round';
+    // chase guns: a short tick off the bow and another off the stern
+    const chaseLvl = Math.min(CHASER.length, this.pstats.chase);
+    if (chaseLvl > 0) {
+      const g = CHASER[chaseLvl - 1];
+      const y = -hw * 0.34;
+      for (const end of [-1, 1] as const) {
+        const prog = clamp(1 - (end > 0 ? this.bowTimer : this.sternTimer) / g.reload, 0, 1);
+        const xa = end < 0 ? -hl * 1.12 : hl * 0.55;
+        const xb = end < 0 ? -hl * 0.55 : hl * 1.12;
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath();
+        ctx.moveTo(xa, y);
+        ctx.lineTo(xb, y);
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = prog >= 1 ? '#ffd84d' : 'rgba(255,255,255,0.7)';
+        ctx.beginPath();
+        ctx.moveTo(xa, y);
+        ctx.lineTo(xa + (xb - xa) * prog, y);
+        ctx.stroke();
+      }
+    }
     for (let side = -1; side <= 1; side += 2) {
       const r = side < 0 ? p.reloadL : p.reloadR;
       const prog = clamp(1 - r / p.reloadTime, 0, 1);

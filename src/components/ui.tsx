@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import {
   Bird,
   Bomb,
+  ChevronsUpDown,
   Crosshair,
   Flame,
   Grape,
@@ -35,6 +36,7 @@ export const UPGRADE_ICONS: Record<UpgradeId, LucideIcon> = {
   swivel: Zap,
   chain: Link,
   grapeshot: Grape,
+  chaser: ChevronsUpDown,
 };
 
 export function KeyCap({ children, className }: { children: ReactNode; className?: string }) {
@@ -141,4 +143,4 @@ export function HighScoreTable({
   );
 }
 
-export { HullPicker } from './HullPicker';
+export { EraPicker } from './EraPicker';

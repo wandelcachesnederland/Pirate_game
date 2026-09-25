@@ -2,16 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Flag, Grape, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
-import type { EraId, GameStats, RegionId, Screen, UpgradeId, UpgradeOffer } from './game/types';
-import { DEFAULT_ERA } from './game/ships/era';
+import type { EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
+import { DEFAULT_ERA, eraRegion } from './game/ships/era';
 import {
   addScore,
+  loadEra,
   loadName,
-  loadRegion,
   loadScores,
   loadSettings,
+  saveEra,
   saveName,
-  saveRegion,
   saveSettings,
   type ScoreEntry,
   type Settings,
@@ -46,10 +46,8 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const settingsRef = useRef(settings);
   const [isTouch, setIsTouch] = useState(() => detectTouch());
-  const [era, setEra] = useState<EraId>(DEFAULT_ERA);
+  const [era, setEra] = useState<EraId>(() => loadEra() ?? DEFAULT_ERA);
   const eraRef = useRef(era);
-  const [region, setRegionState] = useState<RegionId>(() => loadRegion());
-  const regionRef = useRef(region);
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
   const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
   const gameOverAt = useRef(0);
@@ -63,22 +61,13 @@ export default function App() {
     eraRef.current = era;
   }, [era]);
 
-  useEffect(() => {
-    regionRef.current = region;
-  }, [region]);
-
-  // swapping hulls in port updates the ship on the menu at once
+  // the era is the first choice of the game: it swaps the flagship AND charts
+  // the era's own waters on the menu at once
   const pickEra = useCallback((id: EraId) => {
     setEra(id);
+    saveEra(id);
     engineRef.current?.setEra(id);
-  }, []);
-
-  // swapping waters in port re-charts the menu seas at once
-  const pickRegion = useCallback((id: RegionId) => {
-    setRegionState(id);
-    regionRef.current = id;
-    saveRegion(id);
-    engineRef.current?.setRegion(id);
+    engineRef.current?.setRegion(eraRegion(id));
   }, []);
 
   // ---- engine lifecycle
@@ -110,7 +99,7 @@ export default function App() {
       },
     });
     eng.setAudio(settingsRef.current.sfx, settingsRef.current.music);
-    eng.setRegion(regionRef.current);
+    eng.setRegion(eraRegion(eraRef.current));
     engineRef.current = eng;
     setEngine(eng);
     return () => {
@@ -171,7 +160,7 @@ export default function App() {
     setRank(-1);
     setBoardPrompt(null);
     e.setEra(eraRef.current);
-    e.setRegion(regionRef.current);
+    e.setRegion(eraRegion(eraRef.current));
     e.startGame();
   }, []);
 
@@ -376,8 +365,6 @@ export default function App() {
           isTouch={isTouch}
           era={era}
           onEra={pickEra}
-          region={region}
-          onRegion={pickRegion}
         />
       )}
 

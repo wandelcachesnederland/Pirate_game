@@ -312,8 +312,35 @@ export interface Ship {
   captured: boolean;
 }
 
-/** Where in the world the game is played — each has its own waters and islands. */
-export type RegionId = 'caribbean' | 'mediterranean' | 'arabian' | 'singapore';
+/**
+ * Where in the world the game is played — each has its own waters and islands.
+ * Every era sails its own sea (see `ERA_REGION`): an era's waters are picked up
+ * with the era, not chosen separately.
+ */
+export type RegionId =
+  // Age of Sail
+  | 'caribbean'
+  | 'biscay'
+  | 'northSea'
+  | 'chesapeake'
+  // Classical and medieval seas
+  | 'mediterranean'
+  | 'aegean'
+  | 'bosporus'
+  | 'ionian'
+  | 'nileDelta'
+  // Indian Ocean and the East
+  | 'arabian'
+  | 'bengal'
+  | 'singapore'
+  | 'tonkin'
+  | 'inlandSea'
+  | 'koreaStrait'
+  // Polynesia and the Americas
+  | 'bayOfIslands'
+  | 'konaCoast'
+  | 'peruvianCoast'
+  | 'texcoco';
 
 /** An enemy's colours, struck and carried home after a boarding. */
 export interface CapturedFlag {
@@ -346,7 +373,8 @@ export type UpgradeId =
   | 'carpenter'
   | 'swivel'
   | 'chain'
-  | 'grapeshot';
+  | 'grapeshot'
+  | 'chaser';
 
 export interface UpgradeDef {
   id: UpgradeId;

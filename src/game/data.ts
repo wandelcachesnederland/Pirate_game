@@ -2208,6 +2208,7 @@ export const UPGRADES: UpgradeDef[] = [
     desc: 'R: a point-blank blast all round — death to open boats',
     max: 3,
   },
+  { id: 'chaser', name: 'Chase Guns', desc: 'Bow & stern guns fire on their own — rake your pursuers', max: 3 },
 ];
 
 export function waveTitle(n: number): string {

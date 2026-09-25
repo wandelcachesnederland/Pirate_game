@@ -229,6 +229,17 @@ export class Sfx {
     this.tone(d, t, 'triangle', 380, 120, 0.1, 0.25 * vol);
   }
 
+  /** A chase gun: one sharp crack over the bow or the stern, lighter than a broadside. */
+  chaser(vol = 1, pan = 0) {
+    if (!this.ok() || !this.gate('chaser', 0.05)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    const v = vol * (0.85 + Math.random() * 0.3);
+    this.noise(d, t, 0.42, 0.45 * v, 'lowpass', 2200, 240, 0.8, 0.002);
+    this.tone(d, t, 'triangle', 520, 140, 0.16, 0.3 * v, 0.002);
+    this.noise(d, t, 0.06, 0.22 * v, 'highpass', 2800, 1800, 0.7, 0.001);
+  }
+
   /** Grapeshot: one heavy thump, then a long metal-and-shot hiss sweeping out. */
   grapeshot(vol = 1, pan = 0) {
     if (!this.ok() || !this.gate('grape', 0.08)) return;
