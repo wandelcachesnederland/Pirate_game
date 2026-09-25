@@ -369,6 +369,71 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.arc(cx, 0, 2.2, 0, TAU);
       ctx.stroke();
       break;
+    case 'usa':
+      // a white star for the nascent navy
+      ctx.fillStyle = '#f2f0e8';
+      star5(ctx, cx, 0, 3.0);
+      ctx.fill();
+      break;
+    case 'germany':
+      // the Iron Cross, flared arms and all
+      ctx.fillStyle = '#1c1c1c';
+      ctx.beginPath();
+      ctx.moveTo(cx - 1.2, -3.2);
+      ctx.lineTo(cx + 1.2, -3.2);
+      ctx.lineTo(cx + 1.0, -1.0);
+      ctx.lineTo(cx + 3.2, -1.2);
+      ctx.lineTo(cx + 3.2, 1.2);
+      ctx.lineTo(cx + 1.0, 1.0);
+      ctx.lineTo(cx + 1.2, 3.2);
+      ctx.lineTo(cx - 1.2, 3.2);
+      ctx.lineTo(cx - 1.0, 1.0);
+      ctx.lineTo(cx - 3.2, 1.2);
+      ctx.lineTo(cx - 3.2, -1.2);
+      ctx.lineTo(cx - 1.0, -1.0);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'ijn':
+      // the rising sun: disc and rays
+      ctx.strokeStyle = '#c9403b';
+      ctx.lineWidth = 1.0;
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * TAU;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * 2.6, Math.sin(a) * 2.6);
+        ctx.lineTo(cx + Math.cos(a) * 4.4, Math.sin(a) * 4.4);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#c9403b';
+      ctx.beginPath();
+      ctx.arc(cx, 0, 2.2, 0, TAU);
+      ctx.fill();
+      break;
+    case 'iran':
+      // the allah emblem simplified: a curl with a sword stroke
+      ctx.strokeStyle = '#c9403b';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.2, -1.8);
+      ctx.quadraticCurveTo(cx + 2.4, -3.2, cx + 1.8, 1.2);
+      ctx.quadraticCurveTo(cx + 1.2, 3.4, cx - 0.6, 2.2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 3.0, -2.4);
+      ctx.lineTo(cx + 1.6, 2.6);
+      ctx.stroke();
+      break;
+    case 'tripoli':
+      // crescent and star, the corsair mark
+      ctx.fillStyle = '#f2f0e8';
+      ctx.beginPath();
+      ctx.arc(cx - 0.4, 0, 2.6, 0, TAU);
+      ctx.arc(cx + 0.5, 0, 2.1, 0, TAU, true);
+      ctx.fill();
+      star5(ctx, cx + 2.6, 0, 1.5);
+      ctx.fill();
+      break;
   }
   ctx.restore();
 }
@@ -792,6 +857,101 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
       ctx.beginPath();
       ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.28, 0, TAU);
       ctx.stroke();
+      break;
+    }
+    case 'usa': {
+      // the Stars and Stripes of the early republic: stripes and a canton of
+      // white stars on blue
+      const stripes = 13;
+      for (let i = 0; i < stripes; i++) {
+        ctx.fillStyle = i % 2 ? '#f2f0e8' : '#b3261e';
+        ctx.fillRect(0, (h * i) / stripes, w, h / stripes + 0.5);
+      }
+      ctx.fillStyle = '#2a3a6b';
+      ctx.fillRect(0, 0, w * 0.42, h * 0.54);
+      ctx.fillStyle = '#f2f0e8';
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 4; c++) {
+          const dx = w * 0.07 + c * w * 0.095 + (r % 2) * w * 0.045;
+          const dy = h * 0.11 + r * h * 0.16;
+          ctx.beginPath();
+          ctx.arc(dx, dy, Math.max(0.8, h * 0.045), 0, TAU);
+          ctx.fill();
+        }
+      }
+      break;
+    }
+    case 'germany': {
+      // the Kaiser's colours: black over white over red
+      const third = h / 3;
+      ctx.fillStyle = '#1c1c1c';
+      ctx.fillRect(0, 0, w, third + 0.5);
+      ctx.fillStyle = '#f2f0e8';
+      ctx.fillRect(0, third, w, third + 0.5);
+      ctx.fillStyle = '#b3261e';
+      ctx.fillRect(0, third * 2, w, third + 0.5);
+      break;
+    }
+    case 'ijn': {
+      // the rising sun: a red disc with rays on white
+      ctx.fillStyle = '#f2f0e8';
+      ctx.fillRect(0, 0, w, h);
+      {
+        const cx = w * 0.5;
+        const cy = h * 0.5;
+        const r = Math.min(w, h) * 0.24;
+        ctx.strokeStyle = '#c9403b';
+        ctx.lineWidth = Math.max(0.6, h * 0.055);
+        for (let i = 0; i < 16; i++) {
+          const a = (i / 16) * TAU;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * r * 1.15, cy + Math.sin(a) * r * 1.15);
+          ctx.lineTo(cx + Math.cos(a) * Math.min(w, h) * 0.52, cy + Math.sin(a) * Math.min(w, h) * 0.52);
+          ctx.stroke();
+        }
+        ctx.fillStyle = '#c9403b';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, TAU);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'iran': {
+      // the tricolor: green over white over red, with the mark of 1980
+      const third2 = h / 3;
+      ctx.fillStyle = '#239f6b';
+      ctx.fillRect(0, 0, w, third2 + 0.5);
+      ctx.fillStyle = '#f2f0e8';
+      ctx.fillRect(0, third2, w, third2 + 0.5);
+      ctx.fillStyle = '#c9403b';
+      ctx.fillRect(0, third2 * 2, w, third2 + 0.5);
+      ctx.strokeStyle = '#c9403b';
+      ctx.lineWidth = Math.max(0.7, h * 0.07);
+      ctx.beginPath();
+      ctx.moveTo(w * 0.47, h * 0.32);
+      ctx.quadraticCurveTo(w * 0.56, h * 0.5, w * 0.5, h * 0.68);
+      ctx.quadraticCurveTo(w * 0.44, h * 0.52, w * 0.5, h * 0.34);
+      ctx.stroke();
+      break;
+    }
+    case 'tripoli': {
+      // the corsair green: a white crescent and star on green
+      ctx.fillStyle = '#1f6b3a';
+      ctx.fillRect(0, 0, w, h);
+      const ox = w * 0.42;
+      const oy = h * 0.5;
+      const orr = Math.min(w, h) * 0.3;
+      ctx.fillStyle = '#f2f0e8';
+      ctx.beginPath();
+      ctx.arc(ox, oy, orr, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#1f6b3a';
+      ctx.beginPath();
+      ctx.arc(ox + orr * 0.45, oy, orr * 0.82, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#f2f0e8';
+      star5(ctx, ox + orr * 1.05, oy, Math.min(w, h) * 0.11);
+      ctx.fill();
       break;
     }
     case 'fire': {

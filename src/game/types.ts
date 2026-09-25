@@ -1,5 +1,8 @@
 export type Screen = 'menu' | 'playing' | 'paused' | 'upgrade' | 'gameover';
 
+/** What actually flies when a ship fires. */
+export type ProjectileKind = 'arrow' | 'bolt' | 'cannonball' | 'missile';
+
 export type ShipKind =
   | 'player'
   | 'merchant'
@@ -99,7 +102,35 @@ export type ShipKind =
   | 'spanBrigantine'
   | 'tlaxCanoe'
   | 'supplyBrig'
-  | 'cortesCapitana';
+  | 'cortesCapitana'
+  // Great War at Sea — the Kaiser's navy
+  | 'germTB'
+  | 'germUboat'
+  | 'germDrifter'
+  | 'auxCruiser'
+  | 'supplyShip'
+  | 'munitionsShip'
+  | 'kaiserBattleship'
+  // Second World War at Sea — the Imperial Japanese Navy
+  | 'ijnDestroyer'
+  | 'ijnSub'
+  | 'ijnEscort'
+  | 'maru'
+  | 'troopTransport'
+  | 'ijnBattleship'
+  // Tanker War — the Strait of Hormuz, 1988
+  | 'usPatrol'
+  | 'usDestroyer'
+  | 'usFrigate'
+  | 'tanker'
+  | 'supertanker'
+  // Barbary War — the corsairs of Tripoli
+  | 'corsairXebec'
+  | 'corsairPolacca'
+  | 'tripoliGunboat'
+  | 'corsairPrize'
+  | 'tributePolacca'
+  | 'meshuda';
 
 export type Faction =
   | 'pirate'
@@ -132,7 +163,13 @@ export type Faction =
   | 'chola'
   | 'srivijaya'
   | 'daiviet'
-  | 'aztec';
+  | 'aztec'
+  // the new navies
+  | 'usa'
+  | 'germany'
+  | 'ijn'
+  | 'iran'
+  | 'tripoli';
 
 export type HullStyle =
   | 'default'
@@ -144,7 +181,20 @@ export type HullStyle =
   | 'trireme'
   | 'dhow'
   | 'junk'
-  | 'atakebune';
+  | 'atakebune'
+  // steel: steam, oil and missile hulls (no canvas, wind means nothing)
+  | 'warship'
+  | 'submarine'
+  | 'freighter'
+  | 'tanker';
+
+/** Every style that sails without canvas and ignores the wind outright. */
+const STEEL_HULLS: readonly HullStyle[] = ['ironclad', 'warship', 'submarine', 'freighter', 'tanker'];
+
+/** True for any powered, steel hull: sails are never drawn, the wind is ignored. */
+export function isSteelHull(style: HullStyle | undefined): boolean {
+  return style !== undefined && STEEL_HULLS.includes(style);
+}
 
 /** Playable hero hulls — each is a `player`-kind ShipDef with its own styleKey. */
 export type EraId =
@@ -174,7 +224,12 @@ export type EraId =
   | 'egypt'
   | 'chola'
   | 'vietnam'
-  | 'aztec';
+  | 'aztec'
+  // the steel navies and the shore of Tripoli
+  | 'ww1'
+  | 'ww2'
+  | 'hormuz'
+  | 'barbary';
 
 export interface ShipDef {
   kind: ShipKind;
@@ -203,6 +258,12 @@ export interface ShipDef {
   /** Lobs arcing, exploding shells instead of flat broadsides. */
   mortar?: boolean;
   weapon?: 'mechanical' | 'gunpowder';
+  /**
+   * What this hull's broadsides actually are — arrows, bolts, shot or a
+   * guided missile. Left out, the era's default projectile is used
+   * (see `projectileFor`).
+   */
+  projectile?: ProjectileKind;
   /** Reserved: ignores false flags once a disguise system exists. */
   seesThroughDisguise?: boolean;
   /** Gun decks drawn as extra rows of gun ports (default 1). */
@@ -350,7 +411,12 @@ export type RegionId =
   | 'bayOfIslands'
   | 'konaCoast'
   | 'peruvianCoast'
-  | 'texcoco';
+  | 'texcoco'
+  // the steel navies and the Barbary shore
+  | 'doggerBank'
+  | 'coralSea'
+  | 'hormuz'
+  | 'barbary';
 
 /** An enemy's colours, struck and carried home after a boarding. */
 export interface CapturedFlag {

@@ -20,19 +20,25 @@ import { cantusRemigum } from './cassettes/cantusRemigum';
 import { cocNgam } from './cassettes/cocNgam';
 import { greatGreen } from './cassettes/greatGreen';
 import { greekFire } from './cassettes/greekFire';
+import { hailColumbia } from './cassettes/hailColumbia';
 import { hoeaWaka } from './cassettes/hoeaWaka';
 import { ironcladMarch } from './cassettes/ironcladMarch';
+import { armentieres } from './cassettes/armentieres';
 import { jasmineFlower } from './cassettes/jasmineFlower';
 import { kadaram } from './cassettes/kadaram';
 import { kadirga } from './cassettes/kadirga';
 import { lammaBada } from './cassettes/lammaBada';
 import { naoDeLasIndias } from './cassettes/naoDeLasIndias';
+import { navyHymn } from './cassettes/navyHymn';
 import { rodr } from './cassettes/rodr';
 import { sakuraSakura } from './cassettes/sakuraSakura';
 import { seikilosEpitaph } from './cassettes/seikilosEpitaph';
+import { tangehHormoz } from './cassettes/tangehHormoz';
 import { teponaztli } from './cassettes/teponaztli';
 import { theSixteen } from './cassettes/theSixteen';
+import { tipperary } from './cassettes/tipperary';
 import { tulumCanoes } from './cassettes/tulumCanoes';
+import { colonelBogey } from './cassettes/colonelBogey';
 
 export type { Cassette, Deck, MusicMode } from './cassette';
 export { VOICE_NAMES, FEEL_NAMES } from './arrange';
@@ -96,6 +102,11 @@ const ERA_SONGS: Record<EraId, Cassette[]> = {
   // ── Polynesia ────────────────────────────────────────────────────────────
   maori: [hoeaWaka],
   hawaii: [alohaOe],
+  // ── The steel navies and the Barbary shore ───────────────────────────────
+  ww1: [tipperary, armentieres],
+  ww2: [navyHymn, colonelBogey],
+  hormuz: [tangehHormoz],
+  barbary: [hailColumbia],
 };
 
 /** The songs sailing this era's waters. */

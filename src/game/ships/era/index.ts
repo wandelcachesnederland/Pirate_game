@@ -11,9 +11,13 @@
 import { armShipForEra } from '../../weapons';
 import type { EraId, RegionId, ShipDef } from '../../types';
 import { BLACK_GULL } from './blackGull';
+import { HMS_HAVOC } from './hmsHavoc';
 import { HMS_VENGEANCE } from './hmsVengeance';
+import { IRIS_TIR } from './irisTir';
 import { SANTA_BRISA } from './santaBrisa';
 import { SEA_WOLF } from './seaWolf';
+import { USS_ENTERPRISE } from './ussEnterprise';
+import { USS_KESTREL } from './ussKestrel';
 import { USS_REVENANT } from './ussRevenant';
 import {
   ARAB_BOOM,
@@ -84,6 +88,16 @@ export const ERA_SHIPS: EraShip[] = [
     group: 'Age of Sail',
   },
   {
+    id: 'barbary',
+    region: 'barbary',
+    era: 'Barbary War',
+    year: '1801',
+    blurb: 'Schooner: 12 guns, weatherly and quick — to the shores of Tripoli.',
+    def: USS_ENTERPRISE,
+    group: 'Age of Sail',
+    homeWaters: 'the Barbary Coast',
+  },
+  {
     id: 'viking',
     region: 'northSea',
     era: 'Viking Age',
@@ -100,6 +114,36 @@ export const ERA_SHIPS: EraShip[] = [
     blurb: 'Steam casemate: armoured, brutal, no sails.',
     def: USS_REVENANT,
     group: 'Age of Sail',
+  },
+  {
+    id: 'ww1',
+    region: 'doggerBank',
+    era: 'Great War at Sea',
+    year: '1916',
+    blurb: 'Destroyer: quick-firing guns, turbines, thinnest of steel skins.',
+    def: HMS_HAVOC,
+    group: 'Steel Navies',
+    homeWaters: 'the Dogger Bank',
+  },
+  {
+    id: 'ww2',
+    region: 'coralSea',
+    era: 'Second World War at Sea',
+    year: '1943',
+    blurb: 'Fletcher-class: five mounts, radar, the fastest guns afloat.',
+    def: USS_KESTREL,
+    group: 'Steel Navies',
+    homeWaters: 'the Solomons',
+  },
+  {
+    id: 'hormuz',
+    region: 'hormuz',
+    era: 'Tanker War',
+    year: '1988',
+    blurb: 'Kaman-class missile boat: fire first, run fast, dodge the escorts.',
+    def: IRIS_TIR,
+    group: 'Steel Navies',
+    homeWaters: 'the Strait of Hormuz',
   },
   {
     id: 'roman',
@@ -300,5 +344,5 @@ export function eraRegion(id: EraId): RegionId {
   return ERA_REGION[id] ?? ERA_REGION[DEFAULT_ERA];
 }
 
-export { BLACK_GULL, HMS_VENGEANCE, SANTA_BRISA, SEA_WOLF, USS_REVENANT };
+export { BLACK_GULL, HMS_HAVOC, HMS_VENGEANCE, IRIS_TIR, SANTA_BRISA, SEA_WOLF, USS_ENTERPRISE, USS_KESTREL, USS_REVENANT };
 export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, ROMAN_QUINQUEREME, AZTEC_CANOE, BYZANTIUM_DROMON, CHOLA_TIGER, EGYPT_GALLEY, KOREA_TURTLE, LEPANTO_SULTANA, VIETNAM_JUNK };

@@ -6,6 +6,7 @@ import { isTypingTarget } from '../game/input';
 import { HighScoreTable, KeyCap, SoundToggles } from './ui';
 import { EraCarousel } from './EraCarousel';
 import { ERA_FLAGSHIPS } from '../game/ships/era';
+import { isSteelHull } from '../game/types';
 
 interface Props {
   name: string;
@@ -295,10 +296,10 @@ function HelpOverlay({
             <div className="mt-3 rounded-lg border border-parch/25 bg-black/30 p-2 text-[0.85rem] italic leading-snug">
               <p className="flex items-start gap-2">
                 <Wind className="mt-0.5 h-4 w-4 shrink-0" />
-                {ERA_FLAGSHIPS[era].hullStyle === 'ironclad' ? (
+                {isSteelHull(ERA_FLAGSHIPS[era].hullStyle) ? (
                   <span>
-                    A <b>steam ironclad</b> — she burns coal, so the wind means nothing to her. Sink ships in quick
-                    succession to build a <b>plunder streak</b> multiplier!
+                    A <b>powered warship</b> — she burns coal and oil, so the wind means nothing to her. Sink ships in
+                    quick succession to build a <b>plunder streak</b> multiplier!
                   </span>
                 ) : ERA_FLAGSHIPS[era].oared ? (
                   <span>

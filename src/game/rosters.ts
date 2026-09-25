@@ -709,6 +709,156 @@ export const AZTEC_ROSTER: EraRoster = {
   ],
 };
 
+
+// ── 1916 · the Kaiser's navy against the Dover patrol ──────────────────────
+export const WW1_ROSTER: EraRoster = {
+  early: [
+    ['supplyShip', 'supplyShip', 'germDrifter'],
+    ['germTB', 'germTB', 'supplyShip'],
+    ['germUboat', 'germUboat', 'germTB'],
+    ['auxCruiser', 'germTB', 'supplyShip', 'germDrifter'],
+    ['kaiserBattleship'],
+  ],
+  boss: 'kaiserBattleship',
+  jackpot: 'munitionsShip',
+  trader: 'supplyShip',
+  pool: [
+    { kind: 'germTB', cost: 2.0, weight: 3 },
+    { kind: 'germUboat', cost: 1.9, weight: 2, minWave: 3 },
+    { kind: 'germDrifter', cost: 1.2, weight: 2 },
+    { kind: 'supplyShip', cost: 0.9, weight: 1 },
+    { kind: 'auxCruiser', cost: 2.8, weight: 2, minWave: 5 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A supply convoy — cut it off!',
+    'Torpedo boats give chase!',
+    'Periscope sights — steel wolves!',
+    'The raider lines are out!',
+    "A Kaiser's dreadnought approaches!",
+  ],
+  bossTitle: 'The High Seas Fleet sails — with a munitions ship!',
+  lines: [
+    'More smoke on the horizon!',
+    'They want your head, Captain!',
+    'Mind the mines!',
+    'Blood in the water...',
+    'The Admiralty has doubled your bounty!',
+    'Hun hunters close in from all sides!',
+  ],
+};
+
+// ── 1943 · the Solomons, the Tokyo Express ─────────────────────────────────
+export const WW2_ROSTER: EraRoster = {
+  early: [
+    ['maru', 'maru', 'ijnEscort'],
+    ['ijnDestroyer', 'ijnEscort', 'maru'],
+    ['ijnSub', 'ijnSub', 'ijnDestroyer'],
+    ['ijnDestroyer', 'ijnDestroyer', 'maru', 'ijnEscort'],
+    ['ijnBattleship'],
+  ],
+  boss: 'ijnBattleship',
+  jackpot: 'troopTransport',
+  trader: 'maru',
+  pool: [
+    { kind: 'ijnDestroyer', cost: 2.6, weight: 3 },
+    { kind: 'ijnEscort', cost: 1.6, weight: 2 },
+    { kind: 'ijnSub', cost: 1.9, weight: 2, minWave: 3 },
+    { kind: 'maru', cost: 1.1, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Tokyo Express barges — intercept!',
+    'Enemy destroyers give chase!',
+    'Depth charge watch — submarines!',
+    'The perimeter is tested!',
+    'A super battleship approaches!',
+  ],
+  bossTitle: 'The Combined Fleet sails — with a troop convoy!',
+  lines: [
+    'More wakes on the horizon!',
+    'They want your head, Captain!',
+    'Hold the line!',
+    'Blood in the water...',
+    'CINCPAC has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+// ── 1988 · the Tanker War, the Strait of Hormuz ────────────────────────────
+export const HORMUZ_ROSTER: EraRoster = {
+  early: [
+    ['tanker', 'tanker', 'usPatrol'],
+    ['usPatrol', 'usPatrol', 'tanker'],
+    ['usDestroyer', 'usPatrol', 'usPatrol'],
+    ['usDestroyer', 'usDestroyer', 'tanker', 'usPatrol'],
+    ['usFrigate'],
+  ],
+  boss: 'usFrigate',
+  jackpot: 'supertanker',
+  trader: 'tanker',
+  pool: [
+    { kind: 'usPatrol', cost: 1.3, weight: 3 },
+    { kind: 'usDestroyer', cost: 2.9, weight: 2, minWave: 3 },
+    { kind: 'tanker', cost: 1.8, weight: 1 },
+    { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 4 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A tanker convoy — hit the crude!',
+    'Patrol boats give chase!',
+    'Beware the mines — and the escorts!',
+    'The Fifth Fleet has arrived!',
+    'A guided-missile frigate approaches!',
+  ],
+  bossTitle: 'The US Navy sails — with a laden supertanker!',
+  lines: [
+    'More wakes on the horizon!',
+    'They want your boat, Captain!',
+    'No quarter given!',
+    'Oil on the water...',
+    'Washington has doubled the bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+// ── 1801 · To the Shores of Tripoli ────────────────────────────────────────
+export const BARBARY_ROSTER: EraRoster = {
+  early: [
+    ['corsairPrize', 'corsairPrize', 'tripoliGunboat'],
+    ['corsairXebec', 'corsairXebec', 'corsairPrize'],
+    ['tripoliGunboat', 'tripoliGunboat', 'corsairXebec'],
+    ['corsairXebec', 'corsairPolacca', 'corsairPrize', 'tripoliGunboat'],
+    ['meshuda'],
+  ],
+  boss: 'meshuda',
+  jackpot: 'tributePolacca',
+  trader: 'corsairPrize',
+  pool: [
+    { kind: 'corsairXebec', cost: 2.0, weight: 3 },
+    { kind: 'tripoliGunboat', cost: 1.4, weight: 2 },
+    { kind: 'corsairPolacca', cost: 2.6, weight: 2, minWave: 4 },
+    { kind: 'corsairPrize', cost: 0.9, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'Prize ships of the corsairs — retake them!',
+    'Tripolitan xebecs give chase!',
+    'Beware the gunboats of the shallows!',
+    'The Bashaw sends his wolves!',
+    "The Bashaw's Meshuda approaches!",
+  ],
+  bossTitle: 'Tripoli sails — with a tribute fleet!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Captain!',
+    'Millions for defence, not a cent for tribute!',
+    'Blood in the water...',
+    'Jefferson has doubled your bounty!',
+    'Corsairs close in from all sides!',
+  ],
+};
+
 export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   golden: SAIL_ROSTER,
   exploration: SAIL_ROSTER,
@@ -732,4 +882,8 @@ export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   chola: CHOLA_ROSTER,
   vietnam: VIETNAM_ROSTER,
   aztec: AZTEC_ROSTER,
+  ww1: WW1_ROSTER,
+  ww2: WW2_ROSTER,
+  hormuz: HORMUZ_ROSTER,
+  barbary: BARBARY_ROSTER,
 };

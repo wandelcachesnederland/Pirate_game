@@ -7,7 +7,7 @@ import { mulberry32, TAU } from './math';
 import { buildIsland } from './render';
 import { drawShip } from './sprites';
 import type { RegionDef } from './worlds';
-import type { Ship, ShipDef } from './types';
+import { isSteelHull, type Ship, ShipDef } from './types';
 
 /**
  * A throwaway Ship used only to pose a hull for its portrait: the sprite
@@ -161,7 +161,7 @@ export function portraitFit(def: ShipDef, w: number, h: number) {
   const c = Math.abs(Math.cos(PORTRAIT_ANGLE));
   const s = Math.abs(Math.sin(PORTRAIT_ANGLE));
   const len = def.length + 23; // sprite: bowsprit 16 fore, 7 aft
-  const beam = def.width * (def.oared || def.hullStyle === 'ironclad' ? 1 : 1.5) + 14;
+  const beam = def.width * (def.oared || isSteelHull(def.hullStyle) ? 1 : 1.5) + 14;
   const bw = len * c + beam * s;
   const bh = len * s + beam * c;
   const scale = Math.min((w * 0.94) / bw, (h * 0.9) / bh);
