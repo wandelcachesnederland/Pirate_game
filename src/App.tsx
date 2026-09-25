@@ -1,5 +1,6 @@
+import { usesGunpowder } from './game/weapons';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Flag, Grape, Pause } from 'lucide-react';
+import { Flag, Grape, Crosshair, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
 import type { EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
@@ -303,7 +304,7 @@ export default function App() {
             engineRef.current?.fireGrapeshotFromUI();
             setGrape(engineRef.current?.getGrapeshot() ?? null);
           }}
-          aria-label="Grapeshot — sweep the deck"
+          aria-label={usesGunpowder(era) ? 'Grapeshot — sweep the deck' : 'Arrow storm — sweep the deck'}
           className={cn(
             'absolute z-10 flex items-center gap-2 px-4 py-2 leading-none',
             grape.cd > 0 ? 'btn-wood opacity-70' : 'btn-seal cursor-pointer',
@@ -316,9 +317,9 @@ export default function App() {
               : 'calc(max(14px, env(safe-area-inset-bottom)) + 58px)',
           }}
         >
-          <Grape className="h-6 w-6" />
+          {usesGunpowder(era) ? <Grape className="h-6 w-6" /> : <Crosshair className="h-6 w-6" />}
           <span className="flex flex-col items-start">
-            <span className="text-2xl">GRAPE</span>
+            <span className="text-2xl">{usesGunpowder(era) ? 'GRAPE' : 'ARROWS'}</span>
             <span className="text-xs italic tracking-wide opacity-90">
               {grape.cd > 0
                 ? `loading… ${Math.ceil(grape.cd)}s`

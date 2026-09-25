@@ -40,6 +40,8 @@ export const PROVOKE = {
   boatHit: 0.1,
   /** One of their boats sent to the bottom. */
   boatSunk: 2,
+  /** One of their boats taken as a prize. */
+  boatTaken: 2,
   /** A shell landing on the island itself. */
   shelling: 1,
 } as const;
@@ -161,4 +163,64 @@ export function moodOf(st: Settlement): Mood {
 /** Flag flown over the village: red if these people start out hostile. */
 export function flagOf(st: Settlement): 'white' | 'red' {
   return st.hostile ? 'red' : 'white';
+}
+
+/** Procedural political groups, named for local villages rather than
+ * assigning a temperament to a real-world ethnicity. Shared peoples and an
+ * alliance are guaranteed when at least four inhabited islands exist. */
+export function assignIslandPolitics(settlements: Settlement[], rng = Math.random): void {
+  const villages = settlements.filter((st) => st.inhabited);
+  const count = Math.min(6, Math.max(1, Math.floor(villages.length / 2)));
+  const names = [...new Set(villages.map((st) => st.name))];
+  const groups = Array.from({ length: count }, (_, i) => ({
+    id: `people-${i}`, name: `${names[i] ?? `Outer Isles ${i + 1}`} people`,
+  }));
+  // Shuffle the geography, not village names. Adjacent islands need not be kin.
+  const shuffled = [...villages];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  shuffled.forEach((st, i) => {
+    const groupIndex = i % count;
+    const group = groups[groupIndex];
+    st.peopleId = group.id;
+    st.peopleName = group.name;
+    // The first two peoples pledge mutual defence; the others are independent.
+    st.allianceId = count >= 2 && groupIndex < 2 ? 'tide-pact' : undefined;
+    st.allianceName = st.allianceId ? 'Tide Pact' : undefined;
+    st.raidTimer = 0;
+  });
+}
+
+export function areIslandAllies(a: Settlement, b: Settlement): boolean {
+  return a.inhabited && b.inhabited && (a === b ||
+    (!!a.peopleId && a.peopleId === b.peopleId) ||
+    (!!a.allianceId && a.allianceId === b.allianceId));
+}
+
+/** A local offence must cross local patience first. Once war begins, kin and
+ * pact members answer even if they would normally forgive an attack on boats.
+ * Further offences refresh the whole bloc's grievance/cooling period. */
+export function provokeNetwork(
+  source: Settlement, settlements: Settlement[], points: number, kind: 'boats' | 'shell',
+): Settlement[] {
+  if (!source.inhabited || points <= 0 ||
+      (kind === 'boats' && source.friendliness >= BOAT_SENSITIVE_BELOW)) return [];
+  const wasHostile = source.hostile;
+  if (kind === 'boats') provokeBoats(source, points);
+  else provoke(source, points);
+  if (!source.hostile) return [];
+  const roused: Settlement[] = [];
+  for (const st of settlements) {
+    if (!areIslandAllies(source, st)) continue;
+    if (!st.hostile || (st === source && !wasHostile)) roused.push(st);
+    st.hostile = true;
+    // Same excess anger gives the bloc the same truce time. Naturally hostile
+    // villages (patience zero) still never stand down, as before.
+    st.anger = st.patience + 3;
+    st.calm = 0;
+    st.raidTimer = Math.min(st.raidTimer ?? 0, 1);
+  }
+  return roused;
 }

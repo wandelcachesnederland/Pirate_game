@@ -186,6 +186,7 @@ export interface ShipDef {
   speed: number;
   accel: number;
   turn: number;
+  /** Weapon stations per side (bows / pulley launchers in early eras). */
   cannons: number;
   reload: number;
   damage: number;
@@ -201,6 +202,7 @@ export interface ShipDef {
   sailShade: string;
   /** Lobs arcing, exploding shells instead of flat broadsides. */
   mortar?: boolean;
+  weapon?: 'mechanical' | 'gunpowder';
   /** Reserved: ignores false flags once a disguise system exists. */
   seesThroughDisguise?: boolean;
   /** Gun decks drawn as extra rows of gun ports (default 1). */
@@ -365,7 +367,7 @@ export interface ShipInventory {
   maxWater: number;
   food: number;
   maxFood: number;
-  slaves: number;
+  prisoners: number;
   flags: CapturedFlag[];
 }
 
@@ -407,7 +409,7 @@ export interface GameStats {
   /** Prizes taken by boarding (never counted as sunk). */
   boarded?: number;
   /** Souls in irons below decks. */
-  slaves?: number;
+  prisoners?: number;
   /** Enemy colours struck and carried home. */
   flagsTaken?: number;
   /** Waters sailed, for the epitaph. */
@@ -467,6 +469,14 @@ export interface Settlement {
   patience: number;
   /** Village name, for the log. */
   name: string;
+  /** Shared political identity, independent of this village's name. */
+  peopleId?: string;
+  peopleName?: string;
+  /** A mutual-defence bloc shared by different peoples. */
+  allianceId?: string;
+  allianceName?: string;
+  /** Local war-party launch cooldown. */
+  raidTimer?: number;
   fortress?: Fortress;
   hostile: boolean;
   /** Seconds since the last grievance — how long they have been angry. */

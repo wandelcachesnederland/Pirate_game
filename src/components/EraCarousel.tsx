@@ -215,13 +215,16 @@ function HullCard({ e }: { e: EraShip }) {
           <div className="mt-1.5 space-y-1">
             <StatBar label="Hull" v={sc.hull} tint="linear-gradient(90deg,#e07a4a,#b3261e)" />
             <StatBar label="Speed" v={sc.speed} tint="linear-gradient(90deg,#77e0c0,#1b7898)" />
-            <StatBar label="Guns" v={sc.guns} tint="linear-gradient(90deg,#ffd863,#c8912a)" />
+            <StatBar label={e.def.weapon === 'mechanical' ? "Bows" : "Guns"} v={sc.guns} tint="linear-gradient(90deg,#ffd863,#c8912a)" />
             <StatBar label="Helm" v={sc.helm} tint="linear-gradient(90deg,#b9c7f0,#3d55a8)" />
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <div>
             <div className="font-pirate text-2xl leading-none sm:text-3xl">{e.def.name}</div>
+            <div className="mt-1 text-xs text-gold">
+              {e.def.weapon === 'mechanical' ? 'Archery & pulley-drawn bolt launchers' : 'Gunpowder broadsides'}
+            </div>
             <div className="text-[0.62rem] uppercase tracking-[0.16em] opacity-65">
               {e.era} · {e.year}
             </div>

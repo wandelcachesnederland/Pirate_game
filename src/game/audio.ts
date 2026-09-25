@@ -223,6 +223,15 @@ export class Sfx {
   }
 
   // ---------------- SFX ----------------
+  /** Bowstring snap / wooden pulley release, without a powder report. */
+  bow(vol = 1, pan = 0) {
+    if (!this.ok() || vol < 0.03 || !this.gate('bow', 0.028)) return;
+    const t = this.ctx!.currentTime;
+    const d = this.dest(pan);
+    this.tone(d, t, 'triangle', 410, 130, 0.12, 0.22 * vol);
+    this.noise(d, t, 0.13, 0.12 * vol, 'bandpass', 1800, 850, 1, 0.003);
+  }
+
   cannon(vol = 1, pan = 0) {
     if (!this.ok() || vol < 0.03 || !this.gate('cannon', 0.028)) return;
     const t = this.ctx!.currentTime;

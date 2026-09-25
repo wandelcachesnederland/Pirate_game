@@ -95,6 +95,27 @@ export function drawShip(
   if (n > 0 && !def.mortar && !flash) {
     for (let i = 0; i < n; i++) {
       const cx = cannonLocalX(def, n, i);
+      if (def.weapon === 'mechanical') {
+        for (const side of [-1, 1]) {
+          const y = side * (hw - 1);
+          const recoil = side < 0 ? s.recoilL : s.recoilR;
+          // Wooden bow arms, drawn string, bolt rail and pulley wheel.
+          ctx.strokeStyle = '#b78a50';
+          ctx.lineWidth = 1.7;
+          ctx.beginPath();
+          ctx.moveTo(cx - 4, y); ctx.quadraticCurveTo(cx, y + side * 5, cx + 4, y);
+          ctx.stroke();
+          ctx.strokeStyle = '#e6d4a3';
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(cx - 4, y); ctx.lineTo(cx, y - side * (2 + recoil * 2)); ctx.lineTo(cx + 4, y);
+          ctx.moveTo(cx, y - side * 4); ctx.lineTo(cx, y + side * 5);
+          ctx.stroke();
+          ctx.fillStyle = '#755330';
+          ctx.beginPath(); ctx.arc(cx, y - side * 3, 1.2, 0, TAU); ctx.fill();
+        }
+        continue;
+      }
       ctx.fillStyle = '#17170f';
       ctx.fillRect(cx - 1.05, -hw - 3.1 + s.recoilL * 3, 2.1, 4.6);
       ctx.fillRect(cx - 1.05, hw - 1.5 - s.recoilR * 3, 2.1, 4.6);

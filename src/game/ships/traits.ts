@@ -60,7 +60,7 @@ export function shipTraits(def: ShipDef): ShipTraits {
   if (def.oared || def.hullStyle === 'ironclad') strengths.push([0.75, def.hullStyle === 'ironclad' ? 'Burns coal — wind means nothing' : 'Paddles — wind means nothing']);
   if (def.mortar) strengths.push([0.72, 'Lobs exploding shells']);
   if ((def.crew ?? 0) >= 120) strengths.push([0.68, `Big boarding crew (${def.crew})`]);
-  if (big && def.cannons >= 3) strengths.push([0.66, 'Carries a whole fort’s worth of guns']);
+  if (big && def.cannons >= 3) strengths.push([0.66, def.weapon === 'mechanical' ? 'Ranks of archers and pulley-drawn launchers' : 'Carries a whole fort’s worth of guns']);
 
   if (hpR <= 0.4) weaknesses.push([1 - hpR, `Thin hull (${def.hp})`]);
   if (spdR <= 0.65) weaknesses.push([1 - spdR, `Slow — ${def.speed} knots`]);
