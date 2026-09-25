@@ -19,7 +19,7 @@ import { DEFAULT_REGION, regionById } from './worlds';
 import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from './boarding';
 import { Input } from './input';
 import { Sfx } from './audio';
-import { BOSS_CASSETTE, type MusicMode } from './music';
+import type { MusicMode } from './music';
 import {
   buildIsland,
   drawChest,
@@ -419,6 +419,8 @@ export class Engine {
     const def = ERA_FLAGSHIPS[id] ?? ERA_FLAGSHIPS[DEFAULT_ERA];
     this.eraId = id;
     this.playerDef = def;
+    // the deck follows the era: every sea has its own songs and its own dirge
+    this.sfx.setEra(id);
     if (this.screen === 'menu' && this.player) {
       const old = this.player;
       const fresh = this.makeShip('player', old.x, old.y, old.angle);
@@ -427,6 +429,19 @@ export class Engine {
       else this.ships.push(fresh);
       this.player = fresh;
     }
+  }
+
+  /**
+   * Let the player hear the sea they are choosing. Picking an era on the menu
+   * is a click — a gesture — so this is also where the audio unlocks: the
+   * era's own tape starts playing before the first wave is ever launched.
+   */
+  previewEraMusic() {
+    if (this.screen !== 'menu') return;
+    this.sfx.unlock();
+    this.sfx.setEra(this.eraId);
+    this.sfx.insertRandomCassette(false);
+    this.sfx.startMusic();
   }
 
   /** Which waters are being sailed. */
@@ -547,6 +562,7 @@ export class Engine {
     this.input.enabled = true;
     this.screen = 'playing';
     this.cb.onScreen('playing');
+    this.sfx.setEra(this.eraId);
     this.startWave(1);
     this.sfx.stopMusic();
     this.sfx.startMusic();
@@ -579,6 +595,8 @@ export class Engine {
     this.sfx.stopMusic();
     this.sfx.duck(false);
     this.enterMenu();
+    // back in port: the era's tape comes back up while the charts are out
+    this.previewEraMusic();
   }
 
   chooseUpgrade(id: UpgradeId) {
@@ -859,7 +877,7 @@ export class Engine {
     this.sfx.setTempo(n);
     if (this.waveQueue.some((k) => SHIP_DEFS[k].boss)) {
       // a warship is coming: the deck falls silent to the boss theme
-      this.sfx.insertCassette(BOSS_CASSETTE);
+      this.sfx.insertBossCassette();
     } else {
       this.sfx.insertRandomCassette(n > 1);
     }

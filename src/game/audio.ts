@@ -1,5 +1,15 @@
 // All sound is synthesized at runtime with the Web Audio API — no asset downloads.
-import { INSERTED_CASSETTE, randomCassette, type Cassette, type Deck, type MusicMode } from './music';
+import {
+  BOSS_CASSETTE,
+  INSERTED_CASSETTE,
+  bossCassette,
+  randomCassette,
+  randomCassetteForEra,
+  type Cassette,
+  type Deck,
+  type MusicMode,
+} from './music';
+import type { EraId } from './types';
 
 type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext };
 
@@ -22,6 +32,8 @@ export class Sfx {
   private step = 0;
   private nextTime = 0;
   private cassette: Cassette = INSERTED_CASSETTE;
+  /** The sea being sailed: picks which era's tapes the deck loads. */
+  private era: EraId | null = null;
   private wave = 1;
   private stepDur = this.cassette.stepDuration(1);
   private ducked = false;
@@ -453,9 +465,27 @@ export class Sfx {
     console.info(`[music] Now playing: ${cassette.title}`);
   }
 
-  /** Swap in a random cassette. With `avoidRepeat`, never the song that is already playing. */
+  /** The era whose waters are being sailed — its songs are what the deck plays. */
+  setEra(era: EraId) {
+    this.era = era;
+  }
+
+  /** Title of the cassette on the deck right now — shown when the game pauses. */
+  get nowPlaying(): string {
+    return this.cassette.title;
+  }
+
+  /** Swap in a random cassette from the current era's waters. */
   insertRandomCassette(avoidRepeat = true) {
-    this.insertCassette(randomCassette(avoidRepeat ? this.cassette : undefined));
+    const current = avoidRepeat ? this.cassette : undefined;
+    this.insertCassette(
+      this.era ? randomCassetteForEra(this.era, current) : randomCassette(current),
+    );
+  }
+
+  /** Swap in the era's boss theme — the dirge that plays when a warship comes. */
+  insertBossCassette() {
+    this.insertCassette(this.era ? bossCassette(this.era) : BOSS_CASSETTE);
   }
 
   startMusic() {
