@@ -20,6 +20,7 @@ export const USS_REVENANT: ShipDef = {
   range: 500,
   ballSpeed: 700,
   masts: 1,
+  crew: 55,
   value: 0,
   coins: 0,
   hull: '#3a3f44',

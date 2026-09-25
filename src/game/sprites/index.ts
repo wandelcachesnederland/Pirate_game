@@ -11,5 +11,15 @@
 
 export { cannonLocalX, clearPathCache, hullShape, shipPaths, styleId, type ShipPaths } from './hull';
 export { buildHullSprite, clearShipCaches, getHullSprite } from './hullSprite';
-export { drawEmblem, drawEnsign, drawFlagArt, drawOars, drawRigging, drawSail } from './rigging';
+export {
+  drawEmblem,
+  drawEnsign,
+  drawFlagArt,
+  drawJunkBattens,
+  drawLateenSail,
+  drawOars,
+  drawRigging,
+  drawSail,
+  drawSurrenderFlag,
+} from './rigging';
 export { drawShip, drawShipShadow } from './ship';

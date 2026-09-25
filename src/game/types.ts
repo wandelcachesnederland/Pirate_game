@@ -21,7 +21,17 @@ export type ShipKind =
 
 export type Faction = 'pirate' | 'spain' | 'england' | 'france' | 'merchant' | 'fire' | 'native';
 
-export type HullStyle = 'default' | 'longship' | 'ironclad' | 'caravel' | 'canoe';
+export type HullStyle =
+  | 'default'
+  | 'longship'
+  | 'ironclad'
+  | 'caravel'
+  | 'canoe'
+  // heritage silhouettes (museum pieces — not sailed in gameplay yet)
+  | 'trireme'
+  | 'dhow'
+  | 'junk'
+  | 'atakebune';
 
 /** Playable hero hulls — each is a `player`-kind ShipDef with its own styleKey. */
 export type EraId = 'golden' | 'exploration' | 'napoleonic' | 'viking' | 'ironclad';
@@ -61,6 +71,8 @@ export interface ShipDef {
   styleKey?: string;
   /** Paddled/oared craft: no sails, immune to the wind, draws moving oars. */
   oared?: boolean;
+  /** Ship's company at full strength. Casualties mount as the hull takes damage. */
+  crew?: number;
 }
 
 export interface Ship {
@@ -114,6 +126,37 @@ export interface Ship {
    * Nothing sets this yet; `seesThroughDisguise` hulls would ignore it.
    */
   falseFlag?: Faction;
+  /** Hands still standing (fractional internally — casualties accrue with damage). */
+  crew: number;
+  maxCrew: number;
+  /** Struck her colours: drifting under a white flag, silent guns, ready to board. */
+  surrendered: boolean;
+  /** Surrender rolls spent — a ship only gets so many chances to strike. */
+  surrenderRolls: number;
+  /** Taken as a prize: prize crew aboard, counts as cleared like a sinking. */
+  captured: boolean;
+}
+
+/** Where in the world the game is played — each has its own waters and islands. */
+export type RegionId = 'caribbean' | 'mediterranean' | 'arabian' | 'singapore';
+
+/** An enemy's colours, struck and carried home after a boarding. */
+export interface CapturedFlag {
+  faction: Faction;
+  ship: string;
+  wave: number;
+}
+
+/** Everything the player's ship carries — always visible in the HUD. */
+export interface ShipInventory {
+  crew: number;
+  maxCrew: number;
+  water: number;
+  maxWater: number;
+  food: number;
+  maxFood: number;
+  slaves: number;
+  flags: CapturedFlag[];
 }
 
 export type UpgradeId =
@@ -149,6 +192,15 @@ export interface GameStats {
   accuracy: number;
   maxStreak: number;
   time: number;
+  /** Prizes taken by boarding (never counted as sunk). */
+  boarded?: number;
+  /** Souls in irons below decks. */
+  slaves?: number;
+  /** Enemy colours struck and carried home. */
+  flagsTaken?: number;
+  /** Waters sailed, for the epitaph. */
+  region?: RegionId;
+  regionName?: string;
 }
 
 export interface Island {

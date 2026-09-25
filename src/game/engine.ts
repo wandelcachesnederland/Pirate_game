@@ -1,6 +1,21 @@
-import type { EraId, GameStats, Island, Screen, Ship, ShipDef, ShipKind, UpgradeId, UpgradeOffer } from './types';
+import type {
+  CapturedFlag,
+  EraId,
+  GameStats,
+  Island,
+  RegionId,
+  Screen,
+  Ship,
+  ShipDef,
+  ShipInventory,
+  ShipKind,
+  UpgradeId,
+  UpgradeOffer,
+} from './types';
 import { SHIP_DEFS, UPGRADES, waveComposition, waveTitle } from './data';
 import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
+import { DEFAULT_REGION, regionById } from './worlds';
+import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from './boarding';
 import { Input } from './input';
 import { Sfx } from './audio';
 import {
@@ -15,13 +30,14 @@ import {
   makeWaveTile,
   rr,
 } from './render';
-import { cannonLocalX, drawShip, drawShipShadow } from './sprites';
+import { cannonLocalX, drawFlagArt, drawShip, drawShipShadow } from './sprites';
 import { angDiff, TAU } from './math';
 
 // Re-exported so callers can keep importing `angDiff` from the engine.
 export { angDiff };
 const HALF_PI = Math.PI / 2;
-export const WORLD = 2100;
+/** Half-width of the chart. 4200 doubles each dimension — four times the sea. */
+export const WORLD = 4200;
 const MAX_PARTICLES = 1100;
 const MAX_PICKUPS = 260;
 const STREAK_TIME = 7;
@@ -240,7 +256,7 @@ export class Engine {
   private clearTimer = 0;
   private waveDamage = 0;
   private magnetAll = false;
-  private stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0 };
+  private stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
   private banner: Banner = { title: '', sub: '', t: 99, dur: 0, gold: false };
   private hintTimer = 0;
   private firstHit = false;
@@ -262,6 +278,20 @@ export class Engine {
   private pstats: PlayerStats = defaultStats(ERA_FLAGSHIPS[DEFAULT_ERA]);
   private swivelTimer = 0;
   private nativeTimer = rand(4, 8);
+  /** Waters being sailed — picked on the menu, scenery only. */
+  private regionId: RegionId = DEFAULT_REGION;
+  private waterBase = '#1a7394';
+  /** The ship's stores — water, food, souls in irons, colours struck. */
+  private water = 100;
+  private maxWater = 150;
+  private food = 100;
+  private maxFood = 150;
+  private slaves = 0;
+  private flags: CapturedFlag[] = [];
+  /** Surrendered foe lying alongside, ready to board — if any. */
+  private boardCandidate: Ship | null = null;
+  private supplyTimer = 0;
+  private storeWarnTimer = 0;
 
   private waterPattern: CanvasPattern | null = null;
   private wavePatternA: CanvasPattern | null = null;
@@ -284,9 +314,7 @@ export class Engine {
       });
     }
     for (let i = 0; i < 26; i++) this.streaks.push({ x: 0, y: 0, life: 0, max: 1, len: 40 });
-    this.waterPattern = ctx.createPattern(makeWaterTile(), 'repeat');
-    this.wavePatternA = ctx.createPattern(makeWaveTile(77, 30, 0.34), 'repeat');
-    this.wavePatternB = ctx.createPattern(makeWaveTile(991, 16, 0.22), 'repeat');
+    this.buildWaterPatterns();
     this.glowWarm = makeGlow('rgba(255,245,210,1)', 'rgba(255,190,90,0.55)', 'rgba(255,120,30,0)');
     this.glowGold = makeGlow('rgba(255,236,150,0.9)', 'rgba(255,200,60,0.35)', 'rgba(255,180,40,0)');
     this.vignette = makeVignette(2, 14, 30, 0.62);
@@ -348,6 +376,56 @@ export class Engine {
     }
   }
 
+  /** Which waters are being sailed. */
+  getRegion(): RegionId {
+    return this.regionId;
+  }
+
+  /** Pick the sailing region. Rebuilds the menu chart so it shows at once. */
+  setRegion(id: RegionId) {
+    if (this.regionId === id && this.screen === 'menu') return;
+    this.regionId = id;
+    this.buildWaterPatterns();
+    if (this.screen === 'menu') this.enterMenu();
+  }
+
+  /** Prize within boarding reach, if any — polled by the touch BOARD button. */
+  getBoardCandidate(): { name: string; crew: number } | null {
+    const s = this.boardCandidate;
+    if (!s || s.sinking >= 0 || s.captured || !s.surrendered) return null;
+    return { name: s.def.name, crew: Math.max(0, Math.ceil(s.crew)) };
+  }
+
+  /** UI-triggered boarding (touch button). */
+  boardFromUI() {
+    if (this.screen === 'playing' && this.boardCandidate) this.resolveBoarding(this.boardCandidate);
+  }
+
+  /** Snapshot of the ship's stores for UI overlays. */
+  getInventory(): ShipInventory {
+    const p = this.player;
+    return {
+      crew: Math.max(0, Math.ceil(p?.crew ?? 0)),
+      maxCrew: Math.max(0, Math.ceil(p?.maxCrew ?? 0)),
+      water: Math.floor(this.water),
+      maxWater: this.maxWater,
+      food: Math.floor(this.food),
+      maxFood: this.maxFood,
+      slaves: this.slaves,
+      flags: [...this.flags],
+    };
+  }
+
+  /** Re-tint the sea for the current region. */
+  private buildWaterPatterns() {
+    const r = regionById(this.regionId);
+    this.waterBase = r.water.base;
+    const ctx = this.ctx;
+    this.waterPattern = ctx.createPattern(makeWaterTile({ light: r.water.light, dark: r.water.dark }), 'repeat');
+    this.wavePatternA = ctx.createPattern(makeWaveTile(77, 30, 0.34), 'repeat');
+    this.wavePatternB = ctx.createPattern(makeWaveTile(991, 16, 0.22), 'repeat');
+  }
+
   startGame() {
     this.pstats = defaultStats(this.playerDef);
     this.sfx.unlock();
@@ -357,7 +435,7 @@ export class Engine {
     this.mult = 1;
     this.streakTimer = 0;
     this.wave = 0;
-    this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0 };
+    this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
     this.levels = {};
     this.pstats = defaultStats(this.playerDef);
     this.swivelTimer = 0;
@@ -368,6 +446,14 @@ export class Engine {
     this.applyPlayerStats();
     this.player.hp = this.player.maxHp;
     this.player.ghostHp = this.player.maxHp;
+    // full water butts and bread room at sailing; the hold starts empty
+    this.water = 100;
+    this.food = 100;
+    this.slaves = 0;
+    this.flags = [];
+    this.boardCandidate = null;
+    this.supplyTimer = 0;
+    this.storeWarnTimer = 0;
     this.ships.push(this.player);
     this.camX = 0;
     this.camY = 0;
@@ -561,8 +647,10 @@ export class Engine {
     this.islands = [];
     const res = clamp(this.viewScale * this.dpr, 0.7, 1.25);
     const seedBase = (Math.random() * 1e9) | 0;
+    const theme = regionById(this.regionId).islands;
     let tries = 0;
-    while (this.islands.length < 10 && tries++ < 500) {
+    // the chart is four times the sea it was — island count keeps the old density
+    while (this.islands.length < 30 && tries++ < 2500) {
       const r = rand(80, 190);
       const x = rand(-WORLD + r + 140, WORLD - r - 140);
       const y = rand(-WORLD + r + 140, WORLD - r - 140);
@@ -575,7 +663,7 @@ export class Engine {
         }
       }
       if (!ok) continue;
-      this.islands.push(buildIsland(x, y, r, seedBase + tries * 7919, res));
+      this.islands.push(buildIsland(x, y, r, seedBase + tries * 7919, res, theme));
     }
   }
 
@@ -584,6 +672,7 @@ export class Engine {
     const w = Math.max(1, this.wave);
     const enemy = kind !== 'player';
     const hp = Math.round(def.hp * (enemy ? 1 + 0.085 * (w - 1) : 1));
+    const crew = Math.round((def.crew ?? 20) * (enemy ? 1 + Math.min(0.3, 0.02 * (w - 1)) : 1));
     const v0 = def.speed * 0.45;
     return {
       id: this.nextId++,
@@ -602,6 +691,11 @@ export class Engine {
       hp,
       maxHp: hp,
       ghostHp: hp,
+      crew,
+      maxCrew: crew,
+      surrendered: false,
+      surrenderRolls: 0,
+      captured: false,
       reloadL: enemy ? rand(0.8, 2.2) : 0,
       reloadR: enemy ? rand(0.8, 2.2) : 0,
       reloadTime: enemy ? def.reload * Math.max(0.62, 1 - 0.035 * (w - 1)) : def.reload,
@@ -704,12 +798,12 @@ export class Engine {
 
   private countEnemies(): number {
     let n = 0;
-    for (const s of this.ships) if (s.team === 1 && s.sinking < 0) n++;
+    for (const s of this.ships) if (s.team === 1 && s.sinking < 0 && !s.captured) n++;
     return n;
   }
 
   private findBoss(): Ship | null {
-    for (const s of this.ships) if (s.isBoss && s.sinking < 0) return s;
+    for (const s of this.ships) if (s.isBoss && s.sinking < 0 && !s.captured) return s;
     return null;
   }
 
@@ -785,6 +879,11 @@ export class Engine {
       accuracy: this.stats.shots > 0 ? this.stats.hits / this.stats.shots : 0,
       maxStreak: this.stats.maxStreak,
       time: this.stats.time,
+      boarded: this.stats.boarded,
+      slaves: this.slaves,
+      flagsTaken: this.flags.length,
+      region: this.regionId,
+      regionName: regionById(this.regionId).name,
     };
     this.cb.onScreen('gameover');
     this.cb.onGameOver(st);
@@ -845,6 +944,8 @@ export class Engine {
     if (playing) {
       this.updateNatives(dt);
       this.updateSwivel(dt);
+      this.updateBoarding();
+      this.updateSupplies(dt);
     }
     this.updateVolleys(dt);
     this.updateBalls(dt);
@@ -929,6 +1030,7 @@ export class Engine {
     if (inp.starQueued || inp.starHeld) this.tryFire(p, 1, false);
     if (inp.smartQueued) this.smartFire(true);
     else if (inp.smartHeld) this.smartFire(false);
+    if (inp.boardQueued && this.boardCandidate) this.resolveBoarding(this.boardCandidate);
     inp.consume();
   }
 
@@ -937,7 +1039,10 @@ export class Engine {
     let best: Ship | null = null;
     let bestScore = Infinity;
     for (const e of this.ships) {
-      if (e.team === s.team || e.sinking >= 0) continue;
+      if (e.team === s.team || e.sinking >= 0 || e.captured) continue;
+      // prizes are for boarding, not blasting — auto-aim leaves them alone
+      // (a captain who wants her sunk can still fire on her by hand)
+      if (e.surrendered) continue;
       const dx = e.x - s.x;
       const dy = e.y - s.y;
       const d = Math.hypot(dx, dy);
@@ -1057,7 +1162,7 @@ export class Engine {
     let best: Ship | null = null;
     let bd = range;
     for (const e of this.ships) {
-      if (e.team !== 1 || e.sinking >= 0) continue;
+      if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered) continue;
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (d < bd) {
         bd = d;
@@ -1109,8 +1214,14 @@ export class Engine {
         s.y += s.vy * dt;
         s.fxTimer -= dt;
         if (s.fxTimer <= 0) {
-          s.fxTimer = 0.07;
-          this.fxSinking(s);
+          if (s.captured) {
+            // a prize doesn't sink — she drops astern glittering, prize crew aboard
+            s.fxTimer = 0.14;
+            this.fxSparkle(s.x + rand(-22, 22), s.y + rand(-14, 14), 1, '#ffe27a');
+          } else {
+            s.fxTimer = 0.07;
+            this.fxSinking(s);
+          }
         }
         if (s.sinking > 2.6) s.dead = true;
         continue;
@@ -1365,6 +1476,12 @@ export class Engine {
     const dy = p.y - s.y;
     const dist = Math.hypot(dx, dy);
     const toP = Math.atan2(dy, dx);
+    if (s.surrendered) {
+      // struck ship: bare poles, drifting down, silent guns — come board her
+      s.turnInput = clamp(angDiff(s.angle, this.windAngle + Math.PI) / 0.6, -1, 1) * 0.4;
+      s.sailTarget = 0.12;
+      return;
+    }
     let desired = s.angle;
     let sail = 1;
     s.aiTimer -= dt;
@@ -1628,12 +1745,45 @@ export class Engine {
   }
 
   private damageShip(s: Ship, dmg: number, byPlayer: boolean) {
-    if (s.sinking >= 0 || this.screen !== 'playing') return;
+    if (s.sinking >= 0 || s.captured || this.screen !== 'playing') return;
     s.hp -= dmg;
     s.flash = 0.1;
     s.hitTimer = 0;
     if (byPlayer) s.hitByPlayer = true;
-    if (s.hp <= 0) this.sinkShip(s);
+    // casualties mount with the damage — a pounded crew boards poorly
+    const loss = (dmg / s.maxHp) * s.maxCrew * 0.55;
+    if (s === this.player) s.crew = Math.max(1, s.crew - loss);
+    else s.crew = Math.max(0, s.crew - loss);
+    if (s.hp <= 0) {
+      this.sinkShip(s);
+      return;
+    }
+    if (s.team === 1 && !s.surrendered && s.hitByPlayer) this.maybeSurrender(s);
+  }
+
+  /** A mauled foe may strike her colours instead of fighting to the death. */
+  private maybeSurrender(s: Ship) {
+    const base = surrenderChance(s.def.kind);
+    if (base <= 0 || s.surrenderRolls >= 2) return;
+    const ratio = s.hp / s.maxHp;
+    if (s.crew >= 1) {
+      const threshold = s.surrenderRolls === 0 ? SURRENDER_HP : SURRENDER_HP_DESPERATE;
+      if (ratio >= threshold) return;
+      s.surrenderRolls++;
+      if (Math.random() >= base) return;
+    }
+    this.raiseWhiteFlag(s);
+  }
+
+  private raiseWhiteFlag(s: Ship) {
+    s.surrendered = true;
+    s.sailTarget = 0.12;
+    s.reloadL = Math.max(s.reloadL, 1.5);
+    s.reloadR = Math.max(s.reloadR, 1.5);
+    this.addText(s.x, s.y - 32, 'SURRENDERED!', '#ffffff', 26);
+    this.addText(s.x, s.y - 10, 'Close and board her (F) for the full prize!', '#ffe066', 15);
+    this.fxSparkle(s.x, s.y, 10, '#ffffff');
+    this.sfx.fanfare();
   }
 
   private sinkShip(s: Ship, reward = true) {
@@ -1657,6 +1807,10 @@ export class Engine {
         this.launchRowboat(s);
         const pts = this.addScore(s.def.value * (1 + 0.1 * (this.wave - 1)));
         this.addText(s.x, s.y - 30, `SUNK! +${pts.toLocaleString('en-US')}`, '#ffd84d', s.isBoss ? 36 : 26);
+        if (s.surrendered) {
+          // she struck and was sunk anyway — most of the prize went down with her
+          this.addText(s.x, s.y - 8, 'Her treasure went down with her…', '#e6d3a3', 14);
+        }
         this.dropLoot(s);
         this.slowMo = s.isBoss ? 1.0 : 0.32;
         this.zoomPunch = s.isBoss ? 0.14 : 0.06;
@@ -1730,6 +1884,186 @@ export class Engine {
     this.score += pts;
     this.scorePulse = 1;
     return pts;
+  }
+
+  // ================================================================ boarding & stores
+  /** Nearest struck ship lying alongside, if any. */
+  private updateBoarding() {
+    this.boardCandidate = null;
+    const p = this.player;
+    if (p.sinking >= 0 || this.playerDeadTimer >= 0) return;
+    let bd = Infinity;
+    for (const s of this.ships) {
+      if (s.team !== 1 || !s.surrendered || s.sinking >= 0 || s.captured) continue;
+      const reach = (p.def.length + s.def.length) * 0.5 + BOARD_RANGE;
+      const d = Math.hypot(s.x - p.x, s.y - p.y);
+      if (d < reach && d < bd) {
+        bd = d;
+        this.boardCandidate = s;
+      }
+    }
+  }
+
+  /** The slow drip of the water butts and the bread room. */
+  private updateSupplies(dt: number) {
+    if (this.playerDeadTimer >= 0) return;
+    const crew = Math.max(1, Math.ceil(this.player.crew));
+    // a full store lasts a patient captain most of a long cruise
+    this.water = Math.max(0, this.water - dt * crew * 0.0045);
+    this.food = Math.max(0, this.food - dt * crew * 0.0032);
+    this.storeWarnTimer -= dt;
+    if (this.water <= 0 || this.food <= 0) {
+      this.supplyTimer += dt;
+      if (this.supplyTimer > 12) {
+        this.supplyTimer = 0;
+        if (this.player.crew > 1) {
+          this.player.crew -= 1;
+          this.addText(
+            this.player.x,
+            this.player.y - 52,
+            this.water <= 0 ? 'A man died of thirst!' : 'A man starved!',
+            '#ff9a8a',
+            16,
+          );
+        }
+      }
+      if (this.storeWarnTimer <= 0) {
+        this.storeWarnTimer = 20;
+        this.addText(
+          this.player.x,
+          this.player.y - 70,
+          this.water <= 0 ? 'NO WATER — take a prize!' : 'NO FOOD — take a prize!',
+          '#ffd84d',
+          16,
+        );
+      }
+    } else {
+      this.supplyTimer = 0;
+    }
+  }
+
+  private flagName(f: Ship['def']['faction']): string {
+    switch (f) {
+      case 'spain':
+        return 'Spanish';
+      case 'england':
+        return 'English';
+      case 'france':
+        return 'French';
+      case 'merchant':
+        return 'merchant';
+      case 'native':
+        return 'native';
+      case 'fire':
+        return 'fire-ship';
+      default:
+        return 'pirate';
+    }
+  }
+
+  /** Swing the boarding party across to a struck ship. */
+  private resolveBoarding(s: Ship) {
+    const p = this.player;
+    if (s.sinking >= 0 || s.captured || !s.surrendered || p.sinking >= 0) return;
+    const pCrew = Math.ceil(p.crew);
+    if (pCrew < BOARD_MIN_CREW) {
+      this.addText(p.x, p.y - 44, 'Not enough crew to take a prize!', '#ff9a8a', 18);
+      this.sfx.thud(0.6);
+      return;
+    }
+    const outcome = rollBoardingOutcome(pCrew, Math.ceil(s.crew));
+    const V = s.def.value * (1 + 0.1 * (this.wave - 1));
+    const d = Math.hypot(p.x - s.x, p.y - s.y) || 1;
+    const nx = (p.x - s.x) / d;
+    const ny = (p.y - s.y) / d;
+    if (outcome === 'ambush') {
+      // treachery! her crew falls on the boarding party and fights on
+      const lost = Math.min(pCrew - 1, 2 + Math.floor(Math.random() * 4) + Math.floor(s.crew * 0.15));
+      p.crew -= lost;
+      s.crew = Math.max(1, s.crew * 0.6);
+      s.surrendered = false;
+      this.addText(s.x, s.y - 32, 'AMBUSH!', '#ff4b3a', 32);
+      this.addText(s.x, s.y - 10, `Treachery! -${lost} of your crew`, '#ff9a8a', 16);
+      this.hurtPlayer(8 + this.wave * 1.5, nx, ny, false);
+      this.boardCandidate = null;
+      return;
+    }
+    if (outcome === 'sabotage') {
+      // she blows up alongside — the prize goes down with her
+      this.addText(s.x, s.y - 32, 'SABOTAGE! She blows!', '#ff8a3a', 26);
+      const lost = Math.min(pCrew - 1, 1 + Math.floor(Math.random() * 3));
+      p.crew -= lost;
+      this.addText(p.x, p.y - 44, `Boarding party caught! -${lost} crew`, '#ff9a8a', 15);
+      this.sinkShip(s, true);
+      this.hurtPlayer(12 + this.wave, nx, ny, false);
+      this.boardCandidate = null;
+      return;
+    }
+    this.capturePrize(s, V, outcome === 'plague');
+  }
+
+  /** A prize taken: her whole manifest, her stores, her men — and her colours. */
+  private capturePrize(s: Ship, V: number, sick: boolean) {
+    const p = this.player;
+    s.captured = true;
+    s.sinking = 0; // reuses the fade-out path; cleared like a sinking
+    this.stats.boarded++;
+    if (this.streakTimer > 0) {
+      this.mult = Math.min(MAX_MULT, this.mult + 1);
+      this.stats.maxStreak = Math.max(this.stats.maxStreak, this.mult);
+      this.multPulse = 1;
+      this.sfx.streak(this.mult);
+      this.addText(p.x, p.y - 60, `STREAK x${this.mult}!`, '#ff8a3a', 30);
+    }
+    this.streakTimer = STREAK_TIME;
+    // the full manifest — sinkings only wash up singed scraps (~55%)
+    const coinTotal = Math.round(V);
+    this.stats.gold += coinTotal;
+    const pts = this.addScore(V * 1.2);
+    this.goldPopup += pts;
+    this.goldPopupTimer = 1.3;
+    this.goldPopupPulse = 1;
+    this.addText(s.x, s.y - 34, `PRIZE TAKEN! +${pts.toLocaleString('en-US')}`, '#ffd84d', 28);
+    // the captain's chest always survives a boarding
+    const a = rand(0, TAU);
+    const chestGold = Math.round(V * 0.25) + 100;
+    this.addPickup(s.x, s.y, Math.cos(a) * 60, Math.sin(a) * 60, 1, chestGold);
+    // her water and bread come across too
+    const w = 12 + Math.floor(Math.random() * 14);
+    const f = 12 + Math.floor(Math.random() * 14);
+    this.water = Math.min(this.maxWater, this.water + w);
+    this.food = Math.min(this.maxFood, this.food + f);
+    this.addText(p.x, p.y - 78, `+${w} water  +${f} food`, '#9fe7ff', 15);
+    // her company splits: volunteers join, the stubborn go in irons
+    const remaining = Math.max(0, Math.ceil(s.crew));
+    const joiners = Math.round(remaining * (0.35 + Math.random() * 0.2));
+    const chained = remaining - joiners;
+    p.crew = Math.min(150, p.crew + joiners);
+    p.maxCrew = Math.max(p.maxCrew, Math.ceil(p.crew));
+    this.slaves += chained;
+    this.addText(p.x, p.y - 98, joiners > 0 ? `+${joiners} crew joined!` : 'No crew left to join', '#7dff9a', 16);
+    if (chained > 0) this.addText(p.x, p.y - 116, `+${chained} slaves in irons`, '#d8c9a3', 14);
+    // strike her colours and carry them home
+    this.flags.push({ faction: s.def.faction, ship: s.def.name, wave: this.wave });
+    this.addText(s.x, s.y - 56, `Captured the ${this.flagName(s.def.faction)} colours!`, '#ffe066', 16);
+    this.fxSparkle(s.x, s.y, 22, '#ffe27a');
+    this.sfx.chest();
+    if (sick) {
+      // fever below decks — the prize is tainted
+      const dw = Math.min(Math.floor(this.water), 20 + Math.floor(Math.random() * 15));
+      const df = Math.min(Math.floor(this.food), 20 + Math.floor(Math.random() * 15));
+      const dl = Math.min(Math.max(0, Math.ceil(p.crew) - 1), 1 + Math.floor(Math.random() * 2));
+      this.water -= dw;
+      this.food -= df;
+      p.crew -= dl;
+      this.addText(p.x, p.y - 44, `Fever aboard! -${dw} water -${df} food -${dl} crew`, '#c0ff70', 16);
+      this.sfx.thud(0.9);
+    }
+    this.slowMo = 0.32;
+    this.zoomPunch = 0.06;
+    this.flashWhite = 0.2;
+    this.addTrauma(0.25);
+    this.boardCandidate = null;
   }
 
   private dropLoot(s: Ship) {
@@ -2130,6 +2464,7 @@ export class Engine {
       this.drawGoldPopup(ctx);
       this.drawHUD(ctx);
       this.drawHints(ctx);
+      this.drawBoardPrompt(ctx);
     }
     if (this.screen !== 'menu' && this.screen !== 'gameover') this.drawBanner(ctx);
   }
@@ -2148,7 +2483,7 @@ export class Engine {
     const y = this.vy0;
     const w = this.vx1 - this.vx0;
     const h = this.vy1 - this.vy0;
-    ctx.fillStyle = '#1a7394';
+    ctx.fillStyle = this.waterBase;
     ctx.fillRect(x, y, w, h);
     if (this.waterPattern) {
       ctx.fillStyle = this.waterPattern;
@@ -2456,19 +2791,63 @@ export class Engine {
 
   private drawEnemyBars(ctx: CanvasRenderingContext2D, scale: number) {
     const inv = 1 / scale;
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
     for (const s of this.ships) {
-      if (s.team !== 1 || s.sinking >= 0 || !this.shipVisible(s)) continue;
-      if (s.hp >= s.maxHp && !s.isBoss) continue;
+      if (s.team !== 1 || s.sinking >= 0 || s.captured || !this.shipVisible(s)) continue;
+      const showBar = s.hp < s.maxHp || s.isBoss || s.surrendered;
       const w = Math.max(34, s.def.length * 0.75);
       const h = 4.5 * inv;
       const x = s.x - w / 2;
       const y = s.y - s.def.length * 0.5 - 10 - h;
-      ctx.fillStyle = 'rgba(20,10,5,0.78)';
-      ctx.fillRect(x - 1.5 * inv, y - 1.5 * inv, w + 3 * inv, h + 3 * inv);
-      ctx.fillStyle = '#f7e3a1';
-      ctx.fillRect(x, y, (w * s.ghostHp) / s.maxHp, h);
-      ctx.fillStyle = s.hp / s.maxHp < 0.3 ? '#ff4b3a' : '#e8483a';
-      ctx.fillRect(x, y, (w * s.hp) / s.maxHp, h);
+      if (showBar) {
+        ctx.fillStyle = 'rgba(20,10,5,0.78)';
+        ctx.fillRect(x - 1.5 * inv, y - 1.5 * inv, w + 3 * inv, h + 3 * inv);
+        ctx.fillStyle = '#f7e3a1';
+        ctx.fillRect(x, y, (w * s.ghostHp) / s.maxHp, h);
+        ctx.fillStyle = s.hp / s.maxHp < 0.3 ? '#ff4b3a' : '#e8483a';
+        ctx.fillRect(x, y, (w * s.hp) / s.maxHp, h);
+      }
+      // her colours and the hands still standing — every foe, always
+      const tagY = showBar ? y - 6 * inv : y + 2 * inv;
+      const fw = 13 * inv;
+      const fh = 7.5 * inv;
+      ctx.save();
+      ctx.translate(x, tagY - fh);
+      drawFlagArt(ctx, s.def.faction, fw, fh);
+      ctx.lineWidth = 1 * inv;
+      ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.strokeRect(0, 0, fw, fh);
+      ctx.restore();
+      const crewStr = `${Math.max(0, Math.ceil(s.crew))}`;
+      ctx.font = `${Math.max(6, Math.round(10 * inv))}px ${FONT}`;
+      ctx.textAlign = 'left';
+      ctx.lineWidth = 3 * inv;
+      ctx.strokeStyle = 'rgba(22,10,3,0.9)';
+      const tx = x + fw + 3 * inv;
+      const ty = tagY - fh / 2;
+      ctx.strokeText(crewStr, tx, ty);
+      ctx.fillStyle = '#f3e2b3';
+      ctx.fillText(crewStr, tx, ty);
+      if (s.surrendered) {
+        const pulse = 0.72 + 0.28 * Math.sin(this.realTime * 6);
+        ctx.font = `${Math.max(6, Math.round(11 * inv))}px ${FONT}`;
+        ctx.textAlign = 'center';
+        const label = 'SURRENDERED!';
+        const tw = ctx.measureText(label).width + 10 * inv;
+        const bx = s.x - tw / 2;
+        const by = tagY - fh - 14 * inv;
+        ctx.globalAlpha = pulse;
+        rr(ctx, bx, by, tw, 12 * inv, 4 * inv);
+        ctx.fillStyle = 'rgba(245,245,240,0.92)';
+        ctx.fill();
+        ctx.lineWidth = 1 * inv;
+        ctx.strokeStyle = '#8a8a8a';
+        ctx.stroke();
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillText(label, s.x, by + 6 * inv);
+        ctx.globalAlpha = 1;
+      }
     }
   }
 
@@ -2602,7 +2981,13 @@ export class Engine {
       ctx.translate(ix, iy);
       ctx.rotate(Math.atan2(dy, dx));
       ctx.globalAlpha = clamp(1.25 - dist / 1700, 0.4, 1);
-      ctx.fillStyle = e.def.kind === 'fireship' ? '#ff8a2a' : e.def.kind === 'merchant' ? '#ffd84d' : '#ff4b3a';
+      ctx.fillStyle = e.surrendered
+        ? '#ffffff'
+        : e.def.kind === 'fireship'
+          ? '#ff8a2a'
+          : e.def.kind === 'merchant'
+            ? '#ffd84d'
+            : '#ff4b3a';
       ctx.strokeStyle = 'rgba(25,10,3,0.9)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -2690,6 +3075,9 @@ export class Engine {
     ctx.font = `${Math.round(13 * u)}px ${FONT}`;
     this.outlined(ctx, `${kn} kn`, gx + gw + 8 * u, ccy, '#f3e2b3', 3);
 
+    // ---- ship's stores — the manifest, always in sight
+    this.drawStores(ctx, bx, ccy + cr + 26 * u, barW);
+
     // ---- score
     const rx = W - sf.r - 64;
     const pulse = 1 + this.scorePulse * 0.16;
@@ -2754,6 +3142,158 @@ export class Engine {
       ctx.lineWidth = 1.5;
       ctx.strokeRect(bxx - 3, byy - 3, bw + 6, bh + 6);
     }
+  }
+
+  /** The ship's inventory: crew, water, food, slaves in irons, colours struck. */
+  private drawStores(ctx: CanvasRenderingContext2D, x: number, y: number, w: number) {
+    const u = this.ui;
+    const p = this.player;
+    const rowH = 15.5 * u;
+    const pad = 7 * u;
+    const flagH = 13 * u;
+    const regH = 13 * u;
+    const h = pad * 2 + rowH * 4 + flagH + regH;
+    ctx.textBaseline = 'middle';
+    ctx.font = `${Math.round(14 * u)}px ${FONT}`;
+    ctx.textAlign = 'left';
+    this.outlined(ctx, "SHIP'S STORES", x + 2, y - 5 * u, '#f3e2b3', 3);
+    rr(ctx, x - 3, y + 4 * u, w + 6, h, 7 * u);
+    ctx.fillStyle = 'rgba(24,12,4,0.82)';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#d9a441';
+    ctx.stroke();
+    const lx = x + pad;
+    const rw = w - pad * 2;
+    let ry = y + 4 * u + pad + rowH / 2;
+    const crew = Math.max(0, Math.ceil(p.crew));
+    this.storeRow(ctx, lx, ry, rw, 'CREW', `${crew}`, '#f3e2b3');
+    ry += rowH;
+    const wLow = this.water < this.maxWater * 0.25;
+    const fLow = this.food < this.maxFood * 0.25;
+    const blink = Math.sin(this.realTime * 8) > -0.2;
+    this.storeRow(ctx, lx, ry, rw, 'WATER', `${Math.floor(this.water)}`, wLow && blink ? '#ff6a5a' : '#9fd8ff');
+    ry += rowH;
+    this.storeRow(ctx, lx, ry, rw, 'FOOD', `${Math.floor(this.food)}`, fLow && blink ? '#ff6a5a' : '#ffd88a');
+    ry += rowH;
+    this.storeRow(ctx, lx, ry, rw, 'SLAVES', `${this.slaves}`, '#d8c9a3');
+    ry += rowH;
+    // colours struck — mini flags of the prizes, newest last
+    const flagCy = ry + flagH / 2;
+    ctx.font = `${Math.round(11 * u)}px ${FONT}`;
+    ctx.textAlign = 'left';
+    this.outlined(ctx, 'FLAGS', lx, flagCy, '#cbb88f', 3);
+    const fw = 13 * u;
+    const fh = 8 * u;
+    const gap = 2.5 * u;
+    const maxFit = Math.max(1, Math.floor((rw - 44 * u) / (fw + gap)));
+    const shown = this.flags.slice(-maxFit);
+    if (shown.length === 0) {
+      ctx.font = `${Math.round(12 * u)}px ${FONT}`;
+      ctx.textAlign = 'right';
+      this.outlined(ctx, '—', lx + rw, flagCy, '#8a7a5a', 3);
+    } else {
+      let fx = lx + rw - shown.length * (fw + gap) + gap;
+      for (const f of shown) {
+        ctx.save();
+        ctx.translate(fx, flagCy - fh / 2);
+        drawFlagArt(ctx, f.faction, fw, fh);
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, fw, fh);
+        ctx.restore();
+        fx += fw + gap;
+      }
+      const extra = this.flags.length - shown.length;
+      if (extra > 0) {
+        ctx.font = `${Math.round(10 * u)}px ${FONT}`;
+        ctx.textAlign = 'left';
+        this.outlined(ctx, `+${extra}`, lx + 40 * u, flagCy, '#e6d3a3', 3);
+      }
+    }
+    const regCy = ry + flagH + regH / 2;
+    ctx.font = `italic ${Math.round(12 * u)}px ${FELL}`;
+    ctx.textAlign = 'center';
+    this.outlined(ctx, regionById(this.regionId).name, lx + rw / 2, regCy, '#e8c86a', 3);
+  }
+
+  private storeRow(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    label: string,
+    value: string,
+    color: string,
+  ) {
+    const u = this.ui;
+    ctx.font = `${Math.round(11 * u)}px ${FONT}`;
+    ctx.textAlign = 'left';
+    this.outlined(ctx, label, x, y, '#cbb88f', 3);
+    ctx.font = `${Math.round(14 * u)}px ${FONT}`;
+    ctx.textAlign = 'right';
+    this.outlined(ctx, value, x + w, y, color, 3);
+  }
+
+  /** "Prize alongside!" — the boarding call to action. */
+  private drawBoardPrompt(ctx: CanvasRenderingContext2D) {
+    const s = this.boardCandidate;
+    if (!s || this.screen !== 'playing') return;
+    const u = this.ui;
+    const W = this.w;
+    const H = this.h;
+    // marker over the prize
+    const [sx, sy] = this.worldToScreen(s.x, s.y);
+    if (sx > -60 && sx < W + 60 && sy > -80 && sy < H + 60) {
+      const bounce = Math.abs(Math.sin(this.realTime * 5)) * 8 * u;
+      const y = sy - s.def.length * 0.5 * this.curScale - 34 * u - bounce;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${Math.round(20 * u)}px ${FONT}`;
+      this.outlined(ctx, 'BOARD!', sx, y - 14 * u, '#7dff9a', 4);
+      ctx.fillStyle = '#7dff9a';
+      ctx.strokeStyle = 'rgba(28,12,4,0.9)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(sx, y + 10 * u);
+      ctx.lineTo(sx - 9 * u, y - 3 * u);
+      ctx.lineTo(sx + 9 * u, y - 3 * u);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill();
+    }
+    // the offer, bottom-center: her full manifest against the risks
+    const V = s.def.value * (1 + 0.1 * (this.wave - 1));
+    const prize = Math.round(V * 1.25) + 100;
+    const touch = this.isTouch || this.input.usedTouch;
+    const l1 = `Prize alongside: ${s.def.name} — ${Math.max(0, Math.ceil(s.crew))} men`;
+    const l2 = touch
+      ? `Tap BOARD for ~${prize.toLocaleString('en-US')} gold + her colours`
+      : `Press F to BOARD for ~${prize.toLocaleString('en-US')} gold + her colours`;
+    const l3 = 'Full cargo… if her crew plays fair. Beware treachery, scuttling & fever!';
+    ctx.font = `${Math.round(17 * u)}px ${FONT}`;
+    const bw = Math.min(
+      W - 16,
+      Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width, ctx.measureText(l3).width) + 44 * u,
+    );
+    const bh = 74 * u;
+    const bx = W / 2;
+    const by = H - this.safe.b - (touch ? 330 : 168) * u;
+    rr(ctx, bx - bw / 2, by - bh / 2, bw, bh, 12 * u);
+    ctx.fillStyle = 'rgba(20,10,4,0.78)';
+    ctx.fill();
+    ctx.strokeStyle = '#7dff9a';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#7dff9a';
+    ctx.fillText(l1, bx, by - 22 * u);
+    ctx.fillStyle = '#ffd84d';
+    ctx.fillText(l2, bx, by + 1 * u);
+    ctx.font = `italic ${Math.round(13 * u)}px ${FELL}`;
+    ctx.fillStyle = '#e6d3a3';
+    ctx.fillText(l3, bx, by + 22 * u);
   }
 
   private drawReloadBar(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, label: string, r: number, total: number) {

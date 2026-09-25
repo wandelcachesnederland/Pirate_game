@@ -1,6 +1,7 @@
 import { makeCanvas } from './canvas';
 import { mulberry32, TAU } from './math';
 import type { Island } from './types';
+import { CARIBBEAN_ISLANDS, type IslandTheme } from './worlds';
 
 export function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const rad = Math.min(r, w / 2, h / 2);
@@ -18,7 +19,7 @@ export function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 }
 
 // ---------------------------------------------------------------- textures
-export function makeWaterTile(): HTMLCanvasElement {
+export function makeWaterTile(tint?: { light: string; dark: string }): HTMLCanvasElement {
   const S = 512;
   const [c, ctx] = makeCanvas(S, S);
   const rnd = mulberry32(1337);
@@ -26,8 +27,9 @@ export function makeWaterTile(): HTMLCanvasElement {
     const x = rnd() * S;
     const y = rnd() * S;
     const r = 40 + rnd() * 120;
-    const light = rnd() < 0.5;
-    const base = light ? '120,225,235,' : '4,38,78,';
+    const isLight = rnd() < 0.5;
+    const base = isLight ? (tint?.light ?? '120,225,235,') : (tint?.dark ?? '4,38,78,');
+    const light = isLight;
     const a = light ? 0.045 + rnd() * 0.05 : 0.06 + rnd() * 0.07;
     for (let ox = -1; ox <= 1; ox++) {
       for (let oy = -1; oy <= 1; oy++) {
@@ -105,8 +107,16 @@ export function islandRadiusAt(is: { r: number; harm: { amp: number; freq: numbe
   return is.r * k;
 }
 
-function drawPalm(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, rot: number, rnd: () => number) {
-  ctx.fillStyle = 'rgba(0,30,0,0.22)';
+function drawPalm(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  s: number,
+  rot: number,
+  rnd: () => number,
+  theme?: IslandTheme,
+) {
+  ctx.fillStyle = theme?.palmShade ?? 'rgba(0,30,0,0.22)';
   ctx.beginPath();
   ctx.ellipse(x + s * 0.5, y + s * 0.6, s * 0.95, s * 0.8, 0, 0, TAU);
   ctx.fill();
@@ -116,12 +126,12 @@ function drawPalm(ctx: CanvasRenderingContext2D, x: number, y: number, s: number
     const a = rot + (k / n) * TAU + (rnd() - 0.5) * 0.35;
     angles.push(a);
     const len = s * (0.85 + rnd() * 0.3);
-    ctx.fillStyle = k % 2 ? '#3f8f3a' : '#58ab48';
+    ctx.fillStyle = k % 2 ? (theme?.palmDark ?? '#3f8f3a') : (theme?.palmLight ?? '#58ab48');
     ctx.beginPath();
     ctx.ellipse(x + Math.cos(a) * len * 0.5, y + Math.sin(a) * len * 0.5, len * 0.56, s * 0.2, a, 0, TAU);
     ctx.fill();
   }
-  ctx.strokeStyle = 'rgba(28,70,24,0.65)';
+  ctx.strokeStyle = theme?.palmLine ?? 'rgba(28,70,24,0.65)';
   ctx.lineWidth = 0.8;
   ctx.beginPath();
   for (const a of angles) {
@@ -129,7 +139,7 @@ function drawPalm(ctx: CanvasRenderingContext2D, x: number, y: number, s: number
     ctx.lineTo(x + Math.cos(a) * s * 0.95, y + Math.sin(a) * s * 0.95);
   }
   ctx.stroke();
-  ctx.fillStyle = '#7a5530';
+  ctx.fillStyle = theme?.palmTrunk ?? '#7a5530';
   ctx.beginPath();
   ctx.arc(x, y, s * 0.16, 0, TAU);
   ctx.fill();
@@ -183,7 +193,14 @@ function drawHut(ctx: CanvasRenderingContext2D, x: number, y: number, s: number,
   ctx.restore();
 }
 
-export function buildIsland(x: number, y: number, r: number, seed: number, res: number): Island {
+export function buildIsland(
+  x: number,
+  y: number,
+  r: number,
+  seed: number,
+  res: number,
+  theme: IslandTheme = CARIBBEAN_ISLANDS,
+): Island {
   const rnd = mulberry32(seed);
   const harm = [
     { amp: 0.09 + rnd() * 0.08, freq: 2, phase: rnd() * TAU },
@@ -216,24 +233,24 @@ export function buildIsland(x: number, y: number, r: number, seed: number, res: 
   };
 
   // shallows
-  ctx.fillStyle = 'rgba(110, 215, 210, 0.13)';
+  ctx.fillStyle = theme.shallowFar;
   ctx.fill(poly(1, 52, 5, 1));
-  ctx.fillStyle = 'rgba(125, 226, 214, 0.18)';
+  ctx.fillStyle = theme.shallowMid;
   ctx.fill(poly(1, 33, 4, 2));
-  ctx.fillStyle = 'rgba(155, 238, 222, 0.28)';
+  ctx.fillStyle = theme.shallowNear;
   ctx.fill(poly(1, 16, 3, 3));
   // wet sand + sand
-  ctx.fillStyle = '#c9ad74';
+  ctx.fillStyle = theme.wetSand;
   ctx.fill(poly(1, 4));
   const sand = poly(1, 0);
-  ctx.fillStyle = '#edd7a1';
+  ctx.fillStyle = theme.sand;
   ctx.fill(sand);
   ctx.save();
   ctx.clip(sand);
   for (let i = 0; i < 80; i++) {
     const a = rnd() * TAU;
     const d = rnd() * maxR;
-    ctx.fillStyle = rnd() < 0.5 ? 'rgba(190,160,100,0.35)' : 'rgba(255,248,220,0.5)';
+    ctx.fillStyle = rnd() < 0.5 ? theme.sandDark : theme.sandLight;
     ctx.beginPath();
     ctx.arc(Math.cos(a) * d, Math.sin(a) * d, 1 + rnd() * 2.2, 0, TAU);
     ctx.fill();
@@ -242,11 +259,11 @@ export function buildIsland(x: number, y: number, r: number, seed: number, res: 
 
   // jungle
   const jungle = poly(0.7, -8, 5, seed % 7);
-  ctx.fillStyle = '#2d6a30';
+  ctx.fillStyle = theme.jungle;
   ctx.fill(jungle);
   ctx.save();
   ctx.clip(jungle);
-  const greens = ['#3c8a3b', '#4e9d45', '#2b5f2c', '#5aae4e', '#347a36', '#468f3f'];
+  const greens = theme.greens;
   const blobs = Math.floor(r * 0.5);
   for (let i = 0; i < blobs; i++) {
     const a = rnd() * TAU;
@@ -254,7 +271,7 @@ export function buildIsland(x: number, y: number, r: number, seed: number, res: 
     const br = r * (0.055 + rnd() * 0.085);
     const bx = Math.cos(a) * d;
     const by = Math.sin(a) * d;
-    ctx.fillStyle = 'rgba(10,40,12,0.35)';
+    ctx.fillStyle = theme.blobShadow;
     ctx.beginPath();
     ctx.arc(bx + 2, by + 3, br, 0, TAU);
     ctx.fill();
@@ -262,21 +279,21 @@ export function buildIsland(x: number, y: number, r: number, seed: number, res: 
     ctx.beginPath();
     ctx.arc(bx, by, br, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = 'rgba(160,220,110,0.22)';
+    ctx.fillStyle = theme.blobHi;
     ctx.beginPath();
     ctx.arc(bx - br * 0.3, by - br * 0.3, br * 0.45, 0, TAU);
     ctx.fill();
   }
   if (r > 135) {
-    ctx.fillStyle = '#6a7d43';
+    ctx.fillStyle = theme.peaks[0];
     ctx.fill(poly(0.3, -8, 4, seed));
-    ctx.fillStyle = '#8b8764';
+    ctx.fillStyle = theme.peaks[1];
     ctx.fill(poly(0.17, -5, 3, seed + 3));
-    ctx.fillStyle = '#b8b192';
+    ctx.fillStyle = theme.peaks[2];
     ctx.fill(poly(0.07, -2, 1.5, seed + 5));
   }
   ctx.restore();
-  ctx.strokeStyle = 'rgba(20,60,25,0.55)';
+  ctx.strokeStyle = theme.jungleEdge;
   ctx.lineWidth = 2;
   ctx.stroke(jungle);
 
@@ -285,7 +302,7 @@ export function buildIsland(x: number, y: number, r: number, seed: number, res: 
   for (let i = 0; i < palms; i++) {
     const a = rnd() * TAU;
     const d = islandRadiusAt(base, a) * (0.7 + rnd() * 0.17);
-    drawPalm(ctx, Math.cos(a) * d, Math.sin(a) * d, 8 + rnd() * 6, rnd() * TAU, rnd);
+    drawPalm(ctx, Math.cos(a) * d, Math.sin(a) * d, 8 + rnd() * 6, rnd() * TAU, rnd, theme);
   }
   // rocks in the shallows
   const rocks = 2 + Math.floor(rnd() * 5);

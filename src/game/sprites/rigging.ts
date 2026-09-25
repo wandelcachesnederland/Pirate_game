@@ -290,6 +290,126 @@ export function drawEnsign(
   ctx.restore();
 }
 
+let whiteTile: HTMLCanvasElement | null = null;
+
+function surrenderTile(): HTMLCanvasElement {
+  if (!whiteTile) {
+    const [cv, cx] = makeCanvas(48, 24);
+    cx.fillStyle = '#f2f0e8';
+    cx.fillRect(0, 0, 48, 24);
+    // soft folds so the white reads as cloth, not a hole in the world
+    const g = cx.createLinearGradient(0, 0, 0, 24);
+    g.addColorStop(0, 'rgba(255,255,255,0.5)');
+    g.addColorStop(0.5, 'rgba(255,255,255,0)');
+    g.addColorStop(1, 'rgba(120,120,120,0.35)');
+    cx.fillStyle = g;
+    cx.fillRect(0, 0, 48, 24);
+    cx.strokeStyle = 'rgba(90,90,90,0.6)';
+    cx.lineWidth = 1;
+    cx.strokeRect(0.5, 0.5, 47, 23);
+    whiteTile = cv;
+  }
+  return whiteTile;
+}
+
+/**
+ * The white flag: flown at the masthead instead of the ensign once a ship
+ * strikes her colours. Same ripple as the ensigns, so it reads instantly.
+ */
+export function drawSurrenderFlag(
+  ctx: CanvasRenderingContext2D,
+  mx: number,
+  rel: number,
+  t: number,
+  scale = 1,
+) {
+  const L = 15 * scale;
+  const H = 8 * scale;
+  ctx.save();
+  ctx.translate(mx, 0);
+  ctx.rotate(rel);
+  ctx.strokeStyle = 'rgba(30,20,10,0.7)'; // halyard
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -H * 0.5);
+  ctx.lineTo(0, H * 0.5);
+  ctx.stroke();
+  const tile = surrenderTile();
+  const STRIPS = 8;
+  const sw = tile.width / STRIPS;
+  for (let i = 0; i < STRIPS; i++) {
+    const t0 = i / STRIPS;
+    const t1 = (i + 1) / STRIPS;
+    const off = Math.sin(t * 9 - t0 * 3.4) * 1.5 * scale * (0.25 + t0);
+    const h0 = H * (1 - t0 * 0.12);
+    ctx.drawImage(tile, i * sw, 0, sw + 0.6, tile.height, L * t0, -h0 / 2 + off, L * (t1 - t0) + 0.4, h0);
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 0.4;
+  ctx.strokeRect(0, -H / 2, L, H);
+  ctx.restore();
+}
+
+/**
+ * Lateen sail for the dhow: a great triangular sheet slung fore-and-aft.
+ * Seen top-down it reads as a long curved triangle off the mast.
+ */
+export function drawLateenSail(
+  ctx: CanvasRenderingContext2D,
+  mx: number,
+  hl: number,
+  hw: number,
+  bulge: number,
+  col: string,
+  shade: string,
+  rel: number,
+) {
+  const side = Math.sin(rel) >= 0 ? 1 : -1;
+  ctx.save();
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.moveTo(mx - hl * 0.62, 0);
+  ctx.quadraticCurveTo(mx + hl * 0.1, side * (hw * 0.9 + bulge * 0.5), mx + hl * 0.68, side * hw * 0.18);
+  ctx.lineTo(mx - hl * 0.62, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = shade;
+  ctx.lineWidth = 0.7;
+  ctx.stroke();
+  // the long sloping yard
+  ctx.strokeStyle = '#3b2412';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(mx - hl * 0.66, 0);
+  ctx.lineTo(mx + hl * 0.72, side * hw * 0.2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Bamboo battens across a junk's lug sail — drawn right after `drawSail`. */
+export function drawJunkBattens(
+  ctx: CanvasRenderingContext2D,
+  mx: number,
+  w: number,
+  bulge: number,
+  yard: number,
+) {
+  ctx.save();
+  ctx.translate(mx, 0);
+  ctx.rotate(yard);
+  const h = w / 2;
+  ctx.strokeStyle = 'rgba(74,48,24,0.85)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let k = -2; k <= 2; k++) {
+    const yy = (k * h) / 2.4;
+    ctx.moveTo(-4.5, yy);
+    ctx.quadraticCurveTo(bulge * 1.4 - 3, yy, bulge * 2.2 - 2, yy * 0.94);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
 /** Ratlines rigged between the masts and the rails, plus the forestay. */
 export function drawRigging(ctx: CanvasRenderingContext2D, masts: number[], hw: number, hl: number) {
   if (!masts.length) return;

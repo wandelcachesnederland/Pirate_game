@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause } from 'lucide-react';
+import { Flag, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
-import type { EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
+import type { EraId, GameStats, RegionId, Screen, UpgradeId, UpgradeOffer } from './game/types';
 import { DEFAULT_ERA } from './game/ships/era';
 import {
   addScore,
   loadName,
+  loadRegion,
   loadScores,
   loadSettings,
   saveName,
+  saveRegion,
   saveSettings,
   type ScoreEntry,
   type Settings,
@@ -45,6 +47,9 @@ export default function App() {
   const [isTouch, setIsTouch] = useState(() => detectTouch());
   const [era, setEra] = useState<EraId>(DEFAULT_ERA);
   const eraRef = useRef(era);
+  const [region, setRegionState] = useState<RegionId>(() => loadRegion());
+  const regionRef = useRef(region);
+  const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
   const gameOverAt = useRef(0);
   const upgradeAt = useRef(0);
 
@@ -56,10 +61,22 @@ export default function App() {
     eraRef.current = era;
   }, [era]);
 
+  useEffect(() => {
+    regionRef.current = region;
+  }, [region]);
+
   // swapping hulls in port updates the ship on the menu at once
   const pickEra = useCallback((id: EraId) => {
     setEra(id);
     engineRef.current?.setEra(id);
+  }, []);
+
+  // swapping waters in port re-charts the menu seas at once
+  const pickRegion = useCallback((id: RegionId) => {
+    setRegionState(id);
+    regionRef.current = id;
+    saveRegion(id);
+    engineRef.current?.setRegion(id);
   }, []);
 
   // ---- engine lifecycle
@@ -91,6 +108,7 @@ export default function App() {
       },
     });
     eng.setAudio(settingsRef.current.sfx, settingsRef.current.music);
+    eng.setRegion(regionRef.current);
     engineRef.current = eng;
     setEngine(eng);
     return () => {
@@ -107,6 +125,18 @@ export default function App() {
     return () => window.removeEventListener('touchstart', onTouch);
   }, []);
 
+  // ---- poll for a prize lying alongside (drives the BOARD button)
+  useEffect(() => {
+    if (screen !== 'playing') {
+      setBoardPrompt(null);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setBoardPrompt(engineRef.current?.getBoardCandidate() ?? null);
+    }, 200);
+    return () => window.clearInterval(id);
+  }, [screen]);
+
   // ---- actions
   const start = useCallback(() => {
     const e = engineRef.current;
@@ -116,7 +146,9 @@ export default function App() {
     saveName(nameRef.current.trim());
     setStats(null);
     setRank(-1);
+    setBoardPrompt(null);
     e.setEra(eraRef.current);
+    e.setRegion(regionRef.current);
     e.startGame();
   }, []);
 
@@ -224,6 +256,24 @@ export default function App() {
 
       {screen === 'playing' && engine && isTouch && <TouchControls input={engine.input} />}
 
+      {screen === 'playing' && boardPrompt && (
+        <button
+          type="button"
+          tabIndex={-1}
+          onClick={(e) => {
+            e.currentTarget.blur();
+            engineRef.current?.boardFromUI();
+            setBoardPrompt(engineRef.current?.getBoardCandidate() ?? null);
+          }}
+          className="btn-seal anim-pulse absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 px-6 py-2.5 text-2xl"
+          style={{ bottom: 'calc(max(14px, env(safe-area-inset-bottom)) + 18px)' }}
+          aria-label={`Board ${boardPrompt.name}`}
+        >
+          <Flag className="h-6 w-6" />
+          BOARD! {boardPrompt.crew} men
+        </button>
+      )}
+
       {screen === 'playing' && (
         <button
           type="button"
@@ -251,6 +301,8 @@ export default function App() {
           isTouch={isTouch}
           era={era}
           onEra={pickEra}
+          region={region}
+          onRegion={pickRegion}
         />
       )}
 

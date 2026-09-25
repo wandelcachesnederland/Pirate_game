@@ -19,6 +19,7 @@ export const SANTA_BRISA: ShipDef = {
   range: 400,
   ballSpeed: 540,
   masts: 3,
+  crew: 34,
   value: 0,
   coins: 0,
   hull: '#6b4a26',

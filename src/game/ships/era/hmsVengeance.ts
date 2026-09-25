@@ -19,6 +19,7 @@ export const HMS_VENGEANCE: ShipDef = {
   range: 470,
   ballSpeed: 620,
   masts: 3,
+  crew: 60,
   value: 0,
   coins: 0,
   hull: '#2a2b38',

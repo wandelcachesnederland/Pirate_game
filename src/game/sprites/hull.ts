@@ -54,6 +54,48 @@ export function hullShape(p: Path2D, hl: number, hw: number, style: HullStyle = 
     p.closePath();
     return;
   }
+  if (style === 'trireme') {
+    // oared war galley: long, lean, with a bronze ram reaching past the bow
+    p.moveTo(hl * 1.16, 0);
+    p.lineTo(hl * 0.94, -hw * 0.34);
+    p.bezierCurveTo(hl * 0.5, -hw * 0.95, -hl * 0.4, -hw, -hl * 0.9, -hw * 0.68);
+    p.quadraticCurveTo(-hl * 1.02, 0, -hl * 0.9, hw * 0.68);
+    p.bezierCurveTo(-hl * 0.4, hw, hl * 0.5, hw * 0.95, hl * 0.94, hw * 0.34);
+    p.closePath();
+    return;
+  }
+  if (style === 'dhow') {
+    // sewn boat: sharp double-ended bow, flat transom stern
+    p.moveTo(hl * 1.06, 0);
+    p.bezierCurveTo(hl * 0.5, -hw * 0.9, -hl * 0.2, -hw * 0.95, -hl * 0.85, -hw * 0.72);
+    p.lineTo(-hl * 0.85, hw * 0.72);
+    p.bezierCurveTo(-hl * 0.2, hw * 0.95, hl * 0.5, hw * 0.9, hl * 1.06, 0);
+    p.closePath();
+    return;
+  }
+  if (style === 'junk') {
+    // flat-bottomed junk: blunt spoon bow, high square stern
+    p.moveTo(hl * 0.88, 0);
+    p.quadraticCurveTo(hl * 0.86, -hw * 0.9, hl * 0.5, -hw);
+    p.lineTo(-hl * 0.72, -hw);
+    p.quadraticCurveTo(-hl * 0.95, -hw * 0.6, -hl * 0.95, 0);
+    p.quadraticCurveTo(-hl * 0.95, hw * 0.6, -hl * 0.72, hw);
+    p.lineTo(hl * 0.5, hw);
+    p.quadraticCurveTo(hl * 0.86, hw * 0.9, hl * 0.88, 0);
+    p.closePath();
+    return;
+  }
+  if (style === 'atakebune') {
+    // floating castle: slab-sided barge with a bluff bow
+    p.moveTo(hl * 0.86, 0);
+    p.lineTo(hl * 0.62, -hw * 0.95);
+    p.lineTo(-hl * 0.84, -hw * 0.95);
+    p.quadraticCurveTo(-hl * 0.96, -hw * 0.5, -hl * 0.96, 0);
+    p.quadraticCurveTo(-hl * 0.96, hw * 0.5, -hl * 0.84, hw * 0.95);
+    p.lineTo(hl * 0.62, hw * 0.95);
+    p.closePath();
+    return;
+  }
   p.moveTo(hl, 0);
   p.bezierCurveTo(hl * 0.62, -hw * 0.98, hl * 0.05, -hw, -hl * 0.35, -hw);
   p.lineTo(-hl * 0.9, -hw * 0.82);

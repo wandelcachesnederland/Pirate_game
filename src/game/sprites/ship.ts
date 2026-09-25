@@ -5,7 +5,16 @@ import { angDiff, TAU } from '../math';
 import type { Faction, Ship } from '../types';
 import { cannonLocalX, shipPaths } from './hull';
 import { getHullSprite } from './hullSprite';
-import { drawEmblem, drawEnsign, drawOars, drawRigging, drawSail } from './rigging';
+import {
+  drawEmblem,
+  drawEnsign,
+  drawJunkBattens,
+  drawLateenSail,
+  drawOars,
+  drawRigging,
+  drawSail,
+  drawSurrenderFlag,
+} from './rigging';
 
 export function drawShipShadow(ctx: CanvasRenderingContext2D, s: Ship) {
   const sinkK = s.sinking >= 0 ? Math.min(1, s.sinking / 2.4) : 0;
@@ -123,10 +132,13 @@ export function drawShip(
       ctx.fill();
     }
     ctx.globalAlpha = baseA;
+  } else if (style === 'trireme' && oared && nm > 0) {
+    // war galleys row into battle but sail between fights — one small sheet
+    drawSail(ctx, paths.masts[0], sw * 0.66, bulge * 0.7, sailCol, def.sailShade, yard);
   } else if (!oared) {
     drawRigging(ctx, paths.masts, hw, hl);
-    // jib on the bowsprit (not on the double-ended longship)
-    if (s.sail > 0.15 && style !== 'longship') {
+    // jib on the bowsprit (not on the double-ended longship or heritage rigs)
+    if (s.sail > 0.15 && style !== 'longship' && style !== 'dhow' && style !== 'junk' && style !== 'atakebune') {
       ctx.save();
       ctx.rotate(yard * 0.5);
       ctx.fillStyle = sailCol;
@@ -143,11 +155,16 @@ export function drawShip(
       ctx.restore();
       ctx.globalAlpha = baseA;
     }
-    // square sails — the longship gets one much wider striped sail
+    // square sails — the longship gets one much wider striped sail,
+    // the dhow a single lateen sheet, the junk battened lugs
     const wideMul = style === 'longship' ? 1.7 : 1;
-    for (let m = 0; m < nm; m++) {
+    if (style === 'dhow' && nm > 0) {
+      drawLateenSail(ctx, paths.masts[0], hl, hw, bulge, sailCol, def.sailShade, rel);
+    }
+    for (let m = 0; m < (style === 'dhow' ? 0 : nm); m++) {
       const w = (m === 0 && nm > 1 ? sw * 0.84 : sw) * wideMul;
       drawSail(ctx, paths.masts[m], w, bulge, sailCol, def.sailShade, yard);
+      if (style === 'junk') drawJunkBattens(ctx, paths.masts[m], w, bulge, yard);
       if (style === 'longship') {
         ctx.save();
         ctx.translate(paths.masts[m], 0);
@@ -167,7 +184,7 @@ export function drawShip(
       }
     }
     // ---- 6. spanker (fore-and-aft sail off the mizzen) on 3-masters
-    if (nm >= 3 && s.sail > 0.2) {
+    if (nm >= 3 && s.sail > 0.2 && style !== 'junk') {
       const mz = paths.masts[nm - 1];
       ctx.save();
       ctx.fillStyle = sailCol;
@@ -208,7 +225,8 @@ export function drawShip(
 
   // ---- 8. ensign (masthead, or a short jackstaff on oared/ironclad hulls)
   const flagX = style === 'ironclad' || oared ? -hl * 0.6 : paths.masts[0] - 3.2;
-  drawEnsign(ctx, flag, flagX, rel, t + s.bob, def.length > 85 ? 1.25 : 1);
+  if (s.surrendered) drawSurrenderFlag(ctx, flagX, rel, t + s.bob, def.length > 85 ? 1.25 : 1);
+  else drawEnsign(ctx, flag, flagX, rel, t + s.bob, def.length > 85 ? 1.25 : 1);
 
   // ---- 9. hit flash / sinking tint
   if (flash) {
