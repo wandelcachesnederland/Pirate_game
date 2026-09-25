@@ -185,7 +185,12 @@ export function StartScreen({
             <div className="mt-3 rounded-lg border border-ink/20 bg-ink/[0.06] p-2.5 text-[0.9rem] italic leading-snug">
               <p className="flex items-start gap-2">
                 <Wind className="mt-0.5 h-4 w-4 shrink-0" />
-                {ERA_FLAGSHIPS[era].oared ? (
+                {ERA_FLAGSHIPS[era].hullStyle === 'ironclad' ? (
+                  <span>
+                    A <b>steam ironclad</b> — she burns coal, so the wind means nothing to her. Sink ships in
+                    quick succession to build a <b>plunder streak</b> multiplier!
+                  </span>
+                ) : ERA_FLAGSHIPS[era].oared ? (
                   <span>
                     An <b>oared hull</b> — the wind means nothing to her. Row straight at them and sink ships in
                     quick succession to build a <b>plunder streak</b> multiplier!

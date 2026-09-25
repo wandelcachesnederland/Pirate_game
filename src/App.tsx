@@ -132,7 +132,8 @@ export default function App() {
       return;
     }
     const id = window.setInterval(() => {
-      setBoardPrompt(engineRef.current?.getBoardCandidate() ?? null);
+      const next = engineRef.current?.getBoardCandidate() ?? null;
+      setBoardPrompt((prev) => (prev?.name === next?.name && prev?.crew === next?.crew ? prev : next));
     }, 200);
     return () => window.clearInterval(id);
   }, [screen]);
@@ -231,7 +232,15 @@ export default function App() {
   }, [start, pause, resume, choose, updateSettings]);
 
   return (
-    <div className="fixed inset-0 select-none overflow-hidden bg-abyss">
+    <div
+      className="fixed inset-0 select-none overflow-hidden bg-abyss"
+      onPointerUp={(e) => {
+        // releasing the mouse over UI instead of the canvas must still end a held broadside
+        if (e.pointerType !== 'mouse') return;
+        const inp = engineRef.current?.input;
+        if (inp) inp.touchFireHeld = false;
+      }}
+    >
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
@@ -266,7 +275,9 @@ export default function App() {
             setBoardPrompt(engineRef.current?.getBoardCandidate() ?? null);
           }}
           className="btn-seal anim-pulse absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 px-6 py-2.5 text-2xl"
-          style={{ bottom: 'calc(max(14px, env(safe-area-inset-bottom)) + 18px)' }}
+          style={{
+            bottom: `calc(max(14px, env(safe-area-inset-bottom)) + ${isTouch ? 150 : 18}px)`,
+          }}
           aria-label={`Board ${boardPrompt.name}`}
         >
           <Flag className="h-6 w-6" />
