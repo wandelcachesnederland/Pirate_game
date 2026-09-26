@@ -59,7 +59,10 @@ function HeroPortrait({ e }: { e: EraShip }) {
       dpr = ndpr;
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
-      const [sheet, sctx] = makeCanvas(w, h);
+      // the water is a cached layer, painted at device resolution so a phone
+      // still sees crisp swell under the hull
+      const [sheet, sctx] = makeCanvas(cv.width, cv.height);
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       paintWater(sctx, region, w, h, stableSeed(e.id, 91), 18);
       water = sheet;
     };
