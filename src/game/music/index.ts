@@ -39,6 +39,7 @@ import { theSixteen } from './cassettes/theSixteen';
 import { tipperary } from './cassettes/tipperary';
 import { tulumCanoes } from './cassettes/tulumCanoes';
 import { colonelBogey } from './cassettes/colonelBogey';
+import { broadsideMarch } from './cassettes/broadsideMarch';
 
 export type { Cassette, Deck, MusicMode } from './cassette';
 export { VOICE_NAMES, FEEL_NAMES } from './arrange';
@@ -59,6 +60,13 @@ export const BOSS_CASSETTE: Cassette = cursedDeep;
 
 /** The cassette in the player before the first wave starts. */
 export const INSERTED_CASSETTE: Cassette = drunkenSailor;
+
+/**
+ * The attract screen's theme: the Bit Squirrel sting's own wall of sound with
+ * a tune written over it. It is not part of any sea's rotation — it is what
+ * plays while you decide, until an era's tape crossfades in over it.
+ */
+export const TITLE_CASSETTE: Cassette = broadsideMarch;
 
 /** Pick a random cassette, avoiding `current` so the song always changes between waves. */
 export function randomCassette(current?: Cassette): Cassette {
@@ -152,6 +160,7 @@ export function bossCassette(era: EraId): Cassette {
 /** Every cassette the game knows about, era tapes and dirges included. */
 export function allCassettes(): Cassette[] {
   const all = new Set<Cassette>(CASSETTES);
+  all.add(TITLE_CASSETTE);
   for (const songs of Object.values(ERA_SONGS)) for (const song of songs) all.add(song);
   for (const boss of Object.values(ERA_BOSS)) all.add(boss);
   return [...all];

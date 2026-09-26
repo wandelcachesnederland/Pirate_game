@@ -59,6 +59,8 @@ export default function App() {
   const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
   // the studio card: 'on' at start-up, 'fading' while the title screen shows beneath it
   const [splash, setSplash] = useState<'on' | 'fading' | 'off'>('on');
+  // what the menu's own deck is playing — the attract theme until an era takes over
+  const [menuTune, setMenuTune] = useState('');
   const gameOverAt = useRef(0);
   const upgradeAt = useRef(0);
 
@@ -81,8 +83,10 @@ export default function App() {
     saveEra(id);
     engineRef.current?.setEra(id);
     engineRef.current?.setRegion(eraRegion(id));
-    // hear the waters you are picking: the era's own tape starts on the menu
+    // hear the waters you are picking: the era's own tape starts on the menu,
+    // taking the deck over from the attract theme
     engineRef.current?.previewEraMusic();
+    setMenuTune(engineRef.current?.sfx.nowPlaying ?? '');
   }, []);
 
   // the peril of the voyage: saved for the next voyage, told to the engine at once
@@ -138,6 +142,15 @@ export default function App() {
       setEngine(null);
     };
   }, []);
+
+  // the attract screen is a screen of its own, so it has a tune of its own: as
+  // soon as the studio logo starts to fade, the deck loads the Broadside March.
+  // It keeps playing through the steps until an era's tape crossfades over it.
+  useEffect(() => {
+    if (screen !== 'menu' || splash === 'on') return;
+    engineRef.current?.previewTitleMusic();
+    setMenuTune(engineRef.current?.sfx.nowPlaying ?? '');
+  }, [screen, splash]);
 
   // ---- detect first touch on hybrid devices
   useEffect(() => {
@@ -393,6 +406,7 @@ export default function App() {
           onEra={pickEra}
           difficulty={difficulty}
           onDifficulty={pickDifficulty}
+          nowPlaying={menuTune}
         />
       )}
 
