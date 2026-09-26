@@ -107,6 +107,14 @@ const ERA_SONGS: Record<EraId, Cassette[]> = {
   ww2: [navyHymn, colonelBogey],
   hormuz: [tangehHormoz],
   barbary: [hailColumbia],
+  phoenicia: [greatGreen, seikilosEpitaph],
+  hanse: [wellerman, drunkenSailor, haulAwayJoe],
+  portugal: [naoDeLasIndias, spanishLadies, shenandoah],
+  armada: [spanishLadies, sailorsHornpipe, blowTheManDown],
+  dutch: [sailorsHornpipe, wellerman, haulAwayJoe],
+  ottoman: [kadirga],
+  predread: [ironcladMarch, navyHymn],
+  falklands: [navyHymn, colonelBogey, tangehHormoz],
 };
 
 /** The songs sailing this era's waters. */

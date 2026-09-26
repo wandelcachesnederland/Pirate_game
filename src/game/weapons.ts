@@ -18,6 +18,9 @@ export const ERA_WEAPONS: Record<EraId, WeaponTechnology> = {
   arab: 'mechanical', macedon: 'mechanical', byzantium: 'mechanical',
   egypt: 'mechanical', chola: 'mechanical', vietnam: 'mechanical', inca: 'mechanical',
   barbary: 'gunpowder', ww1: 'gunpowder', ww2: 'gunpowder', hormuz: 'gunpowder',
+  phoenicia: 'mechanical', hanse: 'mechanical',
+  portugal: 'gunpowder', armada: 'gunpowder', dutch: 'gunpowder', ottoman: 'gunpowder',
+  predread: 'gunpowder', falklands: 'gunpowder',
 };
 
 export function usesGunpowder(era: EraId): boolean {
@@ -89,6 +92,8 @@ export const ERA_ARMAMENTS: Record<EraId, Armament> = {
   chinese: CANNON, japanese: CANNON, maori: CANNON, hawaii: CANNON,
   maya: CANNON, lepanto: CANNON, korea: CANNON, aztec: CANNON,
   barbary: CANNON, ww1: CANNON, ww2: CANNON, hormuz: CANNON,
+  portugal: CANNON, armada: CANNON, dutch: CANNON, ottoman: CANNON,
+  predread: CANNON, falklands: CANNON,
 
   // ---- pre-gunpowder seas
   viking: archery('bolt', 'arrow', 'Winch-drawn bolt launchers', 'Bow crews',
@@ -111,6 +116,10 @@ export const ERA_ARMAMENTS: Record<EraId, Armament> = {
     'Winch-drawn bolts and fire arrows over the stake barrages', 'bolts & fire arrows'),
   inca: archery('stone', 'arrow', 'Sling-thrown stones', 'Atlatl darts',
     'Sling stones and atlatl darts from the balsa rafts', 'sling stones & darts'),
+  phoenicia: archery('bolt', 'arrow', 'Winch-drawn bolt launchers', 'Archer ranks',
+    'Archery and bolts from the cedar galleys of Tyre'),
+  hanse: archery('bolt', 'arrow', 'Crossbows and springalds', 'Bow crews',
+    'Crossbows, springalds and hand-thrown stones from the castle cogs', 'crossbows & springalds'),
 };
 
 /** What this sea's ships are armed with. */

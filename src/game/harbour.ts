@@ -34,14 +34,14 @@ export interface HarbourFleet {
  */
 export const HARBOUR_FLEETS: Record<EraId, HarbourFleet> = {
   golden: { light: ['gunboat', 'cutter'], heavy: ['sloop', 'brig'], sortie: 'Gunboats and cutters put out from the harbour!' },
-  exploration: { light: ['lugger', 'gunboat'], heavy: ['sloop'], sortie: 'Harbour guard boats put out!' },
-  napoleonic: { light: ['gunboat', 'cutter'], heavy: ['brig', 'corvette'], sortie: 'The harbour gun-brigs put out!' },
-  viking: { light: ['lugger', 'cutter'], heavy: ['sloop'], sortie: 'The jarl’s ships put out from the harbour!' },
-  ironclad: { light: ['gunboat', 'cutter'], heavy: ['corvette'], sortie: 'Steam gunboats put out from the harbour!' },
-  roman: { light: ['cilician'], heavy: ['carthGalley'], sortie: 'Galleys row out from the ship-sheds!' },
-  greek: { light: ['ionianGalley'], heavy: ['phoenTrireme'], sortie: 'Triremes run out of the ship-sheds!' },
-  arab: { light: ['ghurab'], heavy: ['warDhow'], sortie: 'War dhows put out from the harbour!' },
-  chinese: { light: ['wokouJunk'], heavy: ['warlordJunk'], sortie: 'Battle junks put out from the harbour!' },
+  exploration: { light: ['pinnace', 'caravel'], heavy: ['carrack'], sortie: 'Caravels put out from the harbour!' },
+  napoleonic: { light: ['gunbrig', 'cutter'], heavy: ['brig', 'frigate'], sortie: 'The harbour gun-brigs put out!' },
+  viking: { light: ['snekkja'], heavy: ['norseLongship'], sortie: 'The jarl’s longships put out from the harbour!' },
+  ironclad: { light: ['gunboat', 'monitor'], heavy: ['steamFrigate', 'ramShip'], sortie: 'Steam gunboats and monitors put out from the harbour!' },
+  roman: { light: ['cilician', 'liburna'], heavy: ['carthGalley'], sortie: 'Galleys row out from the ship-sheds!' },
+  greek: { light: ['ionianGalley', 'bireme'], heavy: ['phoenTrireme'], sortie: 'Triremes run out of the ship-sheds!' },
+  arab: { light: ['ghurab', 'sambuk'], heavy: ['warDhow'], sortie: 'War dhows put out from the harbour!' },
+  chinese: { light: ['wokouJunk'], heavy: ['warlordJunk', 'fuchuan'], sortie: 'Battle junks put out from the harbour!' },
   japanese: { light: ['kobaya'], heavy: ['sekiBune'], sortie: 'Kobaya and seki-bune put out!' },
   maori: { light: ['rivalWaka'], heavy: ['rivalWaka'], sortie: 'Waka taua put out from the pā!' },
   hawaii: { light: ['rivalWaa'], heavy: ['rivalWaa'], sortie: 'War waʻa put out from the harbour!' },
@@ -55,10 +55,18 @@ export const HARBOUR_FLEETS: Record<EraId, HarbourFleet> = {
   chola: { light: ['srivScout'], heavy: ['srivJong'], sortie: 'Prahus and jongs put out from the harbour!' },
   vietnam: { light: ['yuanScout'], heavy: ['warlordJunk'], sortie: 'Junks put out from the harbour!' },
   aztec: { light: ['tlaxCanoe'], heavy: ['tlaxCanoe'], sortie: 'Great war canoes put out from the causeway port!' },
-  ww1: { light: ['germDrifter'], heavy: ['germTB'], sortie: 'Patrol trawlers and torpedo boats sortie!' },
-  ww2: { light: ['ijnEscort'], heavy: ['ijnDestroyer'], sortie: 'Escorts sortie from the harbour!' },
+  ww1: { light: ['germDrifter'], heavy: ['germTB', 'germCruiser'], sortie: 'Patrol trawlers and torpedo boats sortie!' },
+  ww2: { light: ['ijnEscort'], heavy: ['ijnDestroyer', 'ijnCruiser'], sortie: 'Escorts sortie from the harbour!' },
   hormuz: { light: ['usPatrol'], heavy: ['usPatrol'], sortie: 'Patrol boats scramble from the harbour!' },
   barbary: { light: ['tripoliGunboat'], heavy: ['corsairXebec'], sortie: 'Gunboats and xebecs put out from the mole!' },
+  phoenicia: { light: ['pentekonter'], heavy: ['bireme'], sortie: 'Pentekonters row out from the mole!' },
+  hanse: { light: ['cog'], heavy: ['nef'], sortie: 'Cogs put out from the kontor!' },
+  portugal: { light: ['fusta', 'caravelaLatina'], heavy: ['carrack'], sortie: 'Fustas and caravels put out from the harbour!' },
+  armada: { light: ['flyboat'], heavy: ['galleass'], sortie: 'Flyboats and galleasses put out!' },
+  dutch: { light: ['jacht'], heavy: ['pinas'], sortie: 'Yachts and pinassen put out from the harbour!' },
+  ottoman: { light: ['venetianGalley'], heavy: ['spanishGalley'], sortie: 'League galleys row out from the arsenal!' },
+  predread: { light: ['tb1890'], heavy: ['protectedCruiser'], sortie: 'Torpedo boats and cruisers sortie!' },
+  falklands: { light: ['argCorvette'], heavy: ['argDestroyer'], sortie: 'Corvettes scramble from the harbour!' },
 };
 
 /** At most this many of a harbour's boats out at once. */
@@ -159,6 +167,14 @@ export const HARBOUR_STYLES: Record<EraId, HarbourStyle> = {
   ww2: { quay: 'concrete', roof: 'quonset', roofs: [['#8a9278', '#6c745c'], ['#9aa08a', '#7a806a']], wall: '#b8b4a4', ground: '#a8a088', boats: 'launch', features: ['crane', 'tanks', 'radar'], houses: 9 },
   hormuz: { quay: 'concrete', roof: 'concrete', roofs: CONCRETE, wall: '#d8d2c2', ground: '#c9bea4', boats: 'launch', features: ['gantry', 'tanks', 'radar', 'mosque'], houses: 11 },
   barbary: { quay: 'stone', roof: 'flat', roofs: WHITE, wall: '#e4dccb', ground: '#d8c9a4', boats: 'lateen', features: ['mosque', 'warehouse', 'lighthouse'], houses: 14 },
+  phoenicia: { quay: 'stone', roof: 'tile', roofs: TILE, wall: '#eadfc2', ground: '#c9b891', boats: 'galley', features: ['shipsheds', 'temple'], houses: 12 },
+  hanse: { quay: 'timber', roof: 'tile', roofs: TILE, wall: '#d8c8a8', ground: '#b9a47e', boats: 'square', features: ['warehouse', 'crane', 'church'], houses: 12 },
+  portugal: { quay: 'stone', roof: 'tile', roofs: TILE, wall: '#f1ead6', ground: '#d2bb8e', boats: 'lateen', features: ['church', 'warehouse', 'lighthouse'], houses: 12 },
+  armada: { quay: 'stone', roof: 'tile', roofs: TILE, wall: '#efe4c8', ground: '#cdbb92', boats: 'square', features: ['church', 'lighthouse', 'warehouse'], houses: 13 },
+  dutch: { quay: 'timber', roof: 'slate', roofs: SLATE, wall: '#e3ddcc', ground: '#b9ad95', boats: 'square', features: ['warehouse', 'crane', 'church'], houses: 14 },
+  ottoman: { quay: 'stone', roof: 'tile', roofs: TILE, wall: '#efe4c8', ground: '#cdbb92', boats: 'galley', features: ['mosque', 'shipsheds', 'warehouse'], houses: 13 },
+  predread: { quay: 'concrete', roof: 'slate', roofs: [...SLATE, ['#9a4a3a', '#763628']], wall: '#d8d0c0', ground: '#9e9a90', boats: 'steam', features: ['crane', 'coal', 'lighthouse', 'warehouse'], houses: 13 },
+  falklands: { quay: 'concrete', roof: 'quonset', roofs: [['#8a9278', '#6c745c'], ['#9aa08a', '#7a806a']], wall: '#b8b4a4', ground: '#a8a088', boats: 'launch', features: ['crane', 'radar', 'tanks'], houses: 8 },
 };
 
 export function harbourStyleFor(era: EraId | undefined): HarbourStyle {
