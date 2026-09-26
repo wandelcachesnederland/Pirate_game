@@ -559,6 +559,11 @@ export interface Fortress {
   angle: number;
   /** Walls down and guns spiked — silent for the rest of the run. */
   ruined: boolean;
+  /**
+   * Bearing of the harbour the fort guards (world radians). A fortified
+   * island is a harbour town: its squadron puts out from this mouth.
+   */
+  harbour?: number;
 }
 
 /**

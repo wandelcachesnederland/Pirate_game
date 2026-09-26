@@ -237,6 +237,11 @@ export interface TerrainPaint {
   inhabited: boolean;
   /** Where the island's battery stands, if it has one — kept clear. */
   fortAngle: number | null;
+  /**
+   * Where a fortified island's harbour town stands, if it has one. The town
+   * is painted separately (harbour.ts) and takes the village's place.
+   */
+  harbourAngle?: number | null;
 }
 
 interface Spot {
@@ -303,7 +308,14 @@ export function paintTerrainIsland(p: TerrainPaint) {
     taken.push(best);
     return best;
   };
-  const villageA = p.inhabited ? pickAngle() : null;
+  const harbourA = p.harbourAngle ?? null;
+  if (harbourA !== null) {
+    // the harbour town's streets: trees and landmarks keep off them
+    taken.push(harbourA);
+    const d = R(harbourA) * 0.72;
+    spots.push({ x: Math.cos(harbourA) * d, y: Math.sin(harbourA) * d, r: Math.max(34, r * 0.42) });
+  }
+  const villageA = p.inhabited && harbourA === null ? pickAngle() : null;
   if (villageA !== null) {
     const d = R(villageA) * 0.78;
     spots.push({ x: Math.cos(villageA) * d, y: Math.sin(villageA) * d, r: 26 });

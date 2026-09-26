@@ -141,16 +141,36 @@ threshold; where at least four islands are inhabited, peoples share kin and form
 
 - Hit, sink or capture a village's boats, or put a round into the village itself, and you spend its
   patience. Cross the line and its people turn hostile — and so do their kin and everyone in their pact.
-- Hostile islands launch war canoes when you approach. Raiders only press the attack so far from their own
+- Hostile villages launch war canoes when you approach. Raiders only press the attack so far from their own
   beach, so sailing clear of their waters shakes them off.
 - Some islands carry a **stone fort**: a battery that answers a hostile sail with shot (or, in the
   mechanical eras, archers and bolt launchers on the walls).
+- A fortified island is a **harbour town** (marked ⚓ on the chart), built the way that era built one.
+  You get walled basins, quays and moored craft. Some eras add their own touches: Greek and Punic
+  ship-sheds, the Pharos, the chain across the Golden Horn, whitewashed Tripoli under a minaret, Viking
+  and Māori palisades, coaling wharves in 1916, and gantries and oil tanks in 1988
+  (`src/game/harbour.ts`).
+- A roused harbour town doesn't send canoes. It sends that era's **harbour squadron** out through the
+  harbour mouth: armed guard boats, joined by a proper warship from wave 5. Examples are gunboats and
+  cutters in the Caribbean, lembi and Carthaginian galleys in 260 BC, torpedo boats off Dogger Bank,
+  and patrol boats in the Gulf. At most three are out at once. They answer to their harbour, putting
+  back once you're clear of its waters or once the town stands down. Raze the fort and the town can
+  only man a guard boat or two.
 
 Leave people alone and tempers cool — unless they were never friendly to begin with.
 
 ---
 
 ## Music and sound
+
+**Start-up sting.** The game opens on the **Bit Squirrel** studio card: an 8-bit red squirrel under the
+studio name, drawn pixel by pixel from `src/game/splash/pixels.ts`, with a short "wall of sound" sting
+(`src/game/splash/fanfare.ts`). That means stacked, detuned chip voices across three octaves, pulse
+stabs, glockenspiel, tambourine and a "boom, boom-boom, crack" beat in a big generated reverb. After
+about 4½ seconds the logo and the music fade out together onto the title screen. Any key or tap skips
+it. Browsers that block autoplay hold the logo on "Press any key or tap" until the first gesture. If
+music is switched off, the card plays without sound.
+
 
 There are no audio files. `src/game/audio.ts` synthesises every effect and every note with the Web Audio
 API, and each song is a **cassette**: a small data structure of notes, chords, instrument choices and

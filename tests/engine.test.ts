@@ -5,7 +5,7 @@ import { DIFFICULTIES, DEFAULT_DIFFICULTY, difficultyById } from '../src/game/di
 import { waveCompositionFor } from '../src/game/data';
 import { ERA_FLAGSHIPS, ERA_SHIPS } from '../src/game/ships/era';
 import { armamentFor, blastKindFor, isIncendiary, projectileFor, usesGunpowder } from '../src/game/weapons';
-import { wildIsland } from '../src/game/settlements';
+import { rollSettlement, wildIsland } from '../src/game/settlements';
 import type { EraId } from '../src/game/types';
 
 /** Exercise real combat methods without starting a DOM/canvas animation loop.
@@ -339,4 +339,84 @@ test('the wave roster thickens or thins with the voyage budget', () => {
   assert.ok(thick > full, `a rich budget fields more sails (${thick} vs ${full})`);
   // early waves are scripted and ignore the budget entirely
   assert.deepEqual(waveCompositionFor('golden', 2, 0.6), waveCompositionFor('golden', 2, 1.6));
+});
+
+// ---- harbour towns: a fortified island sends its era's squadron, not canoes
+
+test('every era has a harbour squadron drawn from its own fleet, and every boat carries weapons', async () => {
+  const { HARBOUR_FLEETS, HARBOUR_STYLES } = await import('../src/game/harbour');
+  const { ERA_ROSTERS } = await import('../src/game/rosters');
+  const { SHIP_DEFS } = await import('../src/game/data');
+  for (const era of ERA_SHIPS) {
+    const fleet = HARBOUR_FLEETS[era.id];
+    assert.ok(fleet, `${era.id} has a harbour fleet`);
+    assert.ok(HARBOUR_STYLES[era.id], `${era.id} has a harbour town style`);
+    const roster = ERA_ROSTERS[era.id];
+    const known = new Set([...roster.pool.map((p) => p.kind), ...roster.early.flat(), roster.boss, roster.trader]);
+    for (const kind of [...fleet.light, ...fleet.heavy]) {
+      assert.ok(known.has(kind), `${era.id}: ${kind} belongs to this era's fleet`);
+      assert.ok(SHIP_DEFS[kind].cannons > 0, `${era.id}: ${kind} is armed`);
+      assert.notEqual(kind, 'warCanoe');
+      assert.notEqual(kind, 'fishingCanoe');
+    }
+  }
+});
+
+test('a garrisoned harbour sends two guard boats, and a warship only later in the voyage', async () => {
+  const { HARBOUR_FLEETS, HARBOUR_HEAVY_WAVE, harbourSortie } = await import('../src/game/harbour');
+  const fleet = HARBOUR_FLEETS.golden;
+  for (let i = 0; i < 50; i++) {
+    const early = harbourSortie('golden', 1, true);
+    assert.equal(early.length, 2);
+    assert.ok(early.every((k) => fleet.light.includes(k)));
+    const razed = harbourSortie('golden', 12, false);
+    assert.ok(razed.length >= 1 && razed.length <= 2 && razed.every((k) => fleet.light.includes(k)));
+  }
+  const late = harbourSortie('golden', HARBOUR_HEAVY_WAVE + 10, true, () => 0);
+  assert.ok(late.some((k) => fleet.heavy.includes(k)));
+});
+
+test('every fort rolled on the chart guards a harbour a little way along the shore', () => {
+  for (let i = 0; i < 200; i++) {
+    const st = rollSettlement({ inhabited: 1, friendliness: [0, 100], fort: 1, names: ['Port'] }, 0, 1);
+    assert.ok(st.fortress);
+    const gap = Math.abs(Math.atan2(Math.sin(st.fortress!.harbour! - st.fortress!.angle), Math.cos(st.fortress!.harbour! - st.fortress!.angle)));
+    assert.ok(gap > 0.8 && gap < 1.2);
+  }
+});
+
+test('a roused harbour town puts armed era craft out of its harbour mouth, capped at a squadron', () => {
+  const { e, messages } = harness('golden');
+  const is = island(400, 0);
+  Object.assign(is.settlement, { fortress: fort({ angle: 0.4, harbour: Math.PI }) });
+  e.islands = [is];
+  e.nativeTimer = 100;
+  e.updateNatives(0.1);
+  const squad = e.ships.filter((s: any) => s.homeIsland === is);
+  assert.equal(squad.length, 2);
+  for (const s of squad) {
+    assert.ok(s.def.cannons > 0 && !s.def.native, `${s.def.kind} is a gun-armed harbour craft`);
+    assert.ok(s.x < is.x, 'launched from the harbour side of the island, facing the player');
+  }
+  assert.ok(messages.some((m) => m.includes('harbour')));
+  // later sorties never put more than the squadron cap afloat at once
+  for (let i = 0; i < 6; i++) {
+    is.settlement.raidTimer = 0;
+    e.updateNatives(0.1);
+  }
+  assert.ok(e.ships.filter((s: any) => s.homeIsland === is).length <= 3);
+});
+
+test('harbour craft put back once their town stands down, and hurting them is a grievance', () => {
+  const { e } = harness('golden');
+  const is = island(400, 0);
+  Object.assign(is.settlement, { hostile: false, friendliness: 50, patience: 3, fortress: fort({ harbour: Math.PI }) });
+  e.islands = [is];
+  const boat = e.makeShip('gunboat', 250, 0, 0);
+  e.anchorNative(boat, is, 1.4);
+  e.ships.push(boat);
+  e.aiCombat(boat, 0.1);
+  assert.ok(boat.hunt <= 0, 'a calm town calls its boats home');
+  e.damageShip(boat, 1, true);
+  assert.ok(is.settlement.anger > 0);
 });

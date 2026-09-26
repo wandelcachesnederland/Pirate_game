@@ -21,6 +21,7 @@ import {
   type Settings,
 } from './game/storage';
 import { StartScreen } from './components/StartScreen';
+import { SplashScreen } from './components/SplashScreen';
 import { PauseScreen } from './components/PauseScreen';
 import { UpgradeScreen } from './components/UpgradeScreen';
 import { GameOverScreen } from './components/GameOverScreen';
@@ -56,6 +57,8 @@ export default function App() {
   const difficultyRef = useRef(difficulty);
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
   const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
+  // the studio card: 'on' at start-up, 'fading' while the title screen shows beneath it
+  const [splash, setSplash] = useState<'on' | 'fading' | 'off'>('on');
   const gameOverAt = useRef(0);
   const upgradeAt = useRef(0);
 
@@ -377,7 +380,7 @@ export default function App() {
         </button>
       )}
 
-      {screen === 'menu' && (
+      {screen === 'menu' && splash !== 'on' && (
         <StartScreen
           name={name}
           onName={setName}
@@ -418,6 +421,18 @@ export default function App() {
           onRestart={start}
           onMenu={toMenu}
           isTouch={isTouch}
+        />
+      )}
+
+      {splash !== 'off' && (
+        <SplashScreen
+          music={settings.music}
+          onFadeStart={() => setSplash('fading')}
+          onDone={() => {
+            setSplash('off');
+            // the sting was heard, so sound is allowed: bring up the sea's ambience
+            if (settingsRef.current.sfx || settingsRef.current.music) engineRef.current?.unlockAudio();
+          }}
         />
       )}
     </div>
