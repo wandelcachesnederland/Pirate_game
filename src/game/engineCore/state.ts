@@ -142,6 +142,13 @@ export abstract class EngineState {
   protected vignette!: HTMLCanvasElement;
   protected redVignette!: HTMLCanvasElement;
 
+  // ---- campaign (defined in Engine, typed here so HUD can read)
+  campaignActive = false;
+  campaignEras: EraId[] = [];
+  campaignIndex = 0;
+  campaignWavesPerEra = 5;
+  campaignWavesClearedInEra = 0;
+
   /** The armament of the sea being sailed: cannon, bows, bolts or siphons. */
   protected get arm(): Armament {
     return armamentFor(this.eraId);
