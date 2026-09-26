@@ -3,7 +3,7 @@
 // A region re-skins the same sea (water, shallows, sand, jungle, palms, peaks)
 // for a different look and feel; gameplay is identical everywhere. Tropical
 // seas get palm islands; every other sea carries a `terrain` recipe (see
-// terrain.ts) that shapes its islands — chalk cliffs and bocage in Biscay,
+// terrain/) that shapes its islands — chalk cliffs and bocage in Biscay,
 // heather and skerries in the North Sea, dunes and oases off Arabia. Which waters
 // you sail is decided by the era you pick on the start screen (`ERA_REGION`),
 // so every age fights in its proper sea — the Caribbean for the pirates, the
@@ -42,7 +42,7 @@ export interface IslandTheme {
   /**
    * What the islands here are made of — coastline, shore, ground cover, trees,
    * summit, buildings and landmarks. Left out, an island is a tropical palm
-   * island; every sea outside the tropics has one (see terrain.ts).
+   * island; every sea outside the tropics has one (see terrain/).
    */
   terrain?: Terrain;
 }

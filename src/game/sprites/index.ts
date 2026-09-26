@@ -6,7 +6,7 @@
 //   rigging.ts    - sails, oars, ratlines, mast-top emblems and faction ensigns
 //   ship.ts       - assembles the above into `drawShip` / `drawShipShadow`
 //
-// Colours and dimensions per ship class live in `game/data.ts` (SHIP_DEFS);
+// Colours and dimensions per ship class live in `game/shipDefs/*` (merged into SHIP_DEFS in `game/data.ts`);
 // the playable era hulls live in `game/ships/era/`.
 
 export { cannonLocalX, clearPathCache, hullShape, shipPaths, styleId, type ShipPaths } from './hull';

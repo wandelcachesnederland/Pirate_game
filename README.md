@@ -200,12 +200,13 @@ Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
 
 | File | What it owns |
 | --- | --- |
-| `src/game/engine.ts` | The game: world, ships, ballistics, AI, boarding, forts, settlements, camera, HUD |
+| `src/game/engine.ts` | The `Engine`: lifecycle, public API, world setup, waves, main loop |
+| `src/game/engineCore/` | Engine layers, each extending the previous: `state` → `fx` (particles, camera) → `hud` → `worldRender` → `combat` (ballistics, fire, boarding, loot) → `ships` (physics, AI, natives, forts, settlements) → `weapons` (player guns) |
 | `src/game/weapons.ts` | Armament table per era, projectile profiles, blast rule, era-renamed upgrades |
-| `src/game/data.ts` | 104 ship definitions, the upgrade list, wave titles and fleet compositions |
+| `src/game/data.ts` · `shipDefs/` | 104 ship definitions (one file per sea/era in `shipDefs/`), the upgrade list, wave titles and fleet compositions |
 | `src/game/rosters.ts` | Per-era enemy rosters, captains, boss hulls and their leaders |
 | `src/game/worlds.ts` | 23 regions: water palettes, island themes, peoples, village names |
-| `src/game/terrain.ts` · `render.ts` | Island and water painting, forts, ruins, pickups, vignettes |
+| `src/game/terrain/` · `render.ts` | Island and water painting, forts, ruins, pickups, vignettes |
 | `src/game/sprites/` | Hull, deck, rigging and flag art, **baked once per hull and cached** |
 | `src/game/eraArt/` | The era picker's title cards: per-era action scenes, coasts, weather, emblems and logo plates |
 | `src/game/settlements.ts` | Peoples, pacts, patience, grievance and cooling rules |
@@ -246,7 +247,7 @@ tests fast and honest about what the game really does.
 
 - **An era** — add a hero `ShipDef` (see `src/game/ships/heritage/`), register it in `ships/era/index.ts`
   with a region, and add entries to `ERA_WEAPONS`, `ERA_ARMAMENTS` and the music map.
-- **A ship** — add a `ShipDef` to `SHIP_DEFS` in `data.ts` and put it in an era roster in `rosters.ts`.
+- **A ship** — add a `ShipDef` to the matching file in `src/game/shipDefs/` and put it in an era roster in `rosters.ts`.
   The sprite painter derives the hull from the definition, so a new style usually needs no new art code.
 - **A song** — copy a cassette in `src/game/music/cassettes/`, write the melody with `abc(...)`, and add
   it to the box in `src/game/music/index.ts`.
