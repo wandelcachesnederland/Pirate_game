@@ -237,6 +237,8 @@ export class Engine extends EngineWeapons {
     // building the new chart so restarting a late voyage starts at wave one.
     this.wave = 0;
     this.resetWorld();
+    this.resetTraits();
+    this.buildTraitWorld();
     this.score = 0;
     this.displayScore = 0;
     this.mult = 1;
@@ -632,6 +634,7 @@ export class Engine extends EngineWeapons {
       const k = this.waveQueue.shift();
       if (k) this.spawnEnemy(k, 'near');
     }
+    this.onTraitWaveStart(n);
   }
 
   protected spawnEnemy(kind: ShipKind, mode: 'ahead' | 'near' | 'ring') {
@@ -659,6 +662,7 @@ export class Engine extends EngineWeapons {
     let heading = toP + rand(-0.6, 0.6);
     if (SHIP_DEFS[kind].trader) heading = toP + (Math.random() < 0.5 ? 1 : -1) * rand(1.3, 1.8);
     const s = this.makeShip(kind, x, y, heading);
+    this.traitOnSpawn(s);
     if (s.def.trader) s.sail = s.sailTarget = 0.6;
     // a war flotilla on the wave list keeps to the water it appeared in, and is
     // a touch bolder than a village war party
@@ -711,7 +715,8 @@ export class Engine extends EngineWeapons {
       this.waveClearing = true;
       this.clearTimer = 0;
       const flawless = this.waveDamage <= 0.5;
-      const bonus = Math.round(250 * this.wave * (flawless ? 1.5 : 1) * this.diff.plunder);
+      const bonus = Math.round(250 * this.wave * (flawless ? 1.5 : 1) * this.diff.plunder * this.traitWaveBonusMult());
+      this.onTraitWaveClear();
       this.score += bonus;
       this.scorePulse = 1;
       this.banner = {
@@ -857,6 +862,7 @@ export class Engine extends EngineWeapons {
       this.updateChasers(dt);
       this.updateBoarding();
       this.updateSupplies(dt);
+      this.updateTraits(dt);
     }
     this.updateVolleys(dt);
     this.updateBalls(dt);
@@ -909,6 +915,9 @@ export class Engine extends EngineWeapons {
       this.windTimer = rand(20, 32);
       this.windTarget = this.windAngle + rand(-1.2, 1.2);
     }
+    // the monsoon seas hold their wind to the calendar
+    const forced = this.traitWind();
+    if (forced !== null) this.windTarget = forced;
     const d = angDiff(this.windAngle, this.windTarget);
     this.windAngle += d * Math.min(1, dt * 0.25);
     this.windX = Math.cos(this.windAngle);

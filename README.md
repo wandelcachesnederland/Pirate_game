@@ -19,7 +19,7 @@ from a USB stick or drop on any static host.
 ```bash
 npm install
 npm run dev      # dev server on http://localhost:5173
-npm test         # rules + headless engine regression tests (84 tests)
+npm test         # rules + headless engine regression tests (119 tests)
 npm run build    # tsc --noEmit + vite build -> dist/index.html (single file)
 npm run preview  # serve the production build
 ```
@@ -47,7 +47,8 @@ every foe, fort and fortune. See [Difficulty](#difficulty) below.
 | Trim sails (speed) | `W` / `S` or `↑` / `↓` |
 | Fire port / starboard broadside | `Q` / `E` (or `J` / `L`) |
 | Smart broadside at the nearest target | `Space` (or `K`), or click |
-| Board a prize alongside | `F` (or `B`) |
+| Board a prize alongside — or hail a trader where tribute is due | `F` (or `B`) |
+| Era trait action — oar-sprint, anchor stance, teppo volley | `T` |
 | Special volley — grape, arrow storm or fire pots | `R` (once the upgrade is fitted) |
 | Pause | `P` or `Esc` |
 

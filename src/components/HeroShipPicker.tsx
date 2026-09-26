@@ -12,6 +12,7 @@ import { isSteelHull, type EraId } from '../game/types';
 import { ERA_SHIPS, type EraShip } from '../game/ships/era';
 import { shipScores, shipTraits, type ShipScores } from '../game/ships/traits';
 import { armamentFor, usesGunpowder } from '../game/weapons';
+import { traitDef } from '../game/eraTraits';
 import { regionById } from '../game/worlds';
 import { makeCanvas } from '../game/canvas';
 import { drawPortraitShip, paintWater, stableSeed } from '../game/portrait';
@@ -307,6 +308,9 @@ export function HeroShipPicker({ era, onEra }: Props) {
             <p className="mt-1 text-[0.66rem] italic leading-snug opacity-75">
               {shown.blurb}
               {shown.homeWaters ? ` — the ${shown.homeWaters}.` : '.'}
+            </p>
+            <p className="mt-1 text-[0.66rem] leading-snug text-sky-200/90">
+              {traitDef(shown.id).name}: {traitDef(shown.id).pitch}
             </p>
           </div>
 

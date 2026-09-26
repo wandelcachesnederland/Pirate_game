@@ -1,10 +1,10 @@
 import type { Island, Ship } from '../types';
-import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from '../boarding';
+import { BOARD_MIN_CREW, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from '../boarding';
 import { PROVOKE } from '../settlements';
 import { blastKindFor, isBlunt, SHOT_PROFILE, type ProjectileKind } from '../weapons';
 import { TAU } from '../math';
 import { fenderFireGuard, fenderGuard } from '../hullFittings';
-import { MAX_PICKUPS, STREAK_TIME, MAX_MULT, CHASER_BIG, BURN_TICK, FIRE_SPREAD, SLICK_LIFE, MAX_SLICKS, P_SMOKE, P_FIRE, P_SPLINTER, P_RING, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, WOOD, rand, clamp, pick, type Ball, type Pickup } from './constants';
+import { MAX_PICKUPS, STREAK_TIME, MAX_MULT, CHASER_BIG, BURN_TICK, FIRE_SPREAD, SLICK_LIFE, MAX_SLICKS, P_SMOKE, P_FIRE, P_SPLINTER, P_RING, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, WOOD, rand, clamp, pick, type Ball, type Pickup, type Slick } from './constants';
 import { EngineWorldRender } from './worldRender';
 
 /** Projectiles, damage, fire, sinking, boarding, stores and loot. */
@@ -14,6 +14,20 @@ export abstract class EngineCombat extends EngineWorldRender {
   protected abstract shellIsland(is: Island, b: Ball): void;
   protected abstract provokeBoats(is: Island, points: number): void;
   protected abstract launchRowboat(s: Ship): void;
+  /** Era traits — implemented by `EngineTraits`, above this layer. */
+  protected abstract traitShotDamage(b: Ball, tgt: Ship, dmg: number): number;
+  protected abstract traitBallHits(b: Ball, s: Ship): boolean;
+  protected abstract traitMissile(b: Ball, dt: number): void;
+  protected abstract traitOnSunk(s: Ship, byPlayer: boolean): void;
+  protected abstract traitOnCapture(s: Ship): void;
+  protected abstract traitLootMult(s: Ship): number;
+  protected abstract traitSupplyMult(): number;
+  protected abstract traitSupplies(dt: number): void;
+  protected abstract traitOnFired(s: Ship): void;
+  protected abstract traitBoardRange(): number;
+  protected abstract traitSlick(sl: Slick, dt: number): void;
+  protected abstract traitSlickLife(): number;
+  protected abstract traitShipHidden(s: Ship): boolean;
 
   // ================================================================ combat
   protected updateBalls(dt: number) {
@@ -22,6 +36,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       b.life -= dt;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
+      this.traitMissile(b, dt);
       let remove = false;
       // a missile leaves its booster smoke hanging on the water
       if (b.projectile === 'missile' && Math.random() < 0.7) {
@@ -65,7 +80,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       } else if (falling) {
         for (const s of this.ships) {
           if (s.team === b.team || s.sinking >= 0) continue;
-          if (this.ballHitsShip(b, s)) {
+          if (this.ballHitsShip(b, s) && this.traitBallHits(b, s)) {
             if (b.mortar) this.mortarBlast(b);
             else this.onBallHit(b, s);
             remove = true;
@@ -123,6 +138,8 @@ export abstract class EngineCombat extends EngineWorldRender {
       // a stone: dust, splinters and a hard shove — never a spark
       this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1, false);
     } else this.fxHit(b.x, b.y, dir, crit ? 1.5 : b.small ? 0.6 : 1, prof.sparks);
+    // era gunnery — the gauge, the rake, armour slopes, Mana, brackets
+    dmg = this.traitShotDamage(b, s, dmg);
     // a chase gun hit knocks a canoe off its stroke and back down the wake
     const knock = b.projectile === 'missile' ? 26 : b.chaser ? (openBoat ? 70 : 12) : b.small ? 4 : 10;
     s.vx += Math.cos(dir) * knock;
@@ -297,8 +314,9 @@ export abstract class EngineCombat extends EngineWorldRender {
   protected spawnSlick(b: Ball) {
     const r = (b.small ? 22 : 34) * (1 + Math.random() * 0.25);
     if (this.slicks.length >= MAX_SLICKS) this.slicks.shift();
+    const life = SLICK_LIFE * this.traitSlickLife();
     this.slicks.push({
-      x: b.x, y: b.y, r, life: SLICK_LIFE, max: SLICK_LIFE,
+      x: b.x, y: b.y, r, life, max: life,
       team: b.team, dps: b.dmg * 0.5, seed: Math.random() * TAU,
     });
   }
@@ -308,6 +326,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     for (let i = this.slicks.length - 1; i >= 0; i--) {
       const sl = this.slicks[i];
       sl.life -= dt;
+      this.traitSlick(sl, dt);
       if (Math.random() < dt * 20) {
         const a = rand(0, TAU);
         const d = Math.sqrt(Math.random()) * sl.r;
@@ -381,6 +400,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     }
     if (s.team === 1) {
       if (reward) {
+        this.traitOnSunk(s, s.hitByPlayer || s.burnFromPlayer);
         this.stats.sunk++;
         if (this.streakTimer > 0) {
           this.mult = Math.min(MAX_MULT, this.mult + 1);
@@ -391,7 +411,7 @@ export abstract class EngineCombat extends EngineWorldRender {
         }
         this.streakTimer = STREAK_TIME;
         this.launchRowboat(s);
-        const pts = this.addScore(s.def.value * (1 + 0.1 * (this.wave - 1)));
+        const pts = this.addScore(s.def.value * (1 + 0.1 * (this.wave - 1)) * this.traitLootMult(s));
         this.addText(s.x, s.y - 30, `SUNK! +${pts.toLocaleString('en-US')}`, '#ffd84d', s.isBoss ? 36 : 26);
         if (s.surrendered) {
           // she struck and was sunk anyway — most of the prize went down with her
@@ -537,7 +557,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     let bd = Infinity;
     for (const s of this.ships) {
       if (s.team !== 1 || !s.surrendered || s.sinking >= 0 || s.captured) continue;
-      const reach = (p.def.length + s.def.length) * 0.5 + BOARD_RANGE;
+      const reach = (p.def.length + s.def.length) * 0.5 + this.traitBoardRange();
       const d = Math.hypot(s.x - p.x, s.y - p.y);
       if (d < reach && d < bd) {
         bd = d;
@@ -549,10 +569,12 @@ export abstract class EngineCombat extends EngineWorldRender {
   /** The slow drip of the water butts and the bread room. */
   protected updateSupplies(dt: number) {
     if (this.playerDeadTimer >= 0) return;
+    this.traitSupplies(dt);
     const crew = Math.max(1, Math.ceil(this.player.crew));
+    const drain = this.diff.supplyDrain * this.traitSupplyMult();
     // a full store lasts a patient captain most of a long cruise
-    this.water = Math.max(0, this.water - dt * crew * 0.0045 * this.diff.supplyDrain);
-    this.food = Math.max(0, this.food - dt * crew * 0.0032 * this.diff.supplyDrain);
+    this.water = Math.max(0, this.water - dt * crew * 0.0045 * drain);
+    this.food = Math.max(0, this.food - dt * crew * 0.0032 * drain);
     this.storeWarnTimer -= dt;
     if (this.water <= 0 || this.food <= 0) {
       this.supplyTimer += dt;
@@ -663,7 +685,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     }
     const outcome = rollBoardingOutcome(pCrew, Math.ceil(s.crew));
     const manifest = s.def.value * (1 + 0.1 * (this.wave - 1));
-    const V = manifest * this.diff.plunder;
+    const V = manifest * this.diff.plunder * this.traitLootMult(s);
     const d = Math.hypot(p.x - s.x, p.y - s.y) || 1;
     const nx = (p.x - s.x) / d;
     const ny = (p.y - s.y) / d;
@@ -699,6 +721,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     s.captured = true;
     s.sinking = 0; // reuses the fade-out path; cleared like a sinking
     this.stats.boarded++;
+    this.traitOnCapture(s);
     if (s.homeIsland) this.provokeBoats(s.homeIsland, PROVOKE.boatTaken);
     if (this.streakTimer > 0) {
       this.mult = Math.min(MAX_MULT, this.mult + 1);
@@ -762,7 +785,7 @@ export abstract class EngineCombat extends EngineWorldRender {
 
   protected dropLoot(s: Ship) {
     const n = s.def.coins;
-    const total = s.def.value * 0.55 * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder;
+    const total = s.def.value * 0.55 * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder * this.traitLootMult(s);
     const per = Math.max(1, Math.round(total / n));
     for (let i = 0; i < n; i++) {
       const a = rand(0, TAU);

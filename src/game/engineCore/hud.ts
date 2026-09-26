@@ -3,6 +3,7 @@ import { regionById } from '../worlds';
 import { drawCoin, rr } from '../render';
 import { drawFlagArt } from '../sprites';
 import { TAU } from '../math';
+import { traitDef } from '../eraTraits';
 import { STREAK_TIME, FONT, FELL, clamp } from './constants';
 import { EngineFx } from './fx';
 
@@ -11,6 +12,8 @@ export abstract class EngineHud extends EngineFx {
   /** Implemented by the wave logic in `Engine`. */
   protected abstract countEnemies(): number;
   protected abstract findBoss(): Ship | null;
+  /** Era trait status — implemented by `EngineTraits`, above this layer. */
+  protected abstract traitHudLine(): string | null;
 
   protected outlined(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, lw = 4) {
     ctx.lineJoin = 'round';
@@ -291,6 +294,15 @@ export abstract class EngineHud extends EngineFx {
       ctx.strokeStyle = '#d9a441';
       ctx.lineWidth = 1.5;
       ctx.strokeRect(bxx - 3, byy - 3, bw + 6, bh + 6);
+    }
+
+    // ---- era trait — the age's signature, always in sight
+    const tline = this.traitHudLine();
+    if (tline) {
+      ctx.textAlign = 'center';
+      ctx.font = `${Math.round(13 * u)}px ${FONT}`;
+      const ty = narrow ? my + 40 * u : y0 + (boss ? 100 : 76) * u;
+      this.outlined(ctx, `${traitDef(this.eraId).name} — ${tline}`, W / 2, ty, '#9fd8ff', 3);
     }
   }
 

@@ -8,6 +8,11 @@ import { fittingsFor } from '../hullFittings';
 
 /** Frame rendering: water, islands, ships, projectiles, particles, then the HUD on top. */
 export abstract class EngineWorldRender extends EngineHud {
+  /** Era traits — implemented by `EngineTraits`, above this layer. */
+  protected abstract traitShipHidden(s: Ship): boolean;
+  protected abstract renderTraitZones(ctx: CanvasRenderingContext2D): void;
+  protected abstract traitSkyDark(): number;
+  protected abstract traitSkyLight(): number;
   // ================================================================ render
   protected render() {
     const ctx = this.ctx;
@@ -38,14 +43,15 @@ export abstract class EngineWorldRender extends EngineHud {
     this.drawBounds(ctx);
     this.drawIslands(ctx);
     this.drawSlicks(ctx);
+    this.renderTraitZones(ctx);
     this.drawParticles(ctx, 0);
     this.drawPickups(ctx);
 
     const p = this.player;
     ctx.fillStyle = '#021a2e';
-    for (const s of this.ships) if (this.shipVisible(s)) drawShipShadow(ctx, s);
+    for (const s of this.ships) if (this.shipVisible(s) && !this.traitShipHidden(s)) drawShipShadow(ctx, s);
     for (const s of this.ships)
-      if (s !== p && this.shipVisible(s)) drawShip(ctx, s, this.time, this.windAngle, s.falseFlag ?? s.def.faction);
+      if (s !== p && this.shipVisible(s) && !this.traitShipHidden(s)) drawShip(ctx, s, this.time, this.windAngle, s.falseFlag ?? s.def.faction);
     if (p && !p.dead && this.shipVisible(p)) {
       drawShip(ctx, p, this.time, this.windAngle, p.falseFlag ?? p.def.faction);
       this.drawHullFittings(ctx);
@@ -68,6 +74,21 @@ export abstract class EngineWorldRender extends EngineHud {
       ctx.globalAlpha = Math.min(1, redA);
       ctx.drawImage(this.redVignette, 0, 0, W, H);
       ctx.globalAlpha = 1;
+    }
+    // night actions and uncharted fog: darkness with a hole of lamplight
+    const skyDark = this.traitSkyDark();
+    if (skyDark > 0.01 && inGame && p && !p.dead) {
+      const [psx, psy] = this.worldToScreen(p.x, p.y);
+      const lr = this.traitSkyLight();
+      ctx.fillStyle = `rgba(2,8,20,${(skyDark * 0.55).toFixed(3)})`;
+      ctx.fillRect(0, 0, W, H);
+      if (lr > 0) {
+        const g = ctx.createRadialGradient(psx, psy, lr * 0.35, psx, psy, Math.max(W, H) * 0.75);
+        g.addColorStop(0, 'rgba(2,8,20,0)');
+        g.addColorStop(1, `rgba(2,8,20,${skyDark.toFixed(3)})`);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+      }
     }
     if (this.flashWhite > 0.01) {
       ctx.globalAlpha = this.flashWhite * 0.5;
@@ -741,7 +762,7 @@ export abstract class EngineWorldRender extends EngineHud {
     ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round';
     for (const s of this.ships) {
-      if (s.team !== 1 || s.sinking >= 0 || s.captured || !this.shipVisible(s)) continue;
+      if (s.team !== 1 || s.sinking >= 0 || s.captured || !this.shipVisible(s) || this.traitShipHidden(s)) continue;
       const showBar = s.hp < s.maxHp || s.isBoss || s.surrendered;
       const w = Math.max(34, s.def.length * 0.75);
       const h = 4.5 * inv;
