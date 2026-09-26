@@ -4,7 +4,7 @@ import { difficultyById } from './difficulty';
 import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
 import { regionById } from './worlds';
 import { BOARD_MIN_CREW } from './boarding';
-import type { MusicMode } from './music';
+import { TITLE_CASSETTE, type MusicMode } from './music';
 import { buildIsland, makeGlow, makeVignette, makeWaterTile, makeWaveTile } from './render';
 import { assignIslandPolitics, flagOf, rollSettlement } from './settlements';
 import { armShipForEra, upgradeForEra, usesGunpowder } from './weapons';
@@ -137,6 +137,22 @@ export class Engine extends EngineWeapons {
     this.sfx.unlock();
     this.sfx.setEra(this.eraId);
     this.sfx.insertRandomCassette(false);
+    this.sfx.startMusic();
+  }
+
+  /**
+   * The attract screen's tune. The studio sting hands over to it as the logo
+   * fades: the same wall of sound, now with a song to walk into. It keeps the
+   * port warm through sign-on and peril, and the sea's own tape crossfades over
+   * it the moment an era is picked on the chart.
+   */
+  previewTitleMusic() {
+    if (this.screen !== 'menu') return;
+    this.sfx.unlock();
+    // the title screen has no fight to score, so the band is always fully in
+    this.musicMode = 1;
+    this.sfx.setMode(1);
+    this.sfx.insertCassette(TITLE_CASSETTE);
     this.sfx.startMusic();
   }
 
@@ -295,8 +311,9 @@ export class Engine extends EngineWeapons {
     this.sfx.stopMusic();
     this.sfx.duck(false);
     this.enterMenu();
-    // back in port: the era's tape comes back up while the charts are out
-    this.previewEraMusic();
+    // back in port on the attract screen: its own theme takes the deck again
+    // (`previewTitleMusic`, asked for by the start screen as it comes up)
+    this.previewTitleMusic();
   }
 
   chooseUpgrade(id: UpgradeId) {

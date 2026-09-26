@@ -1,5 +1,17 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { BookOpen, Dices, Flag, Hand, Keyboard, Pencil, Sailboat, Skull, Wind, X } from 'lucide-react';
+import {
+  BookOpen,
+  Dices,
+  Flag,
+  Hand,
+  Keyboard,
+  Music,
+  Pencil,
+  Sailboat,
+  Skull,
+  Wind,
+  X,
+} from 'lucide-react';
 import type { DifficultyId, EraId } from '../game/types';
 import { DIFFICULTIES, difficultyById } from '../game/difficulty';
 import type { ScoreEntry, Settings } from '../game/storage';
@@ -24,6 +36,8 @@ interface Props {
   onEra: (id: EraId) => void;
   difficulty: DifficultyId;
   onDifficulty: (id: DifficultyId) => void;
+  /** What the menu's deck is playing — named on the attract screen. */
+  nowPlaying?: string;
 }
 
 /**
@@ -495,6 +509,7 @@ export function StartScreen({
   onEra,
   difficulty,
   onDifficulty,
+  nowPlaying,
 }: Props) {
   const [step, setStep] = useState<Step>(0);
   const [dir, setDir] = useState<'fwd' | 'back'>('fwd');
@@ -603,6 +618,15 @@ export function StartScreen({
           {step === 0 ? (
             <div className="order-last flex w-full items-center justify-center gap-1.5 sm:order-none sm:w-auto">
               <span className="arcade-tag text-[0.6rem] opacity-70 sm:text-xs">{STEP_LABEL[0]}</span>
+              {settings.music && nowPlaying && (
+                <span
+                  className="flex items-center gap-1 rounded-full border border-gold/40 bg-black/40 px-2 py-0.5 text-[0.56rem] italic text-gold/85 sm:text-[0.62rem]"
+                  title="On the menu's deck"
+                >
+                  <Music className="h-3 w-3 shrink-0" />
+                  <span className="max-w-[12rem] truncate">{nowPlaying}</span>
+                </span>
+              )}
             </div>
           ) : (
             <div className="order-last flex w-full items-center justify-center gap-1 sm:order-none sm:w-auto sm:gap-1.5">

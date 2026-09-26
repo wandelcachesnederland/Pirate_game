@@ -185,6 +185,16 @@ about 4½ seconds the logo and the music fade out together onto the title screen
 it. Browsers that block autoplay hold the logo on "Press any key or tap" until the first gesture. If
 music is switched off, the card plays without sound.
 
+**Attract theme.** The screen the sting hands over to — the title marquee, the attract-mode page the
+player sees next — has a tune of its own: **"The Broadside March"**
+(`src/game/music/cassettes/broadsideMarch.ts`). It is written as a cassette like any sea's tape, and it
+keeps the sting's sound and its chords (D – Bm – G – A) so the logo and the title screen read as one
+piece of music: the same wall of stacked, detuned saws, glockenspiel, off-beat stabs, tambourine and
+"boom, boom-boom" drums, now carrying a real melody — an eight-bar arch that lifts, answers, falls and
+cadences into the leading tone, with a snare roll in the last bar that throws the loop back to the top.
+It starts as the logo fades, runs under sign-on and peril, and crossfades out when the era chart loads
+one of the sea's own tapes; setting sail hands the deck to the voyage.
+
 
 There are no audio files. `src/game/audio.ts` synthesises every effect and every note with the Web Audio
 API, and each song is a **cassette**: a small data structure of notes, chords, instrument choices and

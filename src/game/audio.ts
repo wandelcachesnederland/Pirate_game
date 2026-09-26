@@ -499,6 +499,10 @@ export class Sfx {
 
   /** Swap the cassette; the new song fades in over the old one. */
   insertCassette(cassette: Cassette) {
+    // putting the tape already on the deck back in must not stutter it: a
+    // second pick of the same era (or a menu that re-asks for its theme) is a
+    // no-op, not a restart from bar one
+    if (cassette === this.cassette) return;
     this.cassette = cassette;
     this.stepDur = cassette.stepDuration(this.wave);
     this.step = 0;
