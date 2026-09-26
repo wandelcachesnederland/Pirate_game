@@ -27,6 +27,7 @@ import {
 import { chronologicalEraIds, oldestEra } from './game/campaign';
 import type { ArcadeModeId } from './components/ArcadeSelectScreen';
 import { StartScreen } from './components/StartScreen';
+import { LanguageSelectScreen } from './components/LanguageSelectScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { PauseScreen } from './components/PauseScreen';
 import { UpgradeScreen } from './components/UpgradeScreen';
@@ -70,7 +71,8 @@ export default function App() {
   const arcadeModeRef = useRef<ArcadeModeId>('era');
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
   const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
-  // the studio card: 'on' at start-up, 'fading' while the title screen shows beneath it
+  // the studio card: 'on' at start-up, 'fading' while the language screen shows beneath it
+  const [languageSelected, setLanguageSelected] = useState(false);
   const [splash, setSplash] = useState<'on' | 'fading' | 'off'>('on');
   // what the menu's own deck is playing — the attract theme until an era takes over
   const [menuTune, setMenuTune] = useState('');
@@ -447,7 +449,7 @@ export default function App() {
         </button>
       )}
 
-      {screen === 'menu' && splash !== 'on' && mode === null && (
+      {screen === 'menu' && splash === 'off' && languageSelected && mode === null && (
         <StartScreen
           name={name}
           onName={setName}
@@ -467,7 +469,7 @@ export default function App() {
         />
       )}
 
-      {screen === 'menu' && splash !== 'on' && mode === 'trade' && (
+      {screen === 'menu' && splash === 'off' && languageSelected && mode === 'trade' && (
         <TradeScreen
           name={name}
           settings={settings}
@@ -476,7 +478,7 @@ export default function App() {
         />
       )}
 
-      {screen === 'menu' && splash !== 'on' && mode === 'adventure' && (
+      {screen === 'menu' && splash === 'off' && languageSelected && mode === 'adventure' && (
         <AdventureScreen
           name={name}
           settings={settings}
@@ -511,6 +513,10 @@ export default function App() {
           onMenu={toMenu}
           isTouch={isTouch}
         />
+      )}
+
+      {!languageSelected && splash !== 'on' && (
+        <LanguageSelectScreen ready={splash === 'off'} onDone={() => setLanguageSelected(true)} />
       )}
 
       {splash !== 'off' && (
