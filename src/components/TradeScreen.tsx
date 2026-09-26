@@ -1,24 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import {
-  Coins,
-  Anchor,
-  Ship,
-  Skull,
-  X,
-  Pause,
-  Play,
-  Sailboat,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Crosshair,
-  Flag,
-  ScrollText,
-} from 'lucide-react';
+import { Coins, Anchor, Ship, Skull, X, Pause, Play, Sailboat, ScrollText } from 'lucide-react';
 import { TradeEngine, type TradeHud, type TradePhase, type LogMsg } from '../game/trade/engine';
-import type { GoodId } from '../game/trade/goods';
+import type { GoodId } from '../game/chart/goods';
 import { type Settings } from '../game/storage';
+import { VoyageTouchBar, setLiveInput } from './VoyageTouchBar';
 
 interface Props {
   name: string;
@@ -220,7 +205,7 @@ export function TradeScreen({ name, settings, onExit, isTouch }: Props) {
           </div>
 
           {/* touch steering */}
-          {isTouch && phase === 'sailing' && <TouchBar dock={dock} canDock={hud.canDock} />}
+          {isTouch && phase === 'sailing' && <VoyageTouchBar canDock={hud.canDock} onDock={dock} />}
         </div>
       )}
 
@@ -593,92 +578,5 @@ function TradePanel({
         </div>
       </div>
     </div>
-  );
-}
-
-// ----------------------------------------------------------------- touch
-
-function TouchBar({ dock, canDock }: { dock: () => void; canDock: boolean }) {
-  const eng = useTouchEngine();
-  return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex items-end justify-between p-3">
-      <div className="pointer-events-auto flex gap-2">
-        <TouchBtn label={<ArrowLeft className="h-6 w-6" />} onDown={() => eng('KeyA', true)} onUp={() => eng('KeyA', false)} />
-        <TouchBtn label={<ArrowRight className="h-6 w-6" />} onDown={() => eng('KeyD', true)} onUp={() => eng('KeyD', false)} />
-        <TouchBtn label={<ArrowUp className="h-6 w-6" />} onDown={() => eng('KeyW', true)} onUp={() => eng('KeyW', false)} />
-        <TouchBtn label={<ArrowDown className="h-6 w-6" />} onDown={() => eng('KeyS', true)} onUp={() => eng('KeyS', false)} />
-      </div>
-      <div className="pointer-events-auto flex gap-2">
-        {canDock && (
-          <TouchBtn label={<Flag className="h-6 w-6" />} onDown={dock} accent />
-        )}
-        <TouchBtn
-          label={<Crosshair className="h-6 w-6" />}
-          onDown={() => {
-            const inp = touchInput();
-            if (inp) {
-              inp.portQueued = true;
-              inp.starQueued = true;
-            }
-          }}
-          accent
-        />
-      </div>
-    </div>
-  );
-}
-
-function useTouchEngine() {
-  return (code: string, on: boolean) => {
-    const inp = touchInput();
-    if (!inp) return;
-    if (on) inp.down.add(code);
-    else inp.down.delete(code);
-  };
-}
-
-function touchInput() {
-  // reach the live engine's input through the module-level handle
-  return liveInput;
-}
-
-// the engine registers its input here so the touch bar can drive it
-let liveInput: import('../game/input').Input | null = null;
-export function setLiveInput(i: import('../game/input').Input | null) {
-  liveInput = i;
-}
-
-function TouchBtn({
-  label,
-  onDown,
-  onUp,
-  accent,
-}: {
-  label: React.ReactNode;
-  onDown: () => void;
-  onUp?: () => void;
-  accent?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onPointerDown={(e) => {
-        e.preventDefault();
-        onDown();
-      }}
-      onPointerUp={(e) => {
-        e.preventDefault();
-        onUp?.();
-      }}
-      onPointerLeave={() => onUp?.()}
-      onPointerCancel={() => onUp?.()}
-      className={
-        accent
-          ? 'grid h-14 w-14 place-items-center rounded-full border-2 border-gold bg-blood/80 text-parch shadow-lg active:translate-y-1'
-          : 'grid h-14 w-14 place-items-center rounded-full border-2 border-gold/60 bg-black/50 text-gold shadow-lg active:translate-y-1'
-      }
-    >
-      {label}
-    </button>
   );
 }

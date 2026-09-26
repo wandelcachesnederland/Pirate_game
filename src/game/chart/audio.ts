@@ -1,8 +1,9 @@
-// Tiny self-contained sound effects for the Trade mode, built on the WebAudio
-// API so it needs no assets and no shared engine. All calls are no-ops until
-// the context is unlocked by a user gesture, and respect the sfx setting.
+// Tiny self-contained sound effects for the modes that sail the chart (Trade
+// and Adventure), built on the WebAudio API so they need no assets and no
+// shared engine. All calls are no-ops until the context is unlocked by a user
+// gesture, and respect the sfx setting.
 
-export class TradeAudio {
+export class VoyageAudio {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   enabled = true;
@@ -93,5 +94,29 @@ export class TradeAudio {
     this.tone(523, 0.12, 'triangle', 0.5);
     this.tone(659, 0.12, 'triangle', 0.5);
     this.tone(784, 0.22, 'triangle', 0.5);
+  }
+
+  /** Something huge turning over below the keel: sea beasts. */
+  roar() {
+    this.noise(0.55, 0.85);
+    this.tone(90, 0.5, 'sawtooth', 0.45, 42);
+  }
+
+  /** A rival's colours break out — the sting before a named fight. */
+  stinger() {
+    this.tone(196, 0.18, 'square', 0.35);
+    this.tone(147, 0.3, 'square', 0.35, 110);
+  }
+
+  /** Hull timbers taking a heavy blow. */
+  crunch() {
+    this.noise(0.22, 0.7);
+    this.tone(150, 0.16, 'triangle', 0.35, 70);
+  }
+
+  /** Renown won: a bright two-note salute. */
+  renown() {
+    this.tone(659, 0.1, 'triangle', 0.45);
+    this.tone(988, 0.16, 'triangle', 0.4);
   }
 }

@@ -8,6 +8,7 @@ import { DEFAULT_ERA, eraRegion } from './game/ships/era';
 import { DEFAULT_DIFFICULTY } from './game/difficulty';
 import type { GameModeId } from './components/ModeSelectScreen';
 import { TradeScreen } from './components/TradeScreen';
+import { AdventureScreen } from './components/AdventureScreen';
 import {
   addScore,
   loadDifficulty,
@@ -263,8 +264,9 @@ export default function App() {
     engineRef.current?.chooseUpgrade(id);
   }, []);
 
+  // Trade and Adventure leave the arcade flow and take over the whole screen
   const handleMode = useCallback((m: GameModeId) => {
-    if (m === 'trade') setMode('trade');
+    if (m === 'trade' || m === 'adventure') setMode(m);
   }, []);
 
   const updateSettings = useCallback((s: Settings) => {
@@ -440,7 +442,7 @@ export default function App() {
         </button>
       )}
 
-      {screen === 'menu' && splash !== 'on' && mode !== 'trade' && (
+      {screen === 'menu' && splash !== 'on' && mode === null && (
         <StartScreen
           name={name}
           onName={setName}
@@ -462,6 +464,15 @@ export default function App() {
 
       {screen === 'menu' && splash !== 'on' && mode === 'trade' && (
         <TradeScreen
+          name={name}
+          settings={settings}
+          onExit={() => setMode(null)}
+          isTouch={isTouch}
+        />
+      )}
+
+      {screen === 'menu' && splash !== 'on' && mode === 'adventure' && (
+        <AdventureScreen
           name={name}
           settings={settings}
           onExit={() => setMode(null)}
