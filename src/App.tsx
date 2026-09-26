@@ -3,14 +3,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Flag, Grape, Crosshair, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
-import type { EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
+import type { DifficultyId, EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
 import { DEFAULT_ERA, eraRegion } from './game/ships/era';
+import { DEFAULT_DIFFICULTY } from './game/difficulty';
 import {
   addScore,
+  loadDifficulty,
   loadEra,
   loadName,
   loadScores,
   loadSettings,
+  saveDifficulty,
   saveEra,
   saveName,
   saveSettings,
@@ -49,6 +52,8 @@ export default function App() {
   const [isTouch, setIsTouch] = useState(() => detectTouch());
   const [era, setEra] = useState<EraId>(() => loadEra() ?? DEFAULT_ERA);
   const eraRef = useRef(era);
+  const [difficulty, setDifficulty] = useState<DifficultyId>(() => loadDifficulty() ?? DEFAULT_DIFFICULTY);
+  const difficultyRef = useRef(difficulty);
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
   const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
   const gameOverAt = useRef(0);
@@ -62,6 +67,10 @@ export default function App() {
     eraRef.current = era;
   }, [era]);
 
+  useEffect(() => {
+    difficultyRef.current = difficulty;
+  }, [difficulty]);
+
   // the era is the first choice of the game: it swaps the flagship AND charts
   // the era's own waters on the menu at once
   const pickEra = useCallback((id: EraId) => {
@@ -71,6 +80,13 @@ export default function App() {
     engineRef.current?.setRegion(eraRegion(id));
     // hear the waters you are picking: the era's own tape starts on the menu
     engineRef.current?.previewEraMusic();
+  }, []);
+
+  // the peril of the voyage: saved for the next voyage, told to the engine at once
+  const pickDifficulty = useCallback((id: DifficultyId) => {
+    setDifficulty(id);
+    saveDifficulty(id);
+    engineRef.current?.setDifficulty(id);
   }, []);
 
   // ---- engine lifecycle
@@ -87,7 +103,14 @@ export default function App() {
         gameOverAt.current = performance.now();
         const entryName = nameRef.current.trim() || 'Captain';
         if (st.score > 0) {
-          const res = addScore({ name: entryName, score: st.score, wave: st.wave, sunk: st.sunk, date: Date.now() });
+          const res = addScore({
+            name: entryName,
+            score: st.score,
+            wave: st.wave,
+            sunk: st.sunk,
+            date: Date.now(),
+            difficulty: st.difficulty,
+          });
           setScores(res.scores);
           setRank(res.rank);
         } else {
@@ -103,6 +126,7 @@ export default function App() {
     });
     eng.setAudio(settingsRef.current.sfx, settingsRef.current.music);
     eng.setRegion(eraRegion(eraRef.current));
+    eng.setDifficulty(difficultyRef.current);
     engineRef.current = eng;
     setEngine(eng);
     return () => {
@@ -164,6 +188,7 @@ export default function App() {
     setBoardPrompt(null);
     e.setEra(eraRef.current);
     e.setRegion(eraRegion(eraRef.current));
+    e.setDifficulty(difficultyRef.current);
     e.startGame();
   }, []);
 
@@ -363,6 +388,8 @@ export default function App() {
           isTouch={isTouch}
           era={era}
           onEra={pickEra}
+          difficulty={difficulty}
+          onDifficulty={pickDifficulty}
         />
       )}
 

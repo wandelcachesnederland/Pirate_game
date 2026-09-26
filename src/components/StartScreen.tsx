@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BookOpen, Flag, Hand, Keyboard, Sailboat, Skull, Wind, X } from 'lucide-react';
-import type { EraId } from '../game/types';
+import type { DifficultyId, EraId } from '../game/types';
+import { DIFFICULTIES, difficultyById } from '../game/difficulty';
 import type { ScoreEntry, Settings } from '../game/storage';
 import { isTypingTarget } from '../game/input';
 import { HighScoreTable, KeyCap, SoundToggles } from './ui';
@@ -18,6 +19,8 @@ interface Props {
   isTouch: boolean;
   era: EraId;
   onEra: (id: EraId) => void;
+  difficulty: DifficultyId;
+  onDifficulty: (id: DifficultyId) => void;
 }
 
 function Row({ keys, label }: { keys: ReactNode; label: string }) {
@@ -123,8 +126,64 @@ export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s
 
 // ------------------------------------------------------------------ step two
 
+/** Five degrees of peril: skull pips from a calm cruise to a sea of hunters. */
+function DifficultyPicker({
+  difficulty,
+  onDifficulty,
+}: {
+  difficulty: DifficultyId;
+  onDifficulty: (id: DifficultyId) => void;
+}) {
+  const sel = difficultyById(difficulty);
+  return (
+    <section className="arcade-panel select-none p-2.5 sm:p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <h3 className="flex items-center gap-2 font-pirate text-lg leading-none sm:text-2xl">
+          <Skull className="h-5 w-5 text-gold" />
+          Danger Money
+        </h3>
+        <span className="text-[0.68rem] italic opacity-70">Deeper peril pays richer plunder</span>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-5">
+        {DIFFICULTIES.map((d) => {
+          const active = d.id === difficulty;
+          return (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => onDifficulty(d.id)}
+              aria-pressed={active}
+              className={`flex flex-col items-center gap-0.5 rounded-md border-2 px-1.5 py-1.5 transition-colors sm:px-2 ${
+                active
+                  ? 'border-gold bg-blood/70 text-parch shadow-[0_0_14px_rgba(255,190,60,0.35)]'
+                  : 'cursor-pointer border-parch/25 bg-black/30 text-parch/70 hover:border-parch/50 hover:brightness-125'
+              }`}
+            >
+              <span className="font-pirate text-sm leading-tight sm:text-base">{d.name}</span>
+              <span className={`text-[0.68rem] tracking-[0.2em] ${active ? 'text-gold' : 'text-parch/45'}`}>
+                {'☠'.repeat(d.skulls)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-center text-[0.78rem] italic leading-snug opacity-85">{sel.tagline}</p>
+    </section>
+  );
+}
+
 /** Step two, filling the screen: the era, its waters and its hero hull. */
-export function EraStep({ era, onEra }: { era: EraId; onEra: (id: EraId) => void }) {
+export function EraStep({
+  era,
+  onEra,
+  difficulty,
+  onDifficulty,
+}: {
+  era: EraId;
+  onEra: (id: EraId) => void;
+  difficulty: DifficultyId;
+  onDifficulty: (id: DifficultyId) => void;
+}) {
   return (
     <div className="flex h-full flex-col gap-2 overflow-y-auto no-scrollbar p-2 sm:gap-3 sm:p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
@@ -134,6 +193,7 @@ export function EraStep({ era, onEra }: { era: EraId; onEra: (id: EraId) => void
         </span>
       </div>
       <EraCarousel era={era} onEra={onEra} />
+      <DifficultyPicker difficulty={difficulty} onDifficulty={onDifficulty} />
       <p className="mt-auto text-center text-[0.68rem] italic opacity-60">
         Your pick sets the hero ship you command and the waters you fight in.
       </p>
@@ -344,7 +404,19 @@ function HelpOverlay({
  * scouting report. Orders and the hall of legends sit behind one button so the
  * steps stay uncluttered.
  */
-export function StartScreen({ name, onName, onStart, scores, settings, onSettings, isTouch, era, onEra }: Props) {
+export function StartScreen({
+  name,
+  onName,
+  onStart,
+  scores,
+  settings,
+  onSettings,
+  isTouch,
+  era,
+  onEra,
+  difficulty,
+  onDifficulty,
+}: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [dir, setDir] = useState<'fwd' | 'back'>('fwd');
   const [stage, setStage] = useState<'in' | 'out'>('in');
@@ -419,7 +491,11 @@ export function StartScreen({ name, onName, onStart, scores, settings, onSetting
         {/* ---- the step, filling everything left ---- */}
         <div className="relative min-h-0 flex-1">
           <div className={`h-full ${anim}`}>
-            {step === 1 ? <SignOnStep name={name} onName={onName} isTouch={isTouch} /> : <EraStep era={era} onEra={onEra} />}
+            {step === 1 ? (
+              <SignOnStep name={name} onName={onName} isTouch={isTouch} />
+            ) : (
+              <EraStep era={era} onEra={onEra} difficulty={difficulty} onDifficulty={onDifficulty} />
+            )}
           </div>
         </div>
 

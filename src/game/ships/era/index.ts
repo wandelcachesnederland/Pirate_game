@@ -193,7 +193,7 @@ export const ERA_SHIPS: EraShip[] = [
     blurb: 'Atakebune: black-lacquered gun castle. Slow, brutal.',
     def: JAPANESE_ATAKEBUNE,
     group: 'Heritage Seas',
-    homeWaters: 'the Straits of Singapore',
+    homeWaters: 'the Seto Inland Sea',
   },
   {
     id: 'maori',

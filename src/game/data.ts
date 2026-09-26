@@ -2900,7 +2900,7 @@ export function waveComposition(n: number): ShipKind[] {
   return waveCompositionFor('golden', n);
 }
 
-export function waveCompositionFor(era: EraId, n: number): ShipKind[] {
+export function waveCompositionFor(era: EraId, n: number, budgetMul = 1): ShipKind[] {
   const r = ERA_ROSTERS[era] ?? SAIL_ROSTER;
   if (n >= 1 && n <= 5) return [...r.early[n - 1]];
   const list: ShipKind[] = [];
@@ -2910,7 +2910,7 @@ export function waveCompositionFor(era: EraId, n: number): ShipKind[] {
     list.push(r.jackpot);
   }
   list.push(r.trader);
-  let budget = 6 + (n - 5) * 1.7;
+  let budget = (6 + (n - 5) * 1.7) * Math.max(0, budgetMul);
   const pool = r.pool.filter((p) => n >= (p.minWave ?? 0) && !(n % 5 === 0 && p.noBossWave));
   if (pool.length === 0) return list;
   const totalW = pool.reduce((a, p) => a + p.weight, 0);

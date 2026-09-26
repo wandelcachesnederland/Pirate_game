@@ -245,6 +245,18 @@ export type EraId =
   | 'hormuz'
   | 'barbary';
 
+/**
+ * The voyage's peril, chosen on the start screen. Buccaneer is the voyage as
+ * it was sailed; the seas below and above it scale every foe, fort and fortune
+ * (see `game/difficulty.ts`).
+ */
+export type DifficultyId =
+  | 'landlubber'
+  | 'swashbuckler'
+  | 'buccaneer'
+  | 'dreadCaptain'
+  | 'kingOfTheSeas';
+
 export interface ShipDef {
   kind: ShipKind;
   name: string;
@@ -507,6 +519,8 @@ export interface GameStats {
   /** Waters sailed, for the epitaph. */
   region?: RegionId;
   regionName?: string;
+  /** The peril chosen on the start screen. */
+  difficulty?: DifficultyId;
 }
 
 export interface Island {
