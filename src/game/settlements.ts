@@ -8,7 +8,8 @@
 // only turn on you after you have shelled it several times); a sour one needs no
 // reason at all and sets upon a pirate sail the moment it sees one.
 //
-// A few inhabited islands carry a fort. The garrison keeps the same books as the
+// A few inhabited islands carry a fort — and a fort means a harbour town (see
+// harbour.ts), whose squadron puts out in place of canoes. The garrison keeps the same books as the
 // village — same anger, same patience — but soldiers are quicker to take offence
 // (see the patience penalty below). The gentlest villages (friendliness 85+) will
 // not fight over their boats at all; only a bombardment of the village does it.
@@ -80,6 +81,10 @@ export function wildIsland(): Settlement {
 
 function rollFort(wave: number): Fortress {
   const hp = FORT_HP_BASE + FORT_HP_PER_WAVE * Math.min(8, Math.max(0, wave - 1));
+  // the battery faces one stretch of water, whichever way it was built — and
+  // the harbour it guards opens a little way along the same shore
+  const angle = rand(0, Math.PI * 2);
+  const harbour = angle + (Math.random() < 0.5 ? -1 : 1) * rand(0.85, 1.15);
   return {
     hp,
     maxHp: hp,
@@ -89,8 +94,8 @@ function rollFort(wave: number): Fortress {
     timer: rand(1.2, 3.5),
     damage: FORT_DAMAGE,
     ballSpeed: FORT_BALL_SPEED,
-    // the battery faces one stretch of water, whichever way it was built
-    angle: rand(0, Math.PI * 2),
+    angle,
+    harbour,
     ruined: false,
   };
 }

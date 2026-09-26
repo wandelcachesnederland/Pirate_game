@@ -2,7 +2,8 @@ import { makeCanvas } from './canvas';
 import { mulberry32, TAU } from './math';
 import { wildIsland } from './settlements';
 import { type Harmonic, islandRadiusAt, paintTerrainIsland, terrainHarmonics } from './terrain';
-import type { Island, Settlement } from './types';
+import { harbourStyleFor, paintHarbourTown } from './harbour';
+import type { EraId, Island, Settlement } from './types';
 import { CARIBBEAN_ISLANDS, type IslandTheme } from './worlds';
 
 export { islandRadiusAt };
@@ -191,6 +192,8 @@ function drawHut(ctx: CanvasRenderingContext2D, x: number, y: number, s: number,
 /** What the painter should put on an island: a village, a fort, both or none. */
 export interface IslandLook {
   mechanical?: boolean;
+  /** The era being sailed: a fortified island's harbour town is built its way. */
+  era?: EraId;
   /** Who lives here — decides the village, and the flag over it. */
   settlement?: Settlement;
   /** Colours flying over the village: red if these people start out hostile. */
@@ -256,9 +259,27 @@ export function buildIsland(
       poly,
       inhabited: look.settlement ? look.settlement.inhabited : true,
       fortAngle: look.settlement?.fortress?.angle ?? null,
+      harbourAngle: harbourOf(look),
     });
   } else {
     paintTropicalIsland(ctx, base, r, maxR, seed, rnd, theme, poly, look);
+  }
+
+  // a fortified island is a harbour town: quays, moles, moored craft, streets
+  const fort = look.settlement?.fortress;
+  const hA = harbourOf(look);
+  if (fort && hA !== null) {
+    const fd = islandRadiusAt(base, fort.angle) * 0.8;
+    paintHarbourTown({
+      ctx,
+      base,
+      r,
+      angle: hA,
+      style: harbourStyleFor(look.era),
+      rnd,
+      water: theme.shallowNear,
+      avoid: [{ x: Math.cos(fort.angle) * fd, y: Math.sin(fort.angle) * fd, r: Math.max(10, Math.min(24, r * 0.2)) * 1.3 }],
+    });
   }
 
   // a stone battery on the shore, if this island is one of the fortified few
@@ -268,6 +289,11 @@ export function buildIsland(
 
   const shore = poly(1, 1.5);
   return { x, y, r, maxR, harm, canvas: c, half, shore, seed, settlement: look.settlement ?? wildIsland() };
+}
+
+function harbourOf(look: IslandLook): number | null {
+  const f = look.settlement?.inhabited ? look.settlement.fortress : undefined;
+  return f && f.harbour !== undefined ? f.harbour : null;
 }
 
 /** The tropical seas' palm island: a sand ring, a jungle heart, palms on the beach. */
@@ -361,9 +387,10 @@ function paintTropicalIsland(
     const d = islandRadiusAt(base, a) + 8 + rnd() * 26;
     drawRock(ctx, Math.cos(a) * d, Math.sin(a) * d, 3 + rnd() * 6, rnd);
   }
-  // a fishing village with a dock — inhabited islands only
+  // a fishing village with a dock — inhabited islands only (a fortified one
+  // gets a whole harbour town instead, painted over the top)
   const inhabited = look.settlement ? look.settlement.inhabited : true;
-  if (inhabited) {
+  if (inhabited && harbourOf(look) === null) {
     const a = rnd() * TAU;
     const d = islandRadiusAt(base, a);
     const dx = Math.cos(a);

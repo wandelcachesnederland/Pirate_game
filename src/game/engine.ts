@@ -35,6 +35,7 @@ import {
   rr,
   drawFortRuin,
 } from './render';
+import { HARBOUR_FLEETS, HARBOUR_SQUADRON_CAP, harbourMouth, harbourSortie } from './harbour';
 import { PROVOKE, assignIslandPolitics, coolOff, flagOf, provokeNetwork, rollSettlement } from './settlements';
 import { cannonLocalX, drawFlagArt, drawShip, drawShipShadow } from './sprites';
 import {
@@ -851,7 +852,12 @@ export class Engine {
         f.damage = f.damage * this.diff.fortDamage;
       }
       this.islands.push(
-        buildIsland(x, y, r, seedBase + tries * 7919, res, theme, { settlement, flag: flagOf(settlement), mechanical: !usesGunpowder(this.eraId) }),
+        buildIsland(x, y, r, seedBase + tries * 7919, res, theme, {
+          settlement,
+          flag: flagOf(settlement),
+          mechanical: !usesGunpowder(this.eraId),
+          era: this.eraId,
+        }),
       );
     }
     assignIslandPolitics(this.islands.map((is) => is.settlement));
@@ -2002,6 +2008,8 @@ export class Engine {
         break;
       }
       default: {
+        // a harbour's squadron only chases so far before it puts back
+        if (s.homeIsland && this.nativeBreakOff(s, dt, dist)) return;
         const pref = s.range * 0.6;
         if (dist > s.range * 1.2) {
           const t = dist / 420;
@@ -2096,7 +2104,7 @@ export class Engine {
       s.nativeState = 'home';
       if (this.nativeCallTimer <= 0) {
         this.nativeCallTimer = 4;
-        this.addText(s.x, s.y - 30, 'The war party turns for home!', '#ffd8a8', 15);
+        this.addText(s.x, s.y - 30, s.def.native ? 'The war party turns for home!' : 'The harbour squadron puts back!', '#ffd8a8', 15);
       }
     }
 
@@ -2255,6 +2263,11 @@ export class Engine {
       if (st.raidTimer > 0) continue;
       const wars = this.ships.filter((ship) => ship.homeIsland === is &&
         !ship.peaceful && !ship.dead && !ship.captured && !ship.surrendered && ship.sinking < 0).length;
+      // a harbour town sends its squadron, not canoes
+      if (st.fortress && st.fortress.harbour !== undefined) {
+        if (wars < HARBOUR_SQUADRON_CAP) this.launchHarbourSquadron(is, st.fortress, wars);
+        continue;
+      }
       if (wars >= 4) continue;
       st.raidTimer = rand(12, 19);
       const garrisoned = !!st.fortress && !st.fortress.ruined;
@@ -2274,6 +2287,46 @@ export class Engine {
     this.nativeTimer = rand(12, 19);
     const boats = this.ships.filter((ship) => ship.def.native && ship.peaceful && !ship.dead && ship.sinking < 0).length;
     if (calmIsland && boats < 2 && Math.random() < 0.5) this.launchFishingBoat(calmIsland);
+  }
+
+  /**
+   * A roused harbour town puts its squadron out through the harbour mouth:
+   * the era's guard boats and, later in the voyage, a proper warship. They
+   * answer to the harbour like canoes answer to their beach — they chase, then
+   * put back — but they carry guns. With the fort razed, the town can still
+   * man a guard boat or two.
+   */
+  private launchHarbourSquadron(is: Island, f: Fortress, afloat: number) {
+    const st = is.settlement;
+    const hA = f.harbour ?? Math.atan2(this.player.y - is.y, this.player.x - is.x);
+    const kinds = harbourSortie(this.eraId, this.wave, !f.ruined).slice(0, HARBOUR_SQUADRON_CAP - afloat);
+    st.raidTimer = rand(18, 26);
+    const mouth = harbourMouth(is, hA);
+    let launched = 0;
+    kinds.forEach((kind, i) => {
+      // line astern out of the mouth, the first boat furthest out
+      const off = (kinds.length - 1 - i) * 30;
+      const lat = (i % 2 ? 1 : -1) * (i ? 12 : 0);
+      let x = is.x + mouth.x + Math.cos(hA) * off - Math.sin(hA) * lat;
+      let y = is.y + mouth.y + Math.sin(hA) * off + Math.cos(hA) * lat;
+      if (this.pointInIsland(x, y, 10)) {
+        // a crooked coast: fall back to open water on the player's side
+        const a = Math.atan2(this.player.y - is.y, this.player.x - is.x) + (i - 0.5) * 0.4;
+        x = is.x + Math.cos(a) * (is.maxR + 40);
+        y = is.y + Math.sin(a) * (is.maxR + 40);
+        if (this.pointInIsland(x, y, 10)) return;
+      }
+      const ship = this.makeShip(kind, x, y, hA);
+      // a garrison's boats are bolder than a village's canoes, and range further
+      this.anchorNative(ship, is, f.ruined ? 1.1 : 1.4);
+      this.ships.push(ship);
+      launched++;
+    });
+    if (launched > 0) {
+      const fleet = HARBOUR_FLEETS[this.eraId] ?? HARBOUR_FLEETS.golden;
+      this.addText(is.x + mouth.x, is.y + mouth.y - 30, f.ruined ? 'Guard boats put out from the harbour!' : fleet.sortie, '#ffd8a8', 16);
+      this.sfx.horn();
+    }
   }
 
   /** A peaceful village's boat: put her on the water off her own beach. */
@@ -2668,7 +2721,7 @@ export class Engine {
   private damageShip(s: Ship, dmg: number, byPlayer: boolean) {
     if (s.sinking >= 0 || s.captured || this.screen !== 'playing') return;
     // putting a round into one of a village's boats is a grievance in itself
-    if (byPlayer && s.def.native && s.homeIsland && dmg > 0) {
+    if (byPlayer && s.homeIsland && dmg > 0) {
       this.provokeBoats(s.homeIsland, PROVOKE.boatHit);
     }
     s.hp -= dmg;
@@ -2864,7 +2917,7 @@ export class Engine {
     s.hp = 0;
     s.sinking = 0;
     // sending one of their boats to the bottom is the grievance that counts
-    if (s.def.native && s.homeIsland && s.hitByPlayer) {
+    if (s.homeIsland && s.hitByPlayer) {
       this.provokeBoats(s.homeIsland, PROVOKE.boatSunk);
       if (s.peaceful) this.addText(s.x, s.y - 34, 'their fishing boat…', '#ffd8a8', 16);
     }
@@ -3821,8 +3874,8 @@ export class Engine {
         ctx.lineWidth = 4;
         ctx.strokeStyle = '#092434';
         ctx.fillStyle = st.hostile ? '#ffad8d' : '#f3ead2';
-        const label = `${st.name} · ${st.hostile ? 'HOSTILE' : 'Peaceful'}`;
-        const politics = `${st.peopleName ?? 'Independent'}${st.allianceName ? ` · ${st.allianceName}` : ''}`;
+        const label = `${st.fortress ? '⚓ ' : ''}${st.name} · ${st.hostile ? 'HOSTILE' : 'Peaceful'}`;
+        const politics = `${st.fortress ? 'Harbour town · ' : ''}${st.peopleName ?? 'Independent'}${st.allianceName ? ` · ${st.allianceName}` : ''}`;
         ctx.strokeText(label, is.x, is.y + is.maxR + 24);
         ctx.fillText(label, is.x, is.y + is.maxR + 24);
         ctx.font = `13px ${FELL}`;
