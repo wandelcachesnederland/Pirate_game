@@ -1,7 +1,8 @@
-// The ports of the Trade mode: real trading cities spread across the whole
-// world and every age the game sails. Each is placed by longitude/latitude and
-// assigned a maritime region (for colour and flavour) and the goods it grows or
-// hungers for. The price model in goods.ts turns those into buy/sell spreads.
+// The ports of the chart: real trading cities spread across the whole world and
+// every age the game sails. Both Trade and Adventure call at these ports —
+// Trade prices cargo in the market halls, Adventure takes contracts in the
+// harbour taverns. Each is placed by longitude/latitude and assigned a maritime
+// region (for colour and flavour) and the goods it grows or hungers for.
 
 import type { GoodId } from './goods';
 import { project } from './world';

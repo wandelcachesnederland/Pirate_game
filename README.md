@@ -19,7 +19,7 @@ from a USB stick or drop on any static host.
 ```bash
 npm install
 npm run dev      # dev server on http://localhost:5173
-npm test         # rules + headless engine regression tests (119 tests)
+npm test         # rules + headless engine regression tests (173 tests)
 npm run build    # tsc --noEmit + vite build -> dist/index.html (single file)
 npm run preview  # serve the production build
 ```
@@ -31,6 +31,14 @@ fonts from Google Fonts.
 ---
 
 ## How to play
+
+From the start screen you pick one of three modes:
+
+| Mode | What it is |
+| --- | --- |
+| **Arcade** | The classic cabinet brawl: 27 eras, waves, bosses, refits. |
+| **Trade** | Buy low, sell high across the whole world — see [The chart](#the-chart-trade-and-adventure). |
+| **Adventure** | Hunt the lairs of that same world map: sea beasts, named rivals, contracts and renown. |
 
 You are always one ship — the era's hero hull — against a growing fleet. Waves arrive with a title,
 every fifth wave sends a boss, and clearing a wave opens a refit screen with three upgrades to choose
@@ -239,6 +247,52 @@ afoot, and bring in extra voices mid-fight. When a warship comes for you the ban
 
 ---
 
+## The chart: Trade and Adventure
+
+Trade and Adventure are two different games played on **one map**. The chart lives in `src/game/chart/`
+and neither mode keeps a copy of it: the continents, the projection, the ports and the little WebAudio
+sound set are imported by both, and the shared painter in `chart/paint.ts` draws the same coastline in
+each mode's own palette. Learn a coast in Trade and it is the same coast in Adventure.
+
+| File | What it owns |
+| --- | --- |
+| `src/game/chart/world.ts` | Equirectangular projection, the hand-drawn continents, `isLand`, `nudgeToSea` |
+| `src/game/chart/ports.ts` | The 55 ports of the world by longitude/latitude, with their maritime regions |
+| `src/game/chart/goods.ts` | Trade goods and the price model |
+| `src/game/chart/paint.ts` | The shared chart painter: sea, graticule, land, ports, ships, compass, labels |
+| `src/game/chart/audio.ts` | `VoyageAudio` — the small synthesised sound set both modes sail with |
+
+### Trade — Fortune & Rum
+
+Sail the world, buy where a good is grown and sell where it is wanted, dodge the pirates that work the
+sea lanes, and refit at shipyard ports. The market drifts globally, so the whole world booms and busts
+together. Reach 15,000 gold to corner the markets of the globe.
+
+### Adventure — Chart the Unknown
+
+The same map, peopled. **Ten lairs** are marked on the chart by longitude and latitude — five sea
+beasts and five named rivals, tiered from a first prize to *Admiral Sable, the Dread Commodore*. A lair
+sleeps until you sail within its reach; then the thing in it wakes, names itself, and hunts you across
+its home water. Past its leash it turns for home, sleeps, and heals — you cannot nibble it to death.
+
+- **Renown** is the score. Prizes, raiders and contracts all pay it, and it buys you a reputation:
+  *Unknown Hand* → *Freebooter* → *Sea Rover* → *Dread Corsair* → *Scourge of the Deep* → *Legend of the Chart*.
+- **Salvage** is the currency. Ports caulk your hull and sell refits: heavier guns, a reinforced hull,
+  drilled gunners (faster reload) and copper sheathing (speed). Every refit costs more than the last.
+- **The bounty board** in each harbour offers the trouble nearest that port — renown and salvage on
+  delivery. One contract at a time; tear it up if the wind changes.
+- **Raiders** find you as your name grows, and pay in salvage when they sink.
+- **The voyage ends** when the last lair is empty (*The Chart Is Yours*) or the sea takes your ship.
+
+| File | What it owns |
+| --- | --- |
+| `src/game/adventure/beasts.ts` | The gallery: lair positions, tiers, beast/rival stats, contracts, refits, ranks |
+| `src/game/adventure/engine.ts` | `AdventureEngine`: its own loop, sailing, waking, hunting, prizes, ports, saving |
+| `src/game/adventure/render.ts` | Adventure's dress for the shared chart: lairs, beasts, rivals, targets, wake |
+| `src/components/AdventureScreen.tsx` | HUD, port panel, bounty board, pause, help and the end-of-voyage reckoning |
+
+---
+
 ## How the project is built
 
 Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
@@ -293,6 +347,12 @@ tests fast and honest about what the game really does.
 - `tests/engine.test.ts` — firing, hits, boarding, forts, island solidarity, fire behaviour, and a
   per-era guarantee that no powder blast or explosion sound ever plays before gunpowder.
 - `tests/settlements.test.ts` — peoples, pacts, patience, grievance spread and cooling.
+- `tests/chart.test.ts` — the shared map: projection, continents, ports in bounds, lairs afloat, and a
+  recording canvas proving Trade and Adventure paint the same coastline.
+- `tests/adventure.test.ts` — lairs, tiers, wake and leash rules, gunnery arcs, contracts, refits and
+  the prize payout, exercised on the real engine prototype.
+- `tests/adventureVoyage.test.ts` — whole voyages sailed headlessly on a mocked canvas: making way,
+  waking a lair, putting in at a port, clearing the chart for a victory, and resuming a saved voyage.
 
 `npm run build` also type-checks the whole project (`tsc --noEmit`).
 

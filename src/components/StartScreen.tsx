@@ -688,7 +688,7 @@ export function StartScreen({
               <ModeSelectScreen
                 isTouch={isTouch}
                 onSelect={(m) => {
-                  if (m === 'trade') onMode?.(m);
+                  if (m === 'trade' || m === 'adventure') onMode?.(m);
                   else go(2);
                 }}
               />

@@ -1,5 +1,6 @@
-// The Trade mode engine: a self-contained sailing-trade simulation on a world
-// map. The player steers a ship around the whole globe, buys low and sells high
+// The Trade mode engine: a self-contained sailing-trade simulation on the
+// shared chart (see ../chart/world.ts — Adventure sails the same map). The
+// player steers a ship around the whole globe, buys low and sells high
 // at real ports, and fights pirates that roam the sea lanes. It owns its own
 // requestAnimationFrame loop, canvas rendering hook, and input — it is entirely
 // independent of the arcade combat engine so the rest of the game is untouched.
@@ -12,7 +13,7 @@ import {
   DEG,
   isLand,
   nudgeToSea,
-} from './world';
+} from '../chart/world';
 import {
   GOODS,
   GOOD_BY_ID,
@@ -21,9 +22,9 @@ import {
   buyPrice,
   sellPrice,
   priceFactor,
-} from './goods';
-import { PORTS_PROJ, PORT_BY_ID, REGIONS, type RegionId } from './ports';
-import { TradeAudio } from './audio';
+} from '../chart/goods';
+import { PORTS_PROJ, PORT_BY_ID, REGIONS, type RegionId } from '../chart/ports';
+import { VoyageAudio } from '../chart/audio';
 import { drawWorld } from './render';
 
 export type TradePhase = 'sailing' | 'docked' | 'paused' | 'over' | 'victory';
@@ -109,7 +110,7 @@ export class TradeEngine {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   input = new Input();
-  audio = new TradeAudio();
+  audio = new VoyageAudio();
   cb: TradeCallbacks;
 
   player!: ShipState;

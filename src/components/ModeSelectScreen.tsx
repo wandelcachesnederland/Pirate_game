@@ -43,14 +43,15 @@ const MODES: ModeDef[] = [
     name: 'Adventure',
     subtitle: 'Chart the Unknown',
     desc: 'Story & exploration',
-    longDesc: 'Sail a living world, take on quests, meet legends, and write your own saga on the map.',
+    longDesc:
+      'Hunt the same world map as Trade: ten lairs of sea beasts and named rivals wake as you sail close. Take contracts, refit on salvage, cross every name off the chart.',
     icon: Map,
     accent: '#7de8c3',
     gradient: 'radial-gradient(circle at 35% 30%, #a8e6cf, #3aa88f 55%, #0e4a40)',
     ring: '#7de8c3',
     glow: 'rgba(80, 230, 190, 0.35)',
-    enabled: false,
-    badge: 'Coming Soon',
+    enabled: true,
+    badge: 'Play Now',
   },
   {
     id: 'trade',
@@ -106,7 +107,7 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
           <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Your Mode</h2>
         </div>
         <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">
-          {isTouch ? 'Tap a mode to weigh anchor' : 'Enter — sail Arcade · Adventure charting its course'}
+          {isTouch ? 'Tap a mode to weigh anchor' : 'Enter — sail Arcade · arrow keys to choose a mode'}
         </span>
       </div>
 
@@ -204,13 +205,15 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
             <Gamepad2 className="h-5 w-5 text-gold" />
           </span>
           <div className="text-left">
-            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">Arcade & Trade are ready</div>
-            <div className="text-[0.7rem] italic opacity-75">Adventure is still charting its course — not yet boardable.</div>
+            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">Three ways to sail</div>
+            <div className="text-[0.7rem] italic opacity-75">
+              Adventure and Trade share one chart — the same coasts, the same ports.
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[0.7rem] italic opacity-60">
           <Skull className="h-4 w-4" />
-          <span>Choose Arcade to continue to Sign On</span>
+          <span>Choose Arcade to continue to Sign On · Adventure and Trade set sail at once</span>
         </div>
       </div>
     </div>

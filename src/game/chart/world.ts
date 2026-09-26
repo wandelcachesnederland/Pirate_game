@@ -1,4 +1,6 @@
-// World geography for the Trade mode.
+// World geography shared by every mode that sails the chart — Trade and
+// Adventure both plot their voyages on this one map, so a coastline learned in
+// one mode is the same coastline in the other.
 //
 // A single, self-contained equirectangular projection maps longitude/latitude
 // onto a flat "world" coordinate space. Continents are composed from simple
