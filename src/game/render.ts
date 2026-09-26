@@ -211,7 +211,7 @@ export function buildIsland(
 ): Island {
   const rnd = mulberry32(seed);
   // tropical seas use the palm-island painter below; every other sea carries a
-  // terrain recipe of its own (see terrain.ts) — coastline included
+  // terrain recipe of its own (see terrain/) — coastline included
   const terrain = theme.terrain;
   const harm = terrain
     ? terrainHarmonics(terrain.shape, rnd)
