@@ -72,8 +72,8 @@ sail past doing nothing.
 
 ### Difficulty
 
-Step two of the start screen carries the **Danger Money** panel: five perils, from a calm cruise to a
-sea of hunters.
+Putting to sea is one screen per decision: a title marquee, sign-on, then the **Peril** screen —
+five degrees of danger, each sailing under its own colours — and finally the era and her hero ship.
 
 | Peril | Skulls | The gist |
 | --- | --- | --- |

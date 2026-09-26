@@ -314,17 +314,10 @@ export function EraCarousel({ era, onEra }: Props) {
     onEra(ERA_SHIPS[(idx + d + ERA_SHIPS.length) % ERA_SHIPS.length].id);
 
   return (
+    // NOTE: ← → for the chart are handled globally by the start screen so the
+    // arrows work without focus; nothing here binds keys anymore.
     <section
       className="arcade-panel select-none p-2.5 sm:p-4"
-      onKeyDown={(ev) => {
-        if (ev.key === 'ArrowLeft') {
-          ev.preventDefault();
-          step(-1);
-        } else if (ev.key === 'ArrowRight') {
-          ev.preventDefault();
-          step(1);
-        }
-      }}
     >
       <div className="grid gap-3 lg:grid-cols-[1.32fr_1fr]">
       {/* ---- the chart screen ---- */}

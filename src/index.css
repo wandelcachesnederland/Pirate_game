@@ -362,6 +362,80 @@ canvas {
 .anim-blink {
   animation: blink-plate 1.4s steps(1, end) infinite;
 }
+
+/* ---------- Title marquee ---------- */
+.title-arcade {
+  font-size: clamp(3.4rem, 13vw, 7.25rem);
+  line-height: 0.9;
+}
+.marquee-bulbs {
+  height: 10px;
+  border-radius: 999px;
+  background-image: radial-gradient(circle, #ffe9a8 2.2px, #8a5a12 3px, transparent 3.8px);
+  background-size: 24px 10px;
+  background-repeat: repeat-x;
+  background-position: center;
+  animation: marquee-chase 0.9s steps(2, jump-none) infinite;
+}
+@keyframes marquee-chase {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 24px;
+  }
+}
+.press-start {
+  animation: press-blink 1.2s steps(1, end) infinite;
+}
+@keyframes press-blink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* ---------- Peril badges ---------- */
+.diff-card {
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease,
+    box-shadow 0.15s ease,
+    border-color 0.12s ease;
+}
+.diff-card[data-on='true'] {
+  transform: translateY(-3px);
+}
+.diff-card:not([data-on='true']):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.16);
+}
+
+/* ---------- Cabinet glass ---------- */
+.crt-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(2, 8, 18, 0.42) 100%),
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 3px);
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-bulbs,
+  .press-start,
+  .anim-blink,
+  .anim-pulse,
+  .anim-bob,
+  .anim-shimmer {
+    animation: none;
+  }
 }
 
 /* ---------- Animations ---------- */
