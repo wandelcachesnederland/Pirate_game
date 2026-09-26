@@ -6,6 +6,8 @@ import { isTypingTarget } from './game/input';
 import type { DifficultyId, EraId, GameStats, Screen, UpgradeId, UpgradeOffer } from './game/types';
 import { DEFAULT_ERA, eraRegion } from './game/ships/era';
 import { DEFAULT_DIFFICULTY } from './game/difficulty';
+import type { GameModeId } from './components/ModeSelectScreen';
+import { TradeScreen } from './components/TradeScreen';
 import {
   addScore,
   loadDifficulty,
@@ -53,6 +55,7 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const settingsRef = useRef(settings);
   const [isTouch, setIsTouch] = useState(() => detectTouch());
+  const [mode, setMode] = useState<GameModeId | null>(null);
   const [era, setEra] = useState<EraId>(() => loadEra() ?? DEFAULT_ERA);
   const eraRef = useRef(era);
   const [difficulty, setDifficulty] = useState<DifficultyId>(() => loadDifficulty() ?? DEFAULT_DIFFICULTY);
@@ -260,6 +263,10 @@ export default function App() {
     engineRef.current?.chooseUpgrade(id);
   }, []);
 
+  const handleMode = useCallback((m: GameModeId) => {
+    if (m === 'trade') setMode('trade');
+  }, []);
+
   const updateSettings = useCallback((s: Settings) => {
     settingsRef.current = s;
     setSettings(s);
@@ -433,7 +440,7 @@ export default function App() {
         </button>
       )}
 
-      {screen === 'menu' && splash !== 'on' && (
+      {screen === 'menu' && splash !== 'on' && mode !== 'trade' && (
         <StartScreen
           name={name}
           onName={setName}
@@ -448,7 +455,17 @@ export default function App() {
           onDifficulty={pickDifficulty}
           arcadeMode={arcadeMode}
           onArcadeMode={pickArcadeMode}
+          onMode={handleMode}
           nowPlaying={menuTune}
+        />
+      )}
+
+      {screen === 'menu' && splash !== 'on' && mode === 'trade' && (
+        <TradeScreen
+          name={name}
+          settings={settings}
+          onExit={() => setMode(null)}
+          isTouch={isTouch}
         />
       )}
 

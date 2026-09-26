@@ -57,14 +57,15 @@ const MODES: ModeDef[] = [
     name: 'Trade',
     subtitle: 'Fortune & Rum',
     desc: 'Buy low, sell high',
-    longDesc: 'Run cargo, dodge pirates, build a fleet and corner the markets of the Spanish Main.',
+    longDesc:
+      'Sail a living world map, run cargo between real ports, dodge pirates and corner the markets of the globe.',
     icon: Coins,
     accent: '#c98aff',
     gradient: 'radial-gradient(circle at 35% 30%, #dfaaff, #7a2fc0 55%, #280b4e)',
     ring: '#c98aff',
     glow: 'rgba(180, 110, 255, 0.35)',
-    enabled: false,
-    badge: 'Coming Soon',
+    enabled: true,
+    badge: 'Play Now',
   },
 ];
 
@@ -105,7 +106,7 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
           <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Your Mode</h2>
         </div>
         <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">
-          {isTouch ? 'Tap Arcade to weigh anchor' : 'Enter — sail Arcade · Adventure & Trade coming soon'}
+          {isTouch ? 'Tap a mode to weigh anchor' : 'Enter — sail Arcade · Adventure charting its course'}
         </span>
       </div>
 
@@ -203,8 +204,8 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
             <Gamepad2 className="h-5 w-5 text-gold" />
           </span>
           <div className="text-left">
-            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">Arcade is ready</div>
-            <div className="text-[0.7rem] italic opacity-75">Adventure & Trade are charting their course — not yet boardable.</div>
+            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">Arcade & Trade are ready</div>
+            <div className="text-[0.7rem] italic opacity-75">Adventure is still charting its course — not yet boardable.</div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[0.7rem] italic opacity-60">
