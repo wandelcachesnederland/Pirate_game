@@ -183,11 +183,13 @@ export function EraStep({
 }) {
   const peril = difficultyById(difficulty);
   return (
-    <div className="flex h-full flex-col gap-2 overflow-y-auto no-scrollbar p-2 sm:gap-3 sm:p-3">
-      <div className="flex flex-wrap items-end justify-between gap-2">
+    // the era step fills the cabinet: on a desktop-sized screen nothing scrolls,
+    // the card simply takes the height that is left; a phone scrolls the step
+    <div className="flex h-full min-h-0 flex-col gap-1.5 overflow-y-auto no-scrollbar p-2 sm:gap-2 sm:p-3">
+      <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-2 gap-y-1">
         <div>
           <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 3 of 3 · Era &amp; Hero Ship</div>
-          <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Your Era</h2>
+          <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">Choose Your Era</h2>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           <button
@@ -210,12 +212,9 @@ export function EraStep({
           </button>
         </div>
       </div>
-      <p className="-mt-1 text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">
-        Drag the chart, tap a plate, or use ← →
-      </p>
       <EraCarousel era={era} onEra={onEra} />
-      <p className="mt-auto text-center text-[0.68rem] italic opacity-60">
-        Your pick sets the hero ship you command and the waters you fight in.
+      <p className="shrink-0 text-center text-[0.64rem] italic leading-snug opacity-60">
+        Drag the card, tap a plate or use ← → — your pick sets the hero ship you command and the waters you fight in.
       </p>
     </div>
   );

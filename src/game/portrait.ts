@@ -1,20 +1,21 @@
 // Gallery art: the same renderer the game sails with, painting the pictures the
-// port shows you — a postcard of each stretch of water and a portrait of each
-// hero hull. Nothing here is bespoke artwork: it is the real island painter and
-// the real ship sprite, so what the shipyard shows is exactly what you get.
+// port shows you — a portrait of each hero hull on her own water. Nothing here
+// is bespoke artwork: it is the real ship sprite, so what the shipyard shows is
+// exactly what you get. (The era cards — the action scenes on the picker — live
+// in `game/eraArt/`.)
 
 import { mulberry32, TAU } from './math';
-import { buildIsland } from './render';
 import { drawShip } from './sprites';
 import type { RegionDef } from './worlds';
 import { isSteelHull, type Ship, ShipDef } from './types';
 
 /**
- * A throwaway Ship used only to pose a hull for its portrait: the sprite
- * painter wants a Ship, and this is a Ship standing very still with its sails
- * set and its guns run in.
+ * A throwaway Ship used only to pose a hull for a picture: the sprite painter
+ * wants a Ship, and this is a Ship standing very still with its sails set and
+ * its guns run in. The era cards use it too, then lie to it about hp, burning
+ * and sinking so the hull looks like the middle of a fight.
  */
-function poseShip(def: ShipDef, angle: number, sail: number): Ship {
+export function poseShip(def: ShipDef, angle: number, sail: number): Ship {
   const crew = def.crew ?? 20;
   return {
     id: -1,
@@ -117,39 +118,6 @@ export function paintWater(
     ctx.quadraticCurveTo(x + len * 0.5, y - len * 0.22, x + len, y);
     ctx.stroke();
   }
-}
-
-/**
- * A postcard of one stretch of water: three little islands painted by the
- * game's own island artist, floating on that region's sea.
- */
-export function paintWatersPostcard(
-  ctx: CanvasRenderingContext2D,
-  region: RegionDef,
-  w: number,
-  h: number,
-  seed = 7,
-) {
-  paintWater(ctx, region, w, h, seed, 26);
-  const rnd = mulberry32(seed * 31 + 5);
-  const scale = Math.min(w, h);
-  const spots: [number, number, number][] = [
-    [0.26, 0.64, scale * 0.23],
-    [0.79, 0.29, scale * 0.125],
-    [0.63, 0.9, scale * 0.085],
-  ];
-  for (let i = 0; i < spots.length; i++) {
-    const [fx, fy, rr] = spots[i];
-    const r = rr * (0.88 + rnd() * 0.24);
-    // islands are baked at (0,0) and blitted by their centre — same as the engine
-    const is = buildIsland(0, 0, r, (seed * 7919 + i * 104729) | 0, 1.4, region.islands);
-    ctx.drawImage(is.canvas, fx * w - is.half, fy * h - is.half, is.half * 2, is.half * 2);
-  }
-  const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.28, w / 2, h / 2, Math.max(w, h) * 0.75);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,8,18,0.45)');
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, w, h);
 }
 
 /** Pitch of a hull at her moorings in a portrait frame. */
