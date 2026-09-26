@@ -21,8 +21,12 @@ import { EraCarousel } from './EraCarousel';
 import { HeroShipPicker } from './HeroShipPicker';
 import { TitleStep } from './TitleStep';
 import { PerilStep } from './PerilStep';
+import { ModeSelectScreen } from './ModeSelectScreen';
+import { ArcadeSelectScreen, type ArcadeModeId } from './ArcadeSelectScreen';
+import { CampaignIntroScreen } from './CampaignIntroScreen';
 import { ERA_FLAGSHIPS, ERA_SHIPS, eraShip } from '../game/ships/era';
 import { isSteelHull } from '../game/types';
+import { oldestEra } from '../game/campaign';
 
 interface Props {
   name: string;
@@ -36,16 +40,18 @@ interface Props {
   onEra: (id: EraId) => void;
   difficulty: DifficultyId;
   onDifficulty: (id: DifficultyId) => void;
+  arcadeMode: ArcadeModeId;
+  onArcadeMode: (id: ArcadeModeId) => void;
   /** What the menu's deck is playing — named on the attract screen. */
   nowPlaying?: string;
 }
 
 /**
- * The screens of putting to sea: the attract-mode title, then sign on, then the
- * peril, then the era — and the hero hull she sails in, on her own screen so
- * the chart can breathe.
+ * The screens of putting to sea:
+ * 0 title, 1 game mode (arcade/adventure/trade), 2 arcade sub-mode (practice/era/campaign),
+ * 3 sign on, 4 peril, 5 era (or campaign intro), 6 hero ship
  */
-type Step = 0 | 1 | 2 | 3 | 4;
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 function Row({ keys, label }: { keys: ReactNode; label: string }) {
   return (
@@ -111,12 +117,10 @@ const PIRATE_NAMES = [
   'Red Legs',
 ];
 
-/** Step one, filling the screen: the captain signs the book. */
+/** Step three, filling the screen: the captain signs the book. */
 export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s: string) => void; isTouch: boolean }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
-    // a keyboard player can type straight away; a phone keyboard would just
-    // cover the screen, so wait for a tap there
     if (!isTouch) inputRef.current?.focus();
   }, [isTouch]);
 
@@ -129,7 +133,7 @@ export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s
   return (
     <div className="grid h-full place-items-center overflow-y-auto no-scrollbar p-2 sm:p-4">
       <div className="anim-pop w-full max-w-xl text-center">
-        <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 1 of 4 · Sign On</div>
+        <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 3 of 7 · Sign On</div>
         <h1 className="title-gold mt-1 text-[3.2rem] leading-[0.9] sm:text-7xl">Broadside!</h1>
         <div className="mt-1 flex items-center justify-center gap-2 text-parch/90 sm:gap-3">
           <Skull className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -184,7 +188,7 @@ export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s
   );
 }
 
-// ------------------------------------------------------- steps three and four
+// ------------------------------------------------------- steps era & ship
 
 /** What the two picker steps need: the choices, and the ladder to walk back. */
 interface PickStepProps {
@@ -192,6 +196,7 @@ interface PickStepProps {
   onEra: (id: EraId) => void;
   name: string;
   difficulty: DifficultyId;
+  arcadeMode: ArcadeModeId;
   onJump: (step: Step) => void;
 }
 
@@ -209,7 +214,6 @@ function ChoiceChips({
   name: string;
   difficulty: DifficultyId;
   era: EraId;
-  /** The hero-ship step shows the era too — the two steps must agree. */
   showEra?: boolean;
   onJump: (step: Step) => void;
 }) {
@@ -217,16 +221,16 @@ function ChoiceChips({
   const ship = eraShip(era);
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <button type="button" onClick={() => onJump(1)} title="Change captain" className={CHIP}>
+      <button type="button" onClick={() => onJump(3)} title="Change captain" className={CHIP}>
         {name.trim() || 'Nameless'}
         <Pencil className="h-3.5 w-3.5 opacity-70" />
       </button>
-      <button type="button" onClick={() => onJump(2)} title="Change peril" className={CHIP}>
+      <button type="button" onClick={() => onJump(4)} title="Change peril" className={CHIP}>
         {'☠'.repeat(peril.skulls)} {peril.name}
         <Pencil className="h-3.5 w-3.5 opacity-70" />
       </button>
       {showEra && (
-        <button type="button" onClick={() => onJump(3)} title="Change era" className={CHIP}>
+        <button type="button" onClick={() => onJump(5)} title="Change era" className={CHIP}>
           {ship.era} · {ship.year}
           <Pencil className="h-3.5 w-3.5 opacity-70" />
         </button>
@@ -235,15 +239,13 @@ function ChoiceChips({
   );
 }
 
-/** Step three, filling the screen: the age and the waters it is fought in. */
+/** Step five, filling the screen: the age and the waters it is fought in. */
 export function EraStep({ era, onEra, name, difficulty, onJump }: PickStepProps) {
   return (
-    // the era step fills the cabinet: on a desktop-sized screen nothing scrolls,
-    // the card simply takes the height that is left; a phone scrolls the step
     <div className="flex h-full min-h-0 flex-col gap-1.5 overflow-y-auto no-scrollbar p-2 sm:gap-2 sm:p-3">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-2 gap-y-1">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 3 of 4 · Era &amp; Waters</div>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 5 of 7 · Era &amp; Waters</div>
           <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">Choose Your Era</h2>
         </div>
         <ChoiceChips name={name} difficulty={difficulty} era={era} onJump={onJump} />
@@ -257,21 +259,27 @@ export function EraStep({ era, onEra, name, difficulty, onJump }: PickStepProps)
   );
 }
 
-/** Step four, filling the screen: the hero hull you take into those waters. */
-export function ShipStep({ era, onEra, name, difficulty, onJump }: PickStepProps) {
+/** Step six, filling the screen: the hero hull you take into those waters. */
+export function ShipStep({ era, onEra, name, difficulty, arcadeMode, onJump }: PickStepProps) {
+  const isCampaign = arcadeMode === 'campaign';
   return (
     <div className="flex h-full min-h-0 flex-col gap-1.5 overflow-y-auto no-scrollbar p-2 sm:gap-2 sm:p-3">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-2 gap-y-1">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 4 of 4 · Hero Ship</div>
-          <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">Choose Your Hero Ship</h2>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">
+            {isCampaign ? 'Step 6 of 7 · Campaign Ship' : 'Step 6 of 7 · Hero Ship'}
+          </div>
+          <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">
+            {isCampaign ? 'Choose Your Campaign Ship' : 'Choose Your Hero Ship'}
+          </h2>
         </div>
-        <ChoiceChips name={name} difficulty={difficulty} era={era} showEra onJump={onJump} />
+        <ChoiceChips name={name} difficulty={difficulty} era={era} showEra={!isCampaign} onJump={onJump} />
       </div>
       <HeroShipPicker era={era} onEra={onEra} />
       <p className="shrink-0 text-center text-[0.64rem] italic leading-snug opacity-60">
-        Drag the portrait, tap a hull or use ← → — every number is measured against the whole fleet of heroes,
-        and each hull sails only her own age. Set Sail when she suits.
+        {isCampaign
+          ? 'This hull will carry you through all 26 eras — every age, same ship, upgrades kept. Set Sail when she suits.'
+          : 'Drag the portrait, tap a hull or use ← → — every number is measured against the whole fleet of heroes, and each hull sails only her own age. Set Sail when she suits.'}
       </p>
     </div>
   );
@@ -476,26 +484,26 @@ function HelpOverlay({
 
 const STEP_LABEL: Record<Step, string> = {
   0: 'Attract Mode',
-  1: 'Sign On',
-  2: 'Peril',
-  3: 'Era & Waters',
-  4: 'Hero Ship',
+  1: 'Game Mode',
+  2: 'Arcade Mode',
+  3: 'Sign On',
+  4: 'Peril',
+  5: 'Era',
+  6: 'Hero Ship',
 };
 
 /** The ladder on the cabinet face: one plate per decision after the title. */
-const STEP_PLATES: { n: 1 | 2 | 3 | 4; label: string }[] = [
-  { n: 1, label: 'Sign On' },
-  { n: 2, label: 'Peril' },
-  { n: 3, label: 'Era' },
-  { n: 4, label: 'Hero Ship' },
+const STEP_PLATES: { n: 1 | 2 | 3 | 4 | 5 | 6; label: string }[] = [
+  { n: 1, label: 'Mode' },
+  { n: 2, label: 'Arcade' },
+  { n: 3, label: 'Sign On' },
+  { n: 4, label: 'Peril' },
+  { n: 5, label: 'Era' },
+  { n: 6, label: 'Hero Ship' },
 ];
 
 /**
- * The port, arcade style: one screen per decision. A title marquee with the
- * big logo, then sign on, then peril under its own colours, then the era — the
- * chart you scroll through — and finally the hero hull and her scouting report.
- * Orders and the hall of legends sit behind one button so the steps stay
- * uncluttered.
+ * The port, arcade style: one screen per decision.
  */
 export function StartScreen({
   name,
@@ -509,6 +517,8 @@ export function StartScreen({
   onEra,
   difficulty,
   onDifficulty,
+  arcadeMode,
+  onArcadeMode,
   nowPlaying,
 }: Props) {
   const [step, setStep] = useState<Step>(0);
@@ -532,9 +542,21 @@ export function StartScreen({
     if (timer.current !== null) window.clearTimeout(timer.current);
   }, []);
 
-  const launch = () => (step === 4 ? onStart() : go((step + 1) as Step));
+  const launch = () => (step === 6 ? onStart() : go((step + 1) as Step));
   const back = () => {
     if (step > 0) go((step - 1) as Step);
+  };
+
+  // arcade sub-mode selection helpers
+  const selectArcadeMode = (m: ArcadeModeId) => {
+    if (m === 'practice') return;
+    onArcadeMode(m);
+    if (m === 'campaign') {
+      // lock to oldest era for campaign start
+      const oldest = oldestEra();
+      if (era !== oldest.id) onEra(oldest.id);
+    }
+    go(3);
   };
 
   // the cabinet's own keys: Enter/Space walk the steps, arrows and 1-5 work
@@ -555,7 +577,7 @@ export function StartScreen({
         return;
       }
       const typing = isTypingTarget(e.target);
-      if (step === 2 && !typing) {
+      if (step === 4 && !typing) {
         const idx = DIFFICULTIES.findIndex((d) => d.id === difficulty);
         if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') {
           e.preventDefault();
@@ -568,8 +590,16 @@ export function StartScreen({
           return;
         }
         const num: Record<string, number> = {
-          Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,
-          Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3, Numpad5: 4,
+          Digit1: 0,
+          Digit2: 1,
+          Digit3: 2,
+          Digit4: 3,
+          Digit5: 4,
+          Numpad1: 0,
+          Numpad2: 1,
+          Numpad3: 2,
+          Numpad4: 3,
+          Numpad5: 4,
         };
         if (e.code in num && DIFFICULTIES[num[e.code]]) {
           e.preventDefault();
@@ -578,8 +608,9 @@ export function StartScreen({
         }
       }
       // the chart and the hero roster are the same choice seen twice, so the
-      // arrows cycle the age on both screens
-      if ((step === 3 || step === 4) && !typing && (e.code === 'ArrowLeft' || e.code === 'ArrowRight')) {
+      // arrows cycle the age on both screens — but not in campaign (locked)
+      if ((step === 5 || step === 6) && !typing && (e.code === 'ArrowLeft' || e.code === 'ArrowRight')) {
+        if (arcadeMode === 'campaign' && step === 5) return; // locked
         e.preventDefault();
         const idx = Math.max(
           0,
@@ -599,11 +630,12 @@ export function StartScreen({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [step, help, onStart, difficulty, onDifficulty, era, onEra]);
+  }, [step, help, onStart, difficulty, onDifficulty, era, onEra, arcadeMode]);
 
   const hiScore = scores[0]?.score ?? 0;
-  const anim = stage === 'out' ? (dir === 'fwd' ? 'screen-fwd-out' : 'screen-back-out') : dir === 'fwd' ? 'screen-fwd-in' : 'screen-back-in';
-  const plate = (n: 1 | 2 | 3 | 4): 'todo' | 'active' | 'done' =>
+  const anim =
+    stage === 'out' ? (dir === 'fwd' ? 'screen-fwd-out' : 'screen-back-out') : dir === 'fwd' ? 'screen-fwd-in' : 'screen-back-in';
+  const plate = (n: 1 | 2 | 3 | 4 | 5 | 6): 'todo' | 'active' | 'done' =>
     step === n ? 'active' : step > n ? 'done' : 'todo';
 
   return (
@@ -633,12 +665,7 @@ export function StartScreen({
               {STEP_PLATES.map(({ n, label }, i) => (
                 <span key={n} className="flex items-center gap-1 sm:gap-1.5">
                   {i > 0 && <span className="font-pirate text-lg text-gold/70">›</span>}
-                  <StepPlate
-                    n={n}
-                    label={label}
-                    state={plate(n)}
-                    onClick={step > n ? () => go(n) : undefined}
-                  />
+                  <StepPlate n={n} label={label} state={plate(n)} onClick={step > n ? () => go(n) : undefined} />
                 </span>
               ))}
             </div>
@@ -655,13 +682,21 @@ export function StartScreen({
             {step === 0 ? (
               <TitleStep hiScore={hiScore} scores={scores} isTouch={isTouch} onStart={() => go(1)} />
             ) : step === 1 ? (
-              <SignOnStep name={name} onName={onName} isTouch={isTouch} />
+              <ModeSelectScreen isTouch={isTouch} onSelect={() => go(2)} />
             ) : step === 2 ? (
-              <PerilStep difficulty={difficulty} onDifficulty={onDifficulty} />
+              <ArcadeSelectScreen isTouch={isTouch} onSelect={selectArcadeMode} />
             ) : step === 3 ? (
-              <EraStep era={era} onEra={onEra} name={name} difficulty={difficulty} onJump={go} />
+              <SignOnStep name={name} onName={onName} isTouch={isTouch} />
+            ) : step === 4 ? (
+              <PerilStep difficulty={difficulty} onDifficulty={onDifficulty} />
+            ) : step === 5 ? (
+              arcadeMode === 'campaign' ? (
+                <CampaignIntroScreen era={era} difficulty={difficulty} name={name} onJump={go as any} />
+              ) : (
+                <EraStep era={era} onEra={onEra} name={name} difficulty={difficulty} arcadeMode={arcadeMode} onJump={go} />
+              )
             ) : (
-              <ShipStep era={era} onEra={onEra} name={name} difficulty={difficulty} onJump={go} />
+              <ShipStep era={era} onEra={onEra} name={name} difficulty={difficulty} arcadeMode={arcadeMode} onJump={go} />
             )}
           </div>
         </div>
@@ -698,12 +733,20 @@ export function StartScreen({
               >
                 <Sailboat className="h-6 w-6 sm:h-7 sm:w-7" />
                 {step === 1
-                  ? 'Next: Peril ▸'
+                  ? 'Arcade ▸'
                   : step === 2
-                    ? 'Next: Era ▸'
+                    ? arcadeMode === 'campaign'
+                      ? 'Campaign ▸'
+                      : arcadeMode === 'era'
+                        ? 'Era ▸'
+                        : 'Next ▸'
                     : step === 3
-                      ? 'Next: Hero Ship ▸'
-                      : 'Set Sail!'}
+                      ? 'Next: Peril ▸'
+                      : step === 4
+                        ? 'Next: Era ▸'
+                        : step === 5
+                          ? 'Next: Hero Ship ▸'
+                          : 'Set Sail!'}
               </button>
             </div>
           )}

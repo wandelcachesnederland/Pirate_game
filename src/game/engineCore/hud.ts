@@ -256,10 +256,19 @@ export abstract class EngineHud extends EngineFx {
     const boss = this.findBoss();
     // the voyage's peril, piped under the wave: skull pips and the rank
     const pipStr = `${'☠'.repeat(this.diff.skulls)} ${this.diff.name}`;
+    // campaign line
+    const campaignLine = this.campaignActive
+      ? `Campaign ${this.campaignIndex + 1}/${this.campaignEras.length} · ${this.campaignWavesClearedInEra}/${this.campaignWavesPerEra} waves`
+      : null;
     if (narrow) {
       ctx.textAlign = 'right';
       ctx.font = `${Math.round(17 * u)}px ${FONT}`;
       this.outlined(ctx, `${waveStr} · ${remStr}`, rx, my, '#f3e2b3', 3);
+      if (campaignLine) {
+        ctx.font = `${Math.round(12 * u)}px ${FONT}`;
+        this.outlined(ctx, campaignLine, rx, my + 18 * u, '#7de8c3', 3);
+        my += 16 * u;
+      }
       if (!boss) {
         ctx.font = `${Math.round(13 * u)}px ${FONT}`;
         this.outlined(ctx, pipStr, rx, my + 19 * u, '#c9a86a', 3);
@@ -270,7 +279,14 @@ export abstract class EngineHud extends EngineFx {
       this.outlined(ctx, waveStr, W / 2, y0 + 16 * u, '#f3e2b3', 4);
       ctx.font = `italic ${Math.round(15 * u)}px ${FELL}`;
       this.outlined(ctx, remStr, W / 2, y0 + 39 * u, '#e6d3a3', 3);
-      if (!boss) {
+      if (campaignLine) {
+        ctx.font = `${Math.round(12 * u)}px ${FONT}`;
+        this.outlined(ctx, campaignLine, W / 2, y0 + 56 * u, '#7de8c3', 3);
+        if (!boss) {
+          ctx.font = `${Math.round(13 * u)}px ${FONT}`;
+          this.outlined(ctx, pipStr, W / 2, y0 + 72 * u, '#c9a86a', 3);
+        }
+      } else if (!boss) {
         ctx.font = `${Math.round(13 * u)}px ${FONT}`;
         this.outlined(ctx, pipStr, W / 2, y0 + 57 * u, '#c9a86a', 3);
       }

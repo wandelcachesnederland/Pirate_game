@@ -1,7 +1,7 @@
 import type { EraId, GameStats, RegionId, Ship, ShipInventory, ShipKind, UpgradeId, UpgradeOffer, DifficultyId } from './types';
 import { SHIP_DEFS, UPGRADES, waveCompositionFor, waveTitleFor } from './data';
 import { difficultyById } from './difficulty';
-import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
+import { DEFAULT_ERA, ERA_FLAGSHIPS, eraRegion } from './ships/era';
 import { regionById } from './worlds';
 import { BOARD_MIN_CREW } from './boarding';
 import { TITLE_CASSETTE, type MusicMode } from './music';
@@ -11,6 +11,7 @@ import { armShipForEra, upgradeForEra, usesGunpowder } from './weapons';
 import { angDiff, TAU } from './math';
 import { WORLD, MAX_PARTICLES, GRAPE, rand, clamp, defaultStats, type EngineCallbacks } from './engineCore/constants';
 import { EngineWeapons } from './engineCore/weapons';
+import { CAMPAIGN_WAVES_PER_ERA, chronologicalEraIds, eraById } from './campaign';
 
 // Re-exported so callers can keep importing these from the engine.
 export { angDiff };
@@ -24,6 +25,14 @@ export { WORLD, type EngineCallbacks } from './engineCore/constants';
  * main loop.
  */
 export class Engine extends EngineWeapons {
+  // ---- campaign ----
+  campaignActive = false;
+  campaignEras: EraId[] = [];
+  campaignIndex = 0;
+  campaignWavesPerEra = CAMPAIGN_WAVES_PER_ERA;
+  // how many waves have been cleared in the current campaign era
+  campaignWavesClearedInEra = 0;
+
   constructor(canvas: HTMLCanvasElement, cb: EngineCallbacks) {
     super();
     this.canvas = canvas;
@@ -125,6 +134,53 @@ export class Engine extends EngineWeapons {
       else this.ships.push(fresh);
       this.player = fresh;
     }
+  }
+
+  // ---- campaign API ----
+  setCampaign(active: boolean, eras?: EraId[]) {
+    this.campaignActive = active;
+    if (active) {
+      this.campaignEras = eras && eras.length > 0 ? [...eras] : chronologicalEraIds();
+      this.campaignIndex = 0;
+      this.campaignWavesClearedInEra = 0;
+      this.campaignWavesPerEra = CAMPAIGN_WAVES_PER_ERA;
+    } else {
+      this.campaignEras = [];
+      this.campaignIndex = 0;
+      this.campaignWavesClearedInEra = 0;
+    }
+  }
+
+  getCampaignInfo(): { active: boolean; index: number; total: number; eraId: EraId | null; wavesPerEra: number; wavesClearedInEra: number } | null {
+    if (!this.campaignActive) return null;
+    const eraId = this.campaignEras[this.campaignIndex] ?? null;
+    return {
+      active: this.campaignActive,
+      index: this.campaignIndex,
+      total: this.campaignEras.length,
+      eraId,
+      wavesPerEra: this.campaignWavesPerEra,
+      wavesClearedInEra: this.campaignWavesClearedInEra,
+    };
+  }
+
+  /** Start a campaign: sets era to first in list and begins game */
+  startCampaign(eras?: EraId[], wavesPerEra: number = CAMPAIGN_WAVES_PER_ERA) {
+    const list = eras && eras.length > 0 ? [...eras] : chronologicalEraIds();
+    this.setCampaign(true, list);
+    this.campaignWavesPerEra = wavesPerEra;
+    this.campaignIndex = 0;
+    this.campaignWavesClearedInEra = 0;
+    const first = list[0];
+    if (first) {
+      // set player hull to flagship of first era? keep current playerDef if already set, else use flagship
+      // we keep whatever playerDef was chosen in menu, but ensure eraId/region match campaign start
+      this.eraId = first;
+      this.regionId = eraRegion(first);
+      this.playerDef = ERA_FLAGSHIPS[first] ?? this.playerDef;
+      this.sfx.setEra(first);
+    }
+    this.startGame();
   }
 
   /**
@@ -236,18 +292,42 @@ export class Engine extends EngineWeapons {
     // World generation uses the current wave to set fort strength. Reset before
     // building the new chart so restarting a late voyage starts at wave one.
     this.wave = 0;
+    if (!this.campaignActive) {
+      this.campaignWavesClearedInEra = 0;
+    }
     this.resetWorld();
     this.resetTraits();
     this.buildTraitWorld();
-    this.score = 0;
-    this.displayScore = 0;
-    this.mult = 1;
-    this.streakTimer = 0;
-    this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
-    this.levels = {};
-    this.pstats = defaultStats(this.playerDef);
-    // the flagship's hull is set by the voyage's peril
-    this.pstats.maxHp = Math.round(this.pstats.maxHp * this.diff.playerHp);
+    // In campaign the score / upgrades persist across eras, so only reset when
+    // starting a fresh game (not when advancing via campaign). startCampaign
+    // itself has already set the first era. For a normal arcade start we wipe.
+    if (!this.campaignActive || this.campaignIndex === 0 && this.campaignWavesClearedInEra === 0) {
+      // fresh start: if not campaign, wipe; if campaign at very beginning, wipe too
+      if (!this.campaignActive) {
+        this.score = 0;
+        this.displayScore = 0;
+        this.mult = 1;
+        this.streakTimer = 0;
+        this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
+        this.levels = {};
+        this.pstats = defaultStats(this.playerDef);
+        this.pstats.maxHp = Math.round(this.pstats.maxHp * this.diff.playerHp);
+      } else {
+        // campaign fresh start — same wipe but keep campaign bookkeeping
+        this.score = 0;
+        this.displayScore = 0;
+        this.mult = 1;
+        this.streakTimer = 0;
+        this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
+        this.levels = {};
+        this.pstats = defaultStats(this.playerDef);
+        this.pstats.maxHp = Math.round(this.pstats.maxHp * this.diff.playerHp);
+      }
+    } else {
+      // This path is not used by startGame directly for campaign era transitions
+      // (advanceToNextCampaignEra handles it), but keep pstats maxHp adjustment
+      this.pstats.maxHp = Math.round(this.pstats.maxHp * this.diff.playerHp);
+    }
     this.swivelTimer = 0;
     this.grapeCd = 0;
     this.bowTimer = 0;
@@ -312,6 +392,11 @@ export class Engine extends EngineWeapons {
   quitToMenu() {
     this.sfx.stopMusic();
     this.sfx.duck(false);
+    // leaving campaign — reset its bookkeeping so next arcade era game is clean
+    this.campaignActive = false;
+    this.campaignEras = [];
+    this.campaignIndex = 0;
+    this.campaignWavesClearedInEra = 0;
     this.enterMenu();
     // back in port on the attract screen: its own theme takes the deck again
     // (`previewTitleMusic`, asked for by the start screen as it comes up)
@@ -388,7 +473,95 @@ export class Engine extends EngineWeapons {
     this.addText(p.x, p.y - 44, `${def.name}!`, '#9fe7ff', 24);
     if (id === 'grapeshot') this.addText(p.x, p.y - 20, 'Press R to sweep the deck!', '#ffd84d', 17);
     this.fxSparkle(p.x, p.y, 14, '#9fe7ff');
+
+    // campaign: after each cleared wave we track per-era progress. If the era's quota is met, advance.
+    if (this.campaignActive) {
+      this.campaignWavesClearedInEra++;
+      if (this.campaignWavesClearedInEra >= this.campaignWavesPerEra) {
+        // era complete
+        if (this.campaignIndex + 1 >= this.campaignEras.length) {
+          // campaign complete — victory!
+          this.banner = {
+            title: 'Campaign Complete!',
+            sub: `All ${this.campaignEras.length} eras conquered — ${this.score.toLocaleString('en-US')} gold`,
+            t: 0,
+            dur: 4,
+            gold: true,
+          };
+          // small delay then game over as victory
+          window.setTimeout(() => this.gameOver(), 1800);
+          return;
+        } else {
+          this.advanceToNextCampaignEra();
+          return;
+        }
+      }
+    }
+
     this.startWave(this.wave + 1);
+  }
+
+  /** Advance campaign to next chronological era, keeping score/upgrades */
+  protected advanceToNextCampaignEra() {
+    this.campaignIndex++;
+    this.campaignWavesClearedInEra = 0;
+    const nextId = this.campaignEras[this.campaignIndex];
+    if (!nextId) {
+      this.gameOver();
+      return;
+    }
+    const nextEraDef = eraById(nextId);
+    // keep player hull as chosen, but switch the world/era for enemies, music and map
+    this.eraId = nextId;
+    this.regionId = eraRegion(nextId);
+    this.buildWaterPatterns();
+    this.sfx.setEra(nextId);
+    this.sfx.insertRandomCassette(true);
+    // rebuild world but preserve player stats/upgrades
+    this.resetWorld();
+    this.resetTraits();
+    this.buildTraitWorld();
+    this.wave = 0;
+    this.waveQueue = [];
+    this.spawnTimer = 0;
+    this.waveClearing = false;
+    this.waveDamage = 0;
+    this.magnetAll = false;
+    this.balls = [];
+    this.slicks = [];
+    this.pickups = [];
+    this.texts = [];
+    this.volleys = [];
+    this.pCount = 0;
+    // recreate player at origin with same pstats
+    this.player = this.makeShip('player', 0, 0, this.windAngle + rand(-0.5, 0.5));
+    this.applyPlayerStats();
+    this.player.hp = this.player.maxHp;
+    this.player.ghostHp = this.player.maxHp;
+    this.ships.push(this.player);
+    this.camX = 0;
+    this.camY = 0;
+    this.zoom = 1.12;
+    this.playerDeadTimer = -1;
+    this.hintTimer = 0;
+    this.firstHit = false;
+    this.input.clear();
+    this.input.enabled = true;
+    this.screen = 'playing';
+    this.cb.onScreen('playing');
+    this.banner = {
+      title: `Era ${this.campaignIndex + 1} / ${this.campaignEras.length}`,
+      sub: nextEraDef ? `${nextEraDef.era} — ${nextEraDef.year}` : nextId,
+      t: 0,
+      dur: 3.5,
+      gold: true,
+    };
+    this.sfx.horn();
+    this.sfx.setTempo(1);
+    // small delay then first wave of new era
+    window.setTimeout(() => {
+      if (this.screen === 'playing') this.startWave(1);
+    }, 900);
   }
 
   // ================================================================ setup
@@ -769,6 +942,27 @@ export class Engine extends EngineWeapons {
       this.sfx.duck(false);
       this.cb.onScreen('playing');
       this.addText(p.x, p.y - 44, 'Ship fully upgraded — onward!', '#9fe7ff', 22);
+
+      if (this.campaignActive) {
+        this.campaignWavesClearedInEra++;
+        if (this.campaignWavesClearedInEra >= this.campaignWavesPerEra) {
+          if (this.campaignIndex + 1 >= this.campaignEras.length) {
+            this.banner = {
+              title: 'Campaign Complete!',
+              sub: `All ${this.campaignEras.length} eras conquered — ${this.score.toLocaleString('en-US')} gold`,
+              t: 0,
+              dur: 4,
+              gold: true,
+            };
+            window.setTimeout(() => this.gameOver(), 1800);
+            return;
+          } else {
+            this.advanceToNextCampaignEra();
+            return;
+          }
+        }
+      }
+
       this.startWave(this.wave + 1);
       return;
     }

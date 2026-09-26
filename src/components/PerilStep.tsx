@@ -132,7 +132,7 @@ export function PerilStep({ difficulty, onDifficulty }: Props) {
     <div className="flex h-full flex-col gap-2 overflow-y-auto no-scrollbar p-2 sm:gap-3 sm:p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 2 of 4 · Peril</div>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 4 of 7 · Peril</div>
           <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Your Peril</h2>
         </div>
         <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">

@@ -20,6 +20,8 @@ import {
   type ScoreEntry,
   type Settings,
 } from './game/storage';
+import { chronologicalEraIds, oldestEra } from './game/campaign';
+import type { ArcadeModeId } from './components/ArcadeSelectScreen';
 import { StartScreen } from './components/StartScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { PauseScreen } from './components/PauseScreen';
@@ -55,6 +57,8 @@ export default function App() {
   const eraRef = useRef(era);
   const [difficulty, setDifficulty] = useState<DifficultyId>(() => loadDifficulty() ?? DEFAULT_DIFFICULTY);
   const difficultyRef = useRef(difficulty);
+  const [arcadeMode, setArcadeMode] = useState<ArcadeModeId>('era');
+  const arcadeModeRef = useRef<ArcadeModeId>('era');
   const [boardPrompt, setBoardPrompt] = useState<{ name: string; crew: number } | null>(null);
   const [grape, setGrape] = useState<{ level: number; cd: number; total: number; targets: number } | null>(null);
   // the studio card: 'on' at start-up, 'fading' while the title screen shows beneath it
@@ -75,6 +79,25 @@ export default function App() {
   useEffect(() => {
     difficultyRef.current = difficulty;
   }, [difficulty]);
+
+  useEffect(() => {
+    arcadeModeRef.current = arcadeMode;
+  }, [arcadeMode]);
+
+  const pickArcadeMode = useCallback((id: ArcadeModeId) => {
+    if (id === 'practice') return;
+    setArcadeMode(id);
+    arcadeModeRef.current = id;
+    if (id === 'campaign') {
+      const oldest = oldestEra();
+      setEra(oldest.id);
+      saveEra(oldest.id);
+      engineRef.current?.setEra(oldest.id);
+      engineRef.current?.setRegion(eraRegion(oldest.id));
+      engineRef.current?.previewEraMusic();
+      setMenuTune(engineRef.current?.sfx.nowPlaying ?? '');
+    }
+  }, []);
 
   // the era is the first choice of the game: it swaps the flagship AND charts
   // the era's own waters on the menu at once
@@ -202,10 +225,27 @@ export default function App() {
     setStats(null);
     setRank(-1);
     setBoardPrompt(null);
-    e.setEra(eraRef.current);
-    e.setRegion(eraRegion(eraRef.current));
-    e.setDifficulty(difficultyRef.current);
-    e.startGame();
+    const mode = arcadeModeRef.current;
+    if (mode === 'campaign') {
+      // campaign: all eras in chronological order, 5 waves each, starting at oldest
+      const ordered = chronologicalEraIds();
+      const oldest = oldestEra();
+      // ensure menu era matches campaign start
+      setEra(oldest.id);
+      saveEra(oldest.id);
+      e.setDifficulty(difficultyRef.current);
+      // playerDef is set from current era (oldest or chosen hero ship era)
+      // but campaign will override era/region per step — keep player hull
+      e.setEra(eraRef.current);
+      e.setRegion(eraRegion(eraRef.current));
+      e.startCampaign(ordered);
+    } else {
+      e.setCampaign(false);
+      e.setEra(eraRef.current);
+      e.setRegion(eraRegion(eraRef.current));
+      e.setDifficulty(difficultyRef.current);
+      e.startGame();
+    }
   }, []);
 
   const pause = useCallback(() => {
@@ -406,6 +446,8 @@ export default function App() {
           onEra={pickEra}
           difficulty={difficulty}
           onDifficulty={pickDifficulty}
+          arcadeMode={arcadeMode}
+          onArcadeMode={pickArcadeMode}
           nowPlaying={menuTune}
         />
       )}
