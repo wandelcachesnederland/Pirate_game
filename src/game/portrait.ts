@@ -80,6 +80,17 @@ export function poseShip(def: ShipDef, angle: number, sail: number): Ship {
   };
 }
 
+/**
+ * A stable number off a string, so a picture always shows the same sea: the
+ * menu repaints on hover, on resize and on font load, and the water must not
+ * shuffle under the captain's eyes.
+ */
+export function stableSeed(id: string, salt: number): number {
+  let h = salt;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return Math.abs(h) % 100000;
+}
+
 /** Open water in a region's own colours, with mottling and a little swell. */
 export function paintWater(
   ctx: CanvasRenderingContext2D,

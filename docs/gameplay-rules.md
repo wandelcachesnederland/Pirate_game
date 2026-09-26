@@ -75,8 +75,8 @@ playable eras retain gunpowder weapons.
 Early-era upgrades use matching names and effects: Deck Archers, Chase
 Ballistas, Arrow Storm, Rigging Bolts, stronger bows/pulleys, and additional bow
 stations. In the fire seas they read as Deck Fire Pots, Bow Siphons, Fire Pot
-Volley and Thicker Naphtha. The era picker shows the armament before setting
-sail.
+Volley and Thicker Naphtha. The hero-ship screen that follows the era chart
+shows the armament before setting sail.
 
 ## New eras: steel navies and the Barbary shore
 

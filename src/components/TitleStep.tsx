@@ -94,8 +94,8 @@ export function TitleStep({ hiScore, scores, isTouch, onStart }: Props) {
           </button>
           <p className="mt-2 text-[0.74rem] italic leading-snug opacity-80">
             {isTouch
-              ? 'Tap START, sign the book, pick your peril and your era — then sail.'
-              : 'Press Enter (or START) — then sign on, pick your peril and your era.'}
+              ? 'Tap START, sign the book, pick your peril, your era and your hero ship — then sail.'
+              : 'Press Enter (or START) — then sign on, pick your peril, your era and your hero ship.'}
           </p>
           <div className="marquee-bulbs mt-2 opacity-70" aria-hidden />
         </div>

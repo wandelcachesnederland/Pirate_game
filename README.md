@@ -73,7 +73,11 @@ sail past doing nothing.
 ### Difficulty
 
 Putting to sea is one screen per decision: a title marquee, sign-on, then the **Peril** screen —
-five degrees of danger, each sailing under its own colours — and finally the era and her hero ship.
+five degrees of danger, each sailing under its own colours — then the **era** and its waters, and
+finally the **hero ship** you take into them. The era chart and the shipyard are separate screens:
+the chart shows the age, its sea and its music; the hull's portrait, numbers and scouting report get
+the screen after it. Both drive the same choice (every age sails exactly one flagship), so stepping
+back and forth never desynchronises them.
 
 | Peril | Skulls | The gist |
 | --- | --- | --- |
@@ -93,11 +97,16 @@ choice is saved and stamped on the Hall of Legends and the epitaph.
 
 ## The eras
 
-Every era is a hero hull, a home sea and its own music. The picker shows three squadrons, and each
+Every era is a hero hull, a home sea and its own music. The era screen shows three squadrons, and each
 era gets its own **title card**: her hulls mid-fight with the weapons of the age (broadside smoke,
 bolt volleys, a jet of Greek fire, a missile run), the weather and the shore those waters are known
 for, and a logo plate with the era's name, year, emblem and sea — all painted in code
 (`src/game/eraArt/`), live at 30fps. The screen fits the cabinet: on a desktop nothing scrolls.
+
+The screen after it is the shipyard (`src/components/HeroShipPicker.tsx`): the hero hull painted live
+by the game's own portrait painter, her numbers measured against every hero afloat, her strengths and
+weaknesses, and the whole roster of flagships on one strip — choose a hull there and you choose her
+age too.
 
 | Squadron | Eras |
 | --- | --- |
@@ -106,7 +115,8 @@ for, and a logo plate with the era's name, year, emblem and sea — all painted 
 | **Heritage Seas** (17) | First Punic War (260 BC) · Persian Wars (480 BC) · Macedon at Sea (306 BC) · Against the Sea Peoples (1178 BC) · Monsoon Seas (1200) · Chola Across the Bay (1025) · Bạch Đằng River (1288) · Siege of Constantinople (717) · Ming Treasure Voyages (1405) · Sengoku Period (1575) · Lepanto (1571) · Imjin War (1597) · Māori Musket Wars (1820) · Hawaiian Unification (1795) · Maya First Contact (1517) · Fall of Tenochtitlan (1521) · Inca Pacific Voyages (1465) |
 
 Picking an era picks the whole world: flagship, enemy roster, island art, water colour, weather feel,
-music and the weapons both sides carry.
+music and the weapons both sides carry. The shipyard screen that follows is where that flagship is
+studied and confirmed — it is the same single choice, seen from the hull rather than the chart.
 
 ---
 
@@ -193,7 +203,8 @@ Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
 
 - The `Engine` (`src/game/engine.ts`) owns the simulation *and* the canvas: one `requestAnimationFrame`
   loop, fixed-step physics, pooled particles, and all combat rules.
-- React renders the start screen, era carousel, pause/refit/game-over overlays and touch controls.
+- React renders the start screen, era carousel, hero-ship picker, pause/refit/game-over overlays and
+  touch controls.
 - They meet in two narrow places: the engine reports state changes through callbacks (`onScreen`,
   `onUpgrade`, `onGameOver`) and React polls it through explicit getters (`getInventory`,
   `getBoardCandidate`, `getGrapeshot`, `getEra`). No shared mutable state, no framework inside the loop.
@@ -215,7 +226,8 @@ Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
 | `src/game/difficulty.ts` | The five perils: every modifier that scales foes, forts, spawns and plunder |
 | `src/game/storage.ts` · `input.ts` | `localStorage` scores/settings/era/difficulty, keyboard + touch input |
 | `src/game/ships/` | Hero hulls: `era/` (flagships) and `heritage/` (one per culture) |
-| `src/components/` | React overlays: start, era carousel, pause, refit, game over, touch UI |
+| `src/components/` | React overlays: start (sign-on, peril, era, hero ship), pause, refit, game over, touch UI |
+| `src/components/EraCarousel.tsx` · `HeroShipPicker.tsx` | The two picker screens: the era chart, then the hero hull's portrait and scouting report |
 
 Performance is deliberate: hull sprites and island sprites are pre-rendered to offscreen canvases and
 reused, particles come from a fixed pool, and the device pixel ratio steps down automatically if frames
