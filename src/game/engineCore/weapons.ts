@@ -3,10 +3,10 @@ import { cannonLocalX } from '../sprites';
 import { isIncendiary, projectileFor, usesGunpowder } from '../weapons';
 import { angDiff, TAU } from '../math';
 import { HALF_PI, GRAPE, CHASER, P_SMOKE, P_FIRE, P_SPARK, P_RING, P_FLASH, P_ARROW, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, rand, clamp, pick, type Volley } from './constants';
-import { EngineShips } from './ships';
+import { EngineTraits } from './traits';
 
 /** Player input and the player's weapons: broadsides, swivel, chasers, grapeshot. */
-export abstract class EngineWeapons extends EngineShips {
+export abstract class EngineWeapons extends EngineTraits {
   // ================================================================ player
   protected updatePlayerInput(dt: number) {
     const p = this.player;
@@ -30,7 +30,9 @@ export abstract class EngineWeapons extends EngineShips {
     if (inp.smartQueued) this.smartFire(true);
     else if (inp.smartHeld) this.smartFire(false);
     if (inp.boardQueued && this.boardCandidate) this.resolveBoarding(this.boardCandidate);
+    else if (inp.boardQueued) this.traitHail();
     if (inp.grapeQueued) this.fireGrapeshot();
+    if (inp.traitQueued) this.traitAction();
     inp.consume();
   }
 
@@ -86,6 +88,7 @@ export abstract class EngineWeapons extends EngineShips {
   }
 
   protected fireBroadside(s: Ship, side: number, rel: number) {
+    this.traitOnFired(s);
     const n = s.cannons;
     if (side < 0) s.reloadL = s.reloadTime;
     else s.reloadR = s.reloadTime;
@@ -178,6 +181,8 @@ export abstract class EngineWeapons extends EngineShips {
     for (const e of this.ships) {
       // an unarmed fisherman is not a target: the gun crew waits for a fight
       if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered || e.peaceful) continue;
+      if (this.traitShipHidden(e)) continue;
+      if (this.traitShipHidden(e)) continue;
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (d < bd) {
         bd = d;
@@ -239,6 +244,7 @@ export abstract class EngineWeapons extends EngineShips {
     for (const e of this.ships) {
       // chase guns are for pursuers, not for unarmed fishermen
       if (e.team !== 1 || e.sinking >= 0 || e.captured || e.surrendered || e.peaceful) continue;
+      if (this.traitShipHidden(e)) continue;
       const dx = e.x - s.x;
       const dy = e.y - s.y;
       const d = Math.hypot(dx, dy);

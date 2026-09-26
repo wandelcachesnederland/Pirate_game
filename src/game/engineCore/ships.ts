@@ -16,6 +16,13 @@ export abstract class EngineShips extends EngineCombat {
   /** Implemented by `EngineWeapons` / `Engine`. */
   protected abstract fireBroadside(s: Ship, side: number, rel: number): void;
   protected abstract makeShip(kind: ShipKind, x: number, y: number, angle: number): Ship;
+  /** Era traits — implemented by `EngineTraits`, above this layer. */
+  protected abstract traitSpeedMult(s: Ship): number;
+  protected abstract traitSightRange(s: Ship): number;
+  protected abstract traitSeesPlayer(s: Ship): boolean;
+  protected abstract traitSubAI(s: Ship, dt: number, dist: number, toP: number): boolean;
+  protected abstract traitWater(s: Ship, dt: number): void;
+  protected abstract traitContact(a: Ship, b: Ship): void;
 
   /** When each hull last felt the player's ram / spikes (engine time). */
   private fittingHits = new WeakMap<Ship, { ram: number; spike: number }>();
@@ -60,7 +67,7 @@ export abstract class EngineShips extends EngineCombat {
       s.slowTimer = Math.max(0, s.slowTimer - dt);
       s.biteTimer = Math.max(0, s.biteTimer - dt);
       if (s !== p || !playing) {
-        if (s.team === 1 && playing && p.sinking < 0) this.aiCombat(s, dt);
+        if (s.team === 1 && playing && p.sinking < 0 && this.traitSeesPlayer(s)) this.aiCombat(s, dt);
         else this.aiWander(s, dt);
       }
       this.shipPhysics(s, dt);
@@ -80,7 +87,7 @@ export abstract class EngineShips extends EngineCombat {
   protected shipPhysics(s: Ship, dt: number) {
     s.sail += (s.sailTarget - s.sail) * Math.min(1, dt * 2.5);
     const slow = s.slowTimer > 0 ? 0.55 : 1;
-    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared || isSteelHull(s.def.hullStyle)) * slow;
+    const target = s.maxSpeed * s.sail * this.windFactor(s.angle, !!s.def.oared || isSteelHull(s.def.hullStyle)) * slow * this.traitSpeedMult(s);
     const c = Math.cos(s.angle);
     const sn = Math.sin(s.angle);
     let fwd = s.vx * c + s.vy * sn;
@@ -99,6 +106,7 @@ export abstract class EngineShips extends EngineCombat {
     s.vy = sn * fwd + c * lat;
     s.x += s.vx * dt;
     s.y += s.vy * dt;
+    this.traitWater(s, dt);
   }
 
   protected shipTerrain(s: Ship, dt: number) {
@@ -241,6 +249,7 @@ export abstract class EngineShips extends EngineCombat {
         this.ramGuard = 1;
         if (playing && a.team !== b.team && (a === this.player || b === this.player)) {
           this.hullFittingContact(a === this.player ? b : a, Math.hypot(dx, dy), lim);
+          this.traitContact(a, b);
         }
         this.resolvePair(a, b, playing);
         this.ramGuard = 1;
@@ -402,6 +411,7 @@ export abstract class EngineShips extends EngineCombat {
       s.sailTarget = 0.12;
       return;
     }
+    if (this.traitSubAI(s, dt, dist, toP)) return;
     let desired = s.angle;
     let sail = 1;
     s.aiTimer -= dt;
@@ -475,7 +485,7 @@ export abstract class EngineShips extends EngineCombat {
       }
     }
     this.steer(s, desired, sail);
-    if (s.cannons > 0 && dist < s.range * 0.95 && this.playerDeadTimer < 0) {
+    if (s.cannons > 0 && dist < this.traitSightRange(s) && this.playerDeadTimer < 0) {
       const t = dist / s.ballSpeed;
       const tx = p.x + p.vx * t * s.aiLead;
       const ty = p.y + p.vy * t * s.aiLead;

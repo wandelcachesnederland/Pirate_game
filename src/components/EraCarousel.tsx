@@ -6,6 +6,7 @@ import { regionById } from '../game/worlds';
 import { bossCassette, cassettesForEra } from '../game/music';
 import { stableSeed } from '../game/portrait';
 import { paintEraScene } from '../game/eraArt';
+import { traitDef } from '../game/eraTraits';
 
 // Import the photographic era stills as data URLs so the single-file build
 // remains self-contained. Eras without a commissioned still keep their
@@ -344,6 +345,10 @@ export function EraCarousel({ era, onEra }: Props) {
         </span>
         <span className="opacity-40"> · </span>
         <span className="text-gold/90">{sea.name}</span>
+        <span className="opacity-40"> · </span>
+        <span className="text-sky-200/90">
+          {traitDef(shown.id).name}: {traitDef(shown.id).pitch}
+        </span>
         <span className="hidden opacity-40 md:inline"> · </span>
         <span className="hidden opacity-70 md:inline">
           {cassettesForEra(shown.id)

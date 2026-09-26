@@ -16,6 +16,7 @@ const GAME_KEYS = new Set([
   'KeyF',
   'KeyB',
   'KeyR',
+  'KeyT',
 ]);
 
 export function isTypingTarget(t: EventTarget | null): boolean {
@@ -34,6 +35,8 @@ export class Input {
   boardQueued = false;
   /** Grapeshot: touch off a canister blast (only if the ship is fitted for it). */
   grapeQueued = false;
+  /** Era trait action: oar-sprint, anchor stance, teppo volley (T). */
+  traitQueued = false;
   touchFireHeld = false;
   joyActive = false;
   joyX = 0;
@@ -54,6 +57,7 @@ export class Input {
     else if (c === 'Space' || c === 'KeyK') this.smartQueued = true;
     else if (c === 'KeyF' || c === 'KeyB') this.boardQueued = true;
     else if (c === 'KeyR') this.grapeQueued = true;
+    else if (c === 'KeyT') this.traitQueued = true;
   };
 
   private onUp = (e: KeyboardEvent) => {
@@ -69,6 +73,7 @@ export class Input {
     this.smartQueued = false;
     this.boardQueued = false;
     this.grapeQueued = false;
+    this.traitQueued = false;
     this.touchFireHeld = false;
     this.joyActive = false;
     this.joyMag = 0;
@@ -134,5 +139,6 @@ export class Input {
     this.smartQueued = false;
     this.boardQueued = false;
     this.grapeQueued = false;
+    this.traitQueued = false;
   }
 }
