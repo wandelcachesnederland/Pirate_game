@@ -10,6 +10,15 @@ import { makeCanvas } from '../game/canvas';
 import { drawPortraitShip, paintWater } from '../game/portrait';
 import { paintEraScene } from '../game/eraArt';
 
+// Import the photographic era stills as data URLs so the single-file build
+// remains self-contained. Eras without a commissioned still keep their
+// procedural scene until that art is added.
+const ERA_STILLS = import.meta.glob('../assets/era-stills/*.jpg', {
+  eager: true,
+  query: '?inline',
+  import: 'default',
+}) as Record<string, string>;
+
 interface Props {
   era: EraId;
   onEra: (id: EraId) => void;
@@ -63,12 +72,10 @@ function useCanvasPaint(
 }
 
 /**
- * The era card: a live picture of the age — its hulls mid-fight, its weather,
- * its shore, and its name on a logo plate. Painted at whatever size the frame
- * has (a resize observer keeps it crisp and filling), at ~30fps, and it stops
- * drawing while the tab is hidden.
+ * Animated hand-painted fallback for eras awaiting a photographic still.
+ * Painted to the frame at ~30fps and paused while the tab is hidden.
  */
-function EraSceneArt({ e }: { e: EraShip }) {
+function ProceduralEraSceneArt({ e }: { e: EraShip }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const cvRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -120,6 +127,27 @@ function EraSceneArt({ e }: { e: EraShip }) {
   );
 }
 
+/** Use a cinematic still when it exists; retain the hand-painted scene fallback. */
+function EraSceneArt({ e }: { e: EraShip }) {
+  const still = ERA_STILLS[`../assets/era-stills/${e.id}.jpg`];
+  if (!still) return <ProceduralEraSceneArt e={e} />;
+
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-slate-950">
+      <img
+        src={still}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        decoding="async"
+        className="h-full w-full select-none object-cover object-center"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10" />
+      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_44px_rgba(0,0,0,0.48)]" />
+    </div>
+  );
+}
+
 /** The era's hero hull, alive on the water: portrait art from the game itself. */
 function HeroPortrait({ e }: { e: EraShip }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
@@ -161,6 +189,7 @@ function Slot({
   on: boolean;
   onPick: (id: EraId) => void;
 }) {
+  const still = ERA_STILLS[`../assets/era-stills/${e.id}.jpg`];
   const ref = useCanvasPaint(
     (ctx, cv) => {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -170,18 +199,22 @@ function Slot({
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const g = ctx.createLinearGradient(0, 0, 0, h);
-      if (on) {
-        g.addColorStop(0, '#d2452f');
-        g.addColorStop(0.55, '#8e1c14');
-        g.addColorStop(1, '#560d07');
-      } else {
-        g.addColorStop(0, '#31496b');
-        g.addColorStop(0.55, '#1a2a44');
-        g.addColorStop(1, '#0a1322');
-      }
       rr(ctx, 1.5, 1.5, w - 3, h - 3, 8);
-      ctx.fillStyle = g;
+      if (still) {
+        ctx.fillStyle = on ? 'rgba(84,24,12,0.34)' : 'rgba(3,10,18,0.48)';
+      } else {
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        if (on) {
+          g.addColorStop(0, '#d2452f');
+          g.addColorStop(0.55, '#8e1c14');
+          g.addColorStop(1, '#560d07');
+        } else {
+          g.addColorStop(0, '#31496b');
+          g.addColorStop(0.55, '#1a2a44');
+          g.addColorStop(1, '#0a1322');
+        }
+        ctx.fillStyle = g;
+      }
       ctx.fill();
       const sw = regionById(e.region).swatch;
       const bw = 11;
@@ -219,9 +252,18 @@ function Slot({
       aria-label={`${e.era}, ${e.year}`}
       title={`${e.era} — ${e.year}`}
       onClick={() => onPick(e.id)}
-      className="arcade-slot shrink-0 rounded-lg"
+      className="arcade-slot relative shrink-0 overflow-hidden rounded-lg"
     >
-      <canvas ref={ref} className="block h-12 w-[4.125rem]" />
+      {still && (
+        <img
+          src={still}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      <canvas ref={ref} className="relative z-10 block h-12 w-[4.125rem]" />
     </button>
   );
 }

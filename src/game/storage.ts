@@ -102,7 +102,7 @@ const ERA_KEY = 'broadside.era.v1';
 /** Remember the last era sailed — the pick a captain makes first every time. */
 export function loadEra(): EraId | null {
   const raw = safeGet(ERA_KEY);
-  return raw && raw in ERA_REGION ? (raw as EraId) : null;
+  return raw && Object.prototype.hasOwnProperty.call(ERA_REGION, raw) ? (raw as EraId) : null;
 }
 
 export function saveEra(id: EraId) {

@@ -87,11 +87,14 @@ export class Engine extends EngineWeapons {
 
   /** Pick the player's hull. Rebuilds the ship so the menu shows it at once. */
   setEra(id: EraId) {
-    const def = ERA_FLAGSHIPS[id] ?? ERA_FLAGSHIPS[DEFAULT_ERA];
-    this.eraId = id;
+    // Guard the runtime boundary as well as the TypeScript type: a stale or
+    // hand-edited localStorage value must never select an inherited object key.
+    const safeId = Object.prototype.hasOwnProperty.call(ERA_FLAGSHIPS, id) ? id : DEFAULT_ERA;
+    const def = ERA_FLAGSHIPS[safeId];
+    this.eraId = safeId;
     this.playerDef = def;
     // the deck follows the era: every sea has its own songs and its own dirge
-    this.sfx.setEra(id);
+    this.sfx.setEra(safeId);
     if (this.screen === 'menu' && this.player) {
       const old = this.player;
       const fresh = this.makeShip('player', old.x, old.y, old.angle);
@@ -214,12 +217,14 @@ export class Engine extends EngineWeapons {
   startGame() {
     this.pstats = defaultStats(this.playerDef);
     this.sfx.unlock();
+    // World generation uses the current wave to set fort strength. Reset before
+    // building the new chart so restarting a late voyage starts at wave one.
+    this.wave = 0;
     this.resetWorld();
     this.score = 0;
     this.displayScore = 0;
     this.mult = 1;
     this.streakTimer = 0;
-    this.wave = 0;
     this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
     this.levels = {};
     this.pstats = defaultStats(this.playerDef);
