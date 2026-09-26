@@ -2005,4 +2005,732 @@ const vi: FittingsDict = {
   },
 };
 
-export const fittings: Dict<FittingsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };
+const ar: FittingsDict = {
+  lead: { ram: 'مقدمة', spikes: 'جوانب', fenders: 'حماية' },
+  tag: { breach: ' · يثقبها', tangle: ' · يبطئها', fire: ' · يشعلها', shock: ' · يصعق أطقمها' },
+  eras: {
+    golden: {
+      ram: { name: 'مقدمة مكسوة بالحديد', desc: 'ادفع بالمقدمة المغلفة بالحديد في بدن بسرعة' },
+      spikes: { name: 'خطاطيف على الدرابزين', desc: 'كل ما يحتك بالجنب يُخطَف ويُمسَح ويُبطَأ' },
+      fenders: { name: 'مصدات حبال وعوارض صد', desc: 'مصدات الحبال القديمة والعوارض الطويلة تبعد الكباش وسفن النار' },
+    },
+    exploration: {
+      ram: { name: 'منقار مقوّى', desc: 'منقار مدعّم يحطّم بدنًا بسرعة' },
+      spikes: { name: 'خطاطيف على الصواري', desc: 'شفرات منجلية على الصواري تقطع حبال كل من يقترب' },
+      fenders: { name: 'وسائد جلد الثور', desc: 'جلود محشوة بالصوف معلقة على الجنب تمتص الضربات' },
+    },
+    napoleonic: {
+      ram: { name: 'مقدمة نحاسية وركبة حديد', desc: 'مقدمة مضاعفة تخرق الألواح بسرعة' },
+      spikes: { name: 'شباك استيلاء ورماح', desc: 'شباك وسياج رماح على الدرابزين يجرح المستولين' },
+      fenders: { name: 'مصدات حبال وعوارض', desc: 'المصدات وعوارض الصد تبعد الأبدان الأخرى' },
+    },
+    barbary: {
+      ram: { name: 'مقدمة مغلفة بالنحاس', desc: 'مقدمة السكونة الحادة، مدعّمة لصدم زورق مدفعية' },
+      spikes: { name: 'شباك استيلاء ورماح', desc: 'سياج رماح على الدرابزين للقراصنة' },
+      fenders: { name: 'شباك الأراجيح', desc: 'أراجيح ملفوفة في شباك الدرابزين توقف القذف والشظايا' },
+    },
+    viking: {
+      ram: { name: 'مقدمة مربوطة بالحديد', desc: 'شريط حديد على المقدمة الطويلة — اصعد واكسر ألواحها' },
+      spikes: { name: 'سياج رماح على درابزين التروس', desc: 'رماح مصوّبة بين التروس تخترق كل من يقترب' },
+      fenders: { name: 'ألواح بلوط احتكاكية', desc: 'أحزمة بلوط سميكة تتلقى الضربة بدل الألواح' },
+    },
+    ironclad: {
+      ram: { name: 'مقدمة كبش حديدية', desc: 'حيلة فيرجينيا: اثقبها تحت خط الماء' },
+      spikes: { name: 'خراطيم بخار الغلايات', desc: 'بخار حي موصول للدرابزين يحرق المستولين — فتتشتت أطقمها' },
+      fenders: { name: 'تنانير حديد السكك', desc: 'حديد مائل فوق خط الماء يصدّ الكباش والقذف' },
+    },
+    hanse: {
+      ram: { name: 'مقدمة كوغ مكسوة', desc: 'مقدمة الكوغ الثقيلة، مجهزة للصدم' },
+      spikes: { name: 'صوارٍ بشفرات منجلية', desc: 'شفرات على الصواري تقصّ حبال كل من يقترب' },
+      fenders: { name: 'مصدات أكياس الصوف', desc: 'أكياس صوف إنجليزي معلقة على الجنب — بضاعة الرابطة نفسها' },
+    },
+    portugal: {
+      ram: { name: 'منقار الكاراك', desc: 'منقار ضخم مدعّم لتحطيم الداوات' },
+      spikes: { name: 'خطاطيف القصّ', desc: 'شفرات معقوفة تمزّق حبال كل من يقترب' },
+      fenders: { name: 'حواجز بالات القطن', desc: 'بالات قطن هندي مربوطة على الوسط' },
+    },
+    armada: {
+      ram: { name: 'منقار الغالياس الحديدي', desc: 'مهماز الغالياس الحديدي يثقب الألواح تحت الحزام' },
+      spikes: { name: 'شباك استيلاء بالرماح', desc: 'شباك ورماح على الوسط تجرح المستولين' },
+      fenders: { name: 'عوارض خطاطيف سفن النار', desc: 'عوارض لصدّ سفن نار غرافلين' },
+    },
+    dutch: {
+      ram: { name: 'ركبة مقدمة بلوطية', desc: 'مقدمة بلوطية مضاعفة لدهس غنيمة' },
+      spikes: { name: 'درابزين رماح الاستيلاء', desc: 'رماح مرصوفة على الدرابزين تخترق المستولين' },
+      fenders: { name: 'حصائر قنب', desc: 'حصائر قنب سميكة منسوجة معلقة على الجنب' },
+    },
+    predread: {
+      ram: { name: 'مقدمة كبش', desc: 'كل بوارج 1905 كانت تحمل كبشًا — استخدمه' },
+      spikes: { name: 'عوارض شباك الطوربيد', desc: 'عوارض ممدودة وشباك فولاذية تعرقل كل من يقترب' },
+      fenders: { name: 'حزام هارفي الفولاذي', desc: 'درع مقسّى على خط الماء' },
+    },
+    ww1: {
+      ram: { name: 'مقدمة صدم مقوّاة', desc: 'المدمرات صدمت الغواصات — مقدمة مبنية لذلك' },
+      spikes: { name: 'بارافانات متفجرة', desc: 'شحنات مقطورة من المقدمة تنفجر على بدن — فتترنح الأطقم' },
+      fenders: { name: 'انتفاخات ضد الطوربيد', desc: 'بدن خارجي منتفخ يمتص الضربات والانفجارات' },
+    },
+    ww2: {
+      ram: { name: 'مقدمة صدم معززة', desc: 'مثل بوري ضد U-405: اصعد واسحقها' },
+      spikes: { name: 'سكك قنابل الأعماق', desc: 'قنابل تُدحرَج عن قرب — الصدمة تشتت أطقمها' },
+      fenders: { name: 'فرش الشظايا', desc: 'فرش شظايا فوق الجسر والمدافع' },
+    },
+    hormuz: {
+      ram: { name: 'تدريع مقدمة معزز', desc: 'مقدمة مدرّعة لدهس الزوارق السريعة' },
+      spikes: { name: 'رفوف ألغام تلامسية', desc: 'ألغام على الدرابزين تنفجر على بدن' },
+      fenders: { name: 'ألواح كيفلر', desc: 'ألواح مركّبة فوق الجسر وخط الماء' },
+    },
+    falklands: {
+      ram: { name: 'مقدمة مقوّاة للجليد', desc: 'مقدمة أطلسية جنوبية، قوية بما يكفي للصدم' },
+      spikes: { name: 'قاذفات تشويش كورفوس', desc: 'تشويش وشعلات عن قرب تعمي أطقمها' },
+      fenders: { name: 'ألواح كيفلر ضد الشظايا', desc: 'أُضيفت بعد شيفيلد: درع شظايا فوق الحيويات' },
+    },
+    somali: {
+      ram: { name: 'صفيحة مقدمة فولاذية ملحومة', desc: 'صفيحة خردة ملحومة على مقدمة السفينة الأم — اصدم واستولِ' },
+      spikes: { name: 'سلالم استيلاء معقوفة', desc: 'سلالم ألمنيوم معلقة على درابزينها تعرقلها وتبطئها' },
+      fenders: { name: 'مصدات إطارات شاحنات', desc: 'إطارات قديمة مسلسلة على الجوانب تتلقى الصدمات' },
+    },
+    roman: {
+      ram: { name: 'منقار برونزي', desc: 'كبش برونزي ثلاثي الزعانف — اثقبها تحت خط الماء' },
+      spikes: { name: 'جسر الغراب', desc: 'الجسر المشوك يسقط على سطحها ويثبّتها' },
+      fenders: { name: 'أحزمة بلوط', desc: 'أحزمة ثقيلة على خط الماء تتلقى الصدم' },
+    },
+    greek: {
+      ram: { name: 'المنقار البرونزي', desc: 'كبش سلاميس: بضربة مجاديف كاملة يخرق بدنًا' },
+      spikes: { name: 'عوارض الكبّاش الجانبية', desc: 'عوارض من المقدمة تقصّ مجاديف كل من يقترب' },
+      fenders: { name: 'حبال الشدّ', desc: 'حبال شدّ الأبدان تماسكها عند الضرب' },
+    },
+    macedon: {
+      ram: { name: 'الكبش العظيم والثانوي', desc: 'كبش رئيسي وآخر فوقه للسفن الثقيلة' },
+      spikes: { name: 'خطاطيف الأيدي الحديدية', desc: 'أيدٍ حديدية بسلاسل تمسك كل من يقترب' },
+      fenders: { name: 'أحزمة مضاعفة وستائر جلدية', desc: 'أحزمة مضاعفة وجلود فوق صندوق المجاديف' },
+    },
+    phoenicia: {
+      ram: { name: 'كبش أنف الخنزير البرونزي', desc: 'الكبش المدبب لقوادس أرز صور' },
+      spikes: { name: 'درابزين التروس المعلقة', desc: 'تروس ورؤوس رماح معلقة على الدرابزين' },
+      fenders: { name: 'أحزمة أرز', desc: 'أحزمة أرز لبناني على خط الماء' },
+    },
+    egypt: {
+      ram: { name: 'عارضة مقدمة برأس أسد', desc: 'مقدمة برأس أسد من مدينة هابو، مدعّمة للارتطام' },
+      spikes: { name: 'خطاطيف على عصي', desc: 'خطاطيف على عصي تجرّ المغيرين وتثبّتهم' },
+      fenders: { name: 'حواجز حزم البردي', desc: 'ستائر بردي مربوطة على الدرابزين' },
+    },
+    byzantium: {
+      ram: { name: 'منقار المهماز', desc: 'مهماز الدرومون يعلو ويكسر مجاديفها' },
+      spikes: { name: 'درابزين سيفونات النار اليدوية', desc: 'سيفونات يدوية على الدرابزين ترشّ النار على كل من يقترب' },
+      fenders: { name: 'لبّاد منقوع بالخل', desc: 'لبّاد منقوع بالخل — الدفاع القديم ضد النار الإغريقية' },
+    },
+    lepanto: {
+      ram: { name: 'مهماز القادس', desc: 'المهماز الحديدي يعلو مقدمتها ويحطّم مجاديفها' },
+      spikes: { name: 'تروس ورماح الاستيلاء', desc: 'رماح خلف التروس تخترق المستولين' },
+      fenders: { name: 'شباك وفرش', desc: 'شباك استيلاء وفرش فوق الحواجز' },
+    },
+    ottoman: {
+      ram: { name: 'مهماز القادرغة', desc: 'المهماز العثماني يكسر مجاديف القوادس المسيحية' },
+      spikes: { name: 'سلاسل الخطاطيف', desc: 'خطاطيف بسلاسل تقيّد كل من يقترب' },
+      fenders: { name: 'حواجز بالات الصوف', desc: 'بالات صوف مربوطة خلف الدرابزين' },
+    },
+    arab: {
+      ram: { name: 'غطاء مقدمة ساج', desc: 'مقدمة ساج مغطاة لدهس القراصنة' },
+      spikes: { name: 'رفوف قدور النفط', desc: 'قدور نار فخارية على الدرابزين تنفجر على بدن' },
+      fenders: { name: 'مصدات حبال جوز الهند', desc: 'مصدات ألياف جوز الهند، كالحبال التي تخيط البدن' },
+    },
+    chola: {
+      ram: { name: 'مقدمة مغطاة بالحديد', desc: 'غطاء حديدي على مقدمة كوروماندل الكبيرة' },
+      spikes: { name: 'درابزين أشواك حديدية', desc: 'أشواك حديدية على الدرابزين للبراهوات' },
+      fenders: { name: 'مصدات جوز الهند', desc: 'مصدات ألياف جوز الهند على الجوانب' },
+    },
+    chinese: {
+      ram: { name: 'مقدمة كبش منغتشونغ', desc: 'مقدمة الكباش المغطاة بالجلد الخام لأساطيل الأنهار' },
+      spikes: { name: 'رفوف رماح النار', desc: 'رماح نار على الدرابزين تنفث اللهب عن قرب' },
+      fenders: { name: 'ستائر جلد خام', desc: 'جلد خام مبلل فوق الأجزاء العلوية' },
+    },
+    vietnam: {
+      ram: { name: 'مقدمة أوتاد حديدية', desc: 'أوتاد باك دانغ، مثبّتة على مقدمتك' },
+      spikes: { name: 'تنانير أوتاد خيزران', desc: 'خيزران مشحوذ على خط الماء' },
+      fenders: { name: 'مصدات حزم الخيزران', desc: 'حزم خيزران أخضر مربوطة' },
+    },
+    japanese: {
+      ram: { name: 'مقدمة مدرّعة بالحديد', desc: 'سفن نوبوناغا الحديدية: مقدمة مدرّعة للصدم' },
+      spikes: { name: 'خطاطيف كوماده', desc: 'مشابك مخلب الدب تجرّ كل من يقترب' },
+      fenders: { name: 'حزم خيزران تاكيبا', desc: 'حزم خيزران توقف السهام والضربات' },
+    },
+    korea: {
+      ram: { name: 'كبش رأس التنين', desc: 'رأس التنين — اصدم واخنق طاقمها بدخان الكبريت' },
+      spikes: { name: 'سقف السلحفاة المشوك', desc: 'أشواك حديدية فوق السقف تمزّق كل من يقترب' },
+      fenders: { name: 'درع صفائح سداسية', desc: 'صفائح حديدية فوق البدن والسقف' },
+    },
+    maori: {
+      ram: { name: 'مقدمة تاويخو المنحوتة', desc: 'التمثال المنحوت، مدعّم للاندفاع في واكا' },
+      spikes: { name: 'درابزين رماح تاياها', desc: 'رماح مصوّبة على الدرابزين' },
+      fenders: { name: 'أربطة حبال الكتان', desc: 'أربطة كتان الهاراكيكي تتلقى الصدمات' },
+    },
+    hawaii: {
+      ram: { name: 'مقدمة الكوا', desc: 'مقدمة خشب الكوا للاندفاع بين الأبدان' },
+      spikes: { name: 'درابزين أسنان القرش', desc: 'شفرات أسنان القرش على الدرابزين' },
+      fenders: { name: 'مصدات حصائر الهالا', desc: 'حصائر باندانوس منسوجة فوق الجوانب' },
+    },
+    maya: {
+      ram: { name: 'مقدمة خشب صلب', desc: 'مقدمة تشيكوزابوتي لصدم الزوارق' },
+      spikes: { name: 'درابزين حواف الأوبسيديان', desc: 'شفرات أوبسيديان مثبّتة على الدرابزين' },
+      fenders: { name: 'ستائر قطن مبطّن', desc: 'دروع قطن مبطّن معلقة فوق الجوانب' },
+    },
+    aztec: {
+      ram: { name: 'مقدمة السرو', desc: 'مقدمة خشب الأهويهويتي مدعّمة للصدم' },
+      spikes: { name: 'درابزين شفرات الأوبسيديان', desc: 'شفرات ماكواهويتل مثبّتة على الدرابزين' },
+      fenders: { name: 'عباءات إيتشكاهويبيلي', desc: 'دروع قطن مبطّن مدلاة فوق الجوانب' },
+    },
+    inca: {
+      ram: { name: 'جذع مقدمة خشبي', desc: 'جذع خشب صلب ثقيل مربوط عبر المقدمة' },
+      spikes: { name: 'سياج عصي برؤوس عظمية', desc: 'عصي برؤوس عظمية على حافة الطوف' },
+      fenders: { name: 'حزم قصب التوتورا', desc: 'حزم قصب التوتورا مربوطة حول الطوف' },
+    },
+  },
+};
+
+const sw: FittingsDict = {
+  lead: { ram: 'Pua', spikes: 'Ubavu', fenders: 'Linda' },
+  tag: { breach: ' · humtoboa', tangle: ' · humshusha', fire: ' · humwasha', shock: ' · huwashtua mabaharia' },
+  eras: {
+    golden: {
+      ram: { name: 'Pua Lililofunikwa na Chuma', desc: 'Sukuma shina lililofunikwa na chuma kwenye mwili kwa kasi' },
+      spikes: { name: 'Ndoano Kwenye Reli', desc: 'Chochoote kinachokwaruza ubavu hunaswa, kuchanwa na kupunguzwa kasi' },
+      fenders: { name: 'Vilinda vya Kamba na Miti ya Kuzuia', desc: 'Vilinda vya kamba chakavu na miti mirefu huweka mbali vigongeo na meli za moto' },
+    },
+    exploration: {
+      ram: { name: 'Mdomo Ulioimarishwa', desc: 'Mdomo uliosimamishwa unaobomoa mwili kwa kasi' },
+      spikes: { name: 'Ndoano za Mundu Kwenye Tanga', desc: 'Vembe za mundu kwenye tanga hukata kamba za yeyote aliye ubavu' },
+      fenders: { name: 'Vilinda vya Ngozi ya Ngʼombe', desc: 'Ngozi zilizojaa sufi zilizoningʼinia ubavu hufyonza mapigo' },
+    },
+    napoleonic: {
+      ram: { name: 'Shina la Shaba na Goti la Chuma', desc: 'Shina lililorudufiwa linalobomoa mbao kwa kasi' },
+      spikes: { name: 'Nyavu za Kuteka na Mikuki', desc: 'Nyavu na ua wa mikuki kando ya reli huwajeruhi wanaoteka' },
+      fenders: { name: 'Vilinda vya Kamba na Miti', desc: 'Vilinda na miti ya kuzuia huweka mbali miili mingine' },
+    },
+    barbary: {
+      ram: { name: 'Pua Lililofunikwa na Shaba', desc: 'Pua kali la schooner, lililosimamishwa kugonga boti ya mzinga' },
+      spikes: { name: 'Nyavu za Kuteka na Mikuki', desc: 'Ua wa mikuki kando ya reli kwa maharamia' },
+      fenders: { name: 'Nyavu za Vitanda', desc: 'Vitanda vilivyovingirishwa kwenye nyavu za reli huzuia risasi na vipande' },
+    },
+    viking: {
+      ram: { name: 'Shina Lililofungwa na Chuma', desc: 'Bendi ya chuma kwenye shina refu — panda juu na uvunje mbao zake' },
+      spikes: { name: 'Ua wa Mikuki Kwenye Reli ya Ngao', desc: 'Mikuki iliyoelekezwa kati ya ngao huwachoma yeyote aliye ubavu' },
+      fenders: { name: 'Mbao Nene za Mwaloni', desc: 'Ukanda mnene wa mwaloni hupokea pigo badala ya mbao' },
+    },
+    ironclad: {
+      ram: { name: 'Pua la Kigongeo cha Chuma', desc: 'Hila ya Virginia: mtungue chini ya mstari wa maji' },
+      spikes: { name: 'Mabomba ya Mvuke wa Kuberuza', desc: 'Mvuke hai uliopitishwa kwenye reli huwaberuza wanaoteka — mabaharia wake hutawanyika' },
+      fenders: { name: 'Mapazia ya Chuma cha Reli', desc: 'Chuma kilichoinama juu ya mstari wa maji hugeuza vigongeo na risasi' },
+    },
+    hanse: {
+      ram: { name: 'Shina la Cog Lililofunikwa', desc: 'Shina zito la cog, lililoandaliwa kugonga' },
+      spikes: { name: 'Tanga Zenye Vembe za Mundu', desc: 'Vembe kwenye tanga hukata kamba za yeyote aliye ubavu' },
+      fenders: { name: 'Vilinda vya Magunia ya Sufi', desc: 'Magunia ya sufi ya Kiingereza yaliyoningʼinia ubavu — mizigo ya Ligi yenyewe' },
+    },
+    portugal: {
+      ram: { name: 'Mdomo wa Carrack', desc: 'Mdomo mkubwa uliosimamishwa kubomoa majahazi' },
+      spikes: { name: 'Ndoano za Kukata', desc: 'Vembe vilivyopinda hurarua kamba za yeyote aliye ubavu' },
+      fenders: { name: 'Kuta za Marobota ya Pamba', desc: 'Marobota ya pamba ya India yaliyofungwa kiunoni' },
+    },
+    armada: {
+      ram: { name: 'Mdomo wa Chuma wa Galleass', desc: 'Mchocheo wa chuma wa galleass hutoboa mbao chini ya ukanda' },
+      spikes: { name: 'Nyavu za Kuteka zenye Mikuki', desc: 'Nyavu na mikuki kiunoni huwajeruhi wanaoteka' },
+      fenders: { name: 'Miti ya Ndoano dhidi ya Meli za Moto', desc: 'Miti ya kuzuia meli za moto za Gravelines' },
+    },
+    dutch: {
+      ram: { name: 'Goti la Shina la Mwaloni', desc: 'Shina la mwaloni lililorudufiwa kukimbiza teka' },
+      spikes: { name: 'Reli za Mikuki ya Kuteka', desc: 'Mikuki iliyopangwa kando ya reli huwachoma wanaoteka' },
+      fenders: { name: 'Mikeka ya Vilinda vya Katani', desc: 'Mikeka minene ya katani iliyofumwa iliyoningʼinia ubavu' },
+    },
+    predread: {
+      ram: { name: 'Pua la Kigongeo', desc: 'Kila meli ya kivita ya 1905 ilibeba kigongeo — kitumie' },
+      spikes: { name: 'Miti ya Nyavu za Torpedo', desc: 'Miti iliyotolewa na nyavu za chuma huwakwamiza yeyote aliye ubavu' },
+      fenders: { name: 'Ukanda wa Chuma cha Harvey', desc: 'Silaha ngumu usoni kando ya mstari wa maji' },
+    },
+    ww1: {
+      ram: { name: 'Pua la Kugonga Lililoimarishwa', desc: 'Waharibifu waligonga manowari — pua lililojengwa kwa hilo' },
+      spikes: { name: 'Paravane Zinazolipuka', desc: 'Makombora yanayovutwa kutoka pua hulipuka dhidi ya mwili — mabaharia huyumba' },
+      fenders: { name: 'Mavimbe dhidi ya Torpedo', desc: 'Mwili wa nje uliovimba hufyonza mapigo na milipuko' },
+    },
+    ww2: {
+      ram: { name: 'Shina la Kugonga Lililoimarishwa', desc: 'Kama USS Borie dhidi ya U-405: panda juu na umponde' },
+      spikes: { name: 'Reli za Mabomu ya Kina', desc: 'Mabomu yanayotembezwa karibu — mshtuko hutawanya mabaharia wake' },
+      fenders: { name: 'Magodoro ya Vipande', desc: 'Mikeka ya vipande juu ya daraja na mizinga' },
+    },
+    hormuz: {
+      ram: { name: 'Bamba la Pua Lililoimarishwa', desc: 'Pua lililofunikwa kukimbiza boti za kasi' },
+      spikes: { name: 'Raki za Mabomu ya Mguso', desc: 'Mabomu kwenye reli hulipuka dhidi ya mwili' },
+      fenders: { name: 'Paneli za Silaha za Kevlar', desc: 'Paneli mchanganyiko juu ya daraja na mstari wa maji' },
+    },
+    falklands: {
+      ram: { name: 'Pua Imara kwa Barafu', desc: 'Pua la Atlantiki ya Kusini, imara kutosha kugonga' },
+      spikes: { name: 'Vizindua Chaff vya Corvus', desc: 'Chaff na miale karibu hupofusha mabaharia wake' },
+      fenders: { name: 'Paneli za Kevlar dhidi ya Vipande', desc: 'Ziliongezwa baada ya Sheffield: silaha za vipande juu ya viungo' },
+    },
+    somali: {
+      ram: { name: 'Bamba la Pua la Chuma Lililochomezwa', desc: 'Bamba la chakavu lililochomezwa kwenye pua la meli mama — gonga na teka' },
+      spikes: { name: 'Ngazi za Kuteka zenye Ndoano', desc: 'Ngazi za alumini zenye ndoano juu ya reli yake humkwamiza na kumpunguza kasi' },
+      fenders: { name: 'Vilinda vya Matairi ya Lori', desc: 'Matairi ya zamani yaliyofungwa kwa minyororo kando hupokea mapigo' },
+    },
+    roman: {
+      ram: { name: 'Mdomo wa Shaba', desc: 'Kigongeo cha shaba chenye mapezi matatu — mtungue chini ya mstari wa maji' },
+      spikes: { name: 'Daraja la Kuteka la Korvus', desc: 'Daraja lenye miiba linaanguka kwenye staha yake na kumshikilia' },
+      fenders: { name: 'Ukanda wa Mwaloni', desc: 'Ukanda mzito kando ya mstari wa maji hupokea kugonga' },
+    },
+    greek: {
+      ram: { name: 'Embolon ya Shaba', desc: 'Kigongeo cha Salamis: kwa kupiga kamili hubomoa mwili' },
+      spikes: { name: 'Mihimili ya Epotides', desc: 'Mihimili kutoka pua hukata makasia ya yeyote aliye ubavu' },
+      fenders: { name: 'Kamba za Kufunga Mwili', desc: 'Kamba zinazofunga mwili huushikilia pamoja unapopigwa' },
+    },
+    macedon: {
+      ram: { name: 'Kigongeo Kikuu na Proembolion', desc: 'Kigongeo kikuu na kingine juu yake kwa meli nzito' },
+      spikes: { name: 'Ndoano za Mikono ya Chuma', desc: 'Mikono ya chuma kwenye minyororo huwashika yeyote aliye ubavu' },
+      fenders: { name: 'Ukanda Rudufu na Mapazia ya Ngozi', desc: 'Ukanda rudufu na ngozi juu ya sanduku la makasia' },
+    },
+    phoenicia: {
+      ram: { name: 'Kigongeo cha Shaba cha Pua la Nguruwe', desc: 'Kigongeo chenye ncha cha meli za mwerezi za Tiro' },
+      spikes: { name: 'Reli Iliyotundikwa Ngao', desc: 'Ngao na ncha za mikuki zilizotundikwa kando ya reli' },
+      fenders: { name: 'Ukanda wa Mwerezi', desc: 'Ukanda wa mwerezi wa Lebanoni kando ya mstari wa maji' },
+    },
+    egypt: {
+      ram: { name: 'Boriti ya Pua yenye Kichwa cha Simba', desc: 'Pua lenye kichwa cha simba la Medinet Habu, lililosimamishwa kwa mgongano' },
+      spikes: { name: 'Ndoano za Kushika Kwenye Miti', desc: 'Ndoano kwenye miti huwavuta wavamizi ubavu na kuwashikilia' },
+      fenders: { name: 'Kuta za Mafungwa ya Mafunjo', desc: 'Mapazia ya mafunjo yaliyofungwa kando ya reli' },
+    },
+    byzantium: {
+      ram: { name: 'Mdomo wa Mchocheo', desc: 'Mchocheo wa dromon hupanda juu na kuvunja makasia yake' },
+      spikes: { name: 'Reli za Moto za Mirija ya Mkono', desc: 'Mirija ya mkono kando ya reli hunyunyizia moto yeyote aliye ubavu' },
+      fenders: { name: 'Ngozi Iliyolowekwa kwenye Siki', desc: 'Ngozi iliyolowekwa kwenye siki — ulinzi wa zamani dhidi ya moto wa Kigiriki' },
+    },
+    lepanto: {
+      ram: { name: 'Mchocheo wa Meli (Sperone)', desc: 'Mchocheo wa chuma hupanda juu ya pua yake na kuvunja makasia yake' },
+      spikes: { name: 'Pavesade na Mikuki ya Kuteka', desc: 'Mikuki nyuma ya ngao huwachoma wanaoteka' },
+      fenders: { name: 'Nyavu na Magodoro', desc: 'Nyavu za kuteka na magodoro juu ya rambade' },
+    },
+    ottoman: {
+      ram: { name: 'Mchocheo wa Kadırga', desc: 'Mchocheo wa Ottoman huvunja makasia ya meli za Kikristo' },
+      spikes: { name: 'Minyororo ya Ndoano', desc: 'Ndoano kwenye minyororo humfunga yeyote aliye ubavu' },
+      fenders: { name: 'Pavisade za Marobota ya Sufi', desc: 'Marobota ya sufi yaliyofungwa nyuma ya reli' },
+    },
+    arab: {
+      ram: { name: 'Kofia ya Shina la Mvule', desc: 'Shina la mvule lenye kofia kukimbiza maharamia' },
+      spikes: { name: 'Raki za Chungu za Mafuta', desc: 'Chungu za moto za udongo kwenye reli hulipuka dhidi ya mwili' },
+      fenders: { name: 'Vilinda vya Kamba za Nazi', desc: 'Vilinda vya nyuzi za nazi, kama kamba inayoshona mwili' },
+    },
+    chola: {
+      ram: { name: 'Shina Lenye Kofia ya Chuma', desc: 'Kofia ya chuma kwenye shina kubwa la Coromandel' },
+      spikes: { name: 'Reli ya Miiba ya Chuma', desc: 'Miiba ya chuma kando ya reli kwa prahu' },
+      fenders: { name: 'Vilinda vya Nazi', desc: 'Vilinda vya nyuzi za nazi kando' },
+    },
+    chinese: {
+      ram: { name: 'Pua la Kigongeo la Mengchong', desc: 'Pua la wagongaji lililofunikwa na ngozi ghafi la meli za mito' },
+      spikes: { name: 'Raki za Mikuki ya Moto', desc: 'Mikuki ya moto kwenye reli hutema miali karibu' },
+      fenders: { name: 'Mapazia ya Ngozi Ghafi', desc: 'Ngozi ghafi yenye unyevu juu ya sehemu za juu' },
+    },
+    vietnam: {
+      ram: { name: 'Pua la Vigingi vyenye Ncha za Chuma', desc: 'Vigingi vya Bạch Đằng, vilivyowekwa kwenye pua yako mwenyewe' },
+      spikes: { name: 'Mapazia ya Vigingi vya Mwanzi', desc: 'Mwanzi ulionolewa kando ya mstari wa maji' },
+      fenders: { name: 'Vilinda vya Mafungwa ya Mwanzi', desc: 'Mafungwa yaliyofungwa ya mwanzi mchanga' },
+    },
+    japanese: {
+      ram: { name: 'Pua Lililofunikwa na Chuma', desc: 'Meli za chuma za Nobunaga: pua la silaha kwa kugonga' },
+      spikes: { name: 'Ndoano za Kumade', desc: 'Raki za makucha ya dubu huvuta yeyote aliye ubavu' },
+      fenders: { name: 'Mafungwa ya Mwanzi ya Takeba', desc: 'Mafungwa ya mwanzi yanayozuia mishale na mapigo' },
+    },
+    korea: {
+      ram: { name: 'Kigongeo cha Kichwa cha Joka', desc: 'Kichwa cha joka — gonga, na umsongeshe mabaharia wake kwa moshi wa sulfuri' },
+      spikes: { name: 'Paa la Kobe Lenye Miiba ya Chuma', desc: 'Miiba ya chuma juu ya paa humrarua yeyote anayekuja ubavu' },
+      fenders: { name: 'Silaha za Bamba za Hexagoni', desc: 'Mabamba ya chuma juu ya mwili na paa' },
+    },
+    maori: {
+      ram: { name: 'Pua Lililochongwa la Tauihu', desc: 'Sanamu iliyochongwa, iliyosimamishwa kusukuma ndani ya waka' },
+      spikes: { name: 'Reli ya Mikuki ya Taiaha', desc: 'Mikuki iliyoelekezwa kando ya reli' },
+      fenders: { name: 'Mafungamano ya Kamba za Kitani', desc: 'Mafungamano ya kitani cha harakeke hupokea mapigo' },
+    },
+    hawaii: {
+      ram: { name: 'Pua la Koa', desc: 'Pua la mti wa koa kusukuma kati ya miili' },
+      spikes: { name: 'Reli ya Meno ya Papa', desc: 'Vembe vya meno ya papa vya leiomano kando ya reli' },
+      fenders: { name: 'Vilinda vya Mikeka ya Hala', desc: 'Mikeka ya pandanus iliyofumwa juu ya pande' },
+    },
+    maya: {
+      ram: { name: 'Pua la Mti Mgumu', desc: 'Pua la chicozapote kugonga mitumbwi' },
+      spikes: { name: 'Reli Zenye Kingo za Obsidian', desc: 'Vembe vya obsidian vilivyowekwa kando ya reli' },
+      fenders: { name: 'Mapazia ya Pamba Iliyoshonwa', desc: 'Silaha za pamba zilizoshonwa zilizoningʼinia pande' },
+    },
+    aztec: {
+      ram: { name: 'Pua la Mvinje', desc: 'Pua la mti wa ahuehuete lililosimamishwa kwa kugonga' },
+      spikes: { name: 'Reli ya Vembe vya Obsidian', desc: 'Vembe vya macuahuitl vilivyowekwa kando ya reli' },
+      fenders: { name: 'Majivuno ya Ichcahuipilli', desc: 'Silaha za pamba zilizoshonwa zilizofunikwa pande' },
+    },
+    inca: {
+      ram: { name: 'Gogo la Pua la Mti Mgumu', desc: 'Gogo zito la mti mgumu lililofungwa kuvuka pua' },
+      spikes: { name: 'Ua wa Miti yenye Ncha za Mifupa', desc: 'Miti yenye ncha za mifupa kando ya tanga' },
+      fenders: { name: 'Mafungwa ya Matete ya Totora', desc: 'Mafungwa ya matete ya totora yaliyofungwa kuzunguka tanga' },
+    },
+  },
+};
+
+const ha: FittingsDict = {
+  lead: { ram: 'Gaba', spikes: 'Gefaye', fenders: 'Tsaro' },
+  tag: { breach: ' · yana huda ta', tangle: ' · yana rage gudunta', fire: ' · yana kunna ta', shock: ' · yana firgita ma’aikatanta' },
+  eras: {
+    golden: {
+      ram: { name: 'Gaba Mai Rufin Ƙarfe', desc: 'Tura gaban da aka lulluɓe da ƙarfe cikin jiki da gudu' },
+      spikes: { name: 'Ƙugiyoyi a Kan Hanya', desc: 'Duk abin da ya shafe gefe ana kama shi, a yayyage shi a rage gudunsa' },
+      fenders: { name: 'Masu Kariya na Igiya & Sandunan Turewa', desc: 'Masu kariyar tsohuwar igiya da dogayen sanduna suna nisantar da karos da jiragen wuta' },
+    },
+    exploration: {
+      ram: { name: 'Bakin da aka Ƙarfafa', desc: 'Baki mai goyon baya da ke rushe jiki da gudu' },
+      spikes: { name: 'Ƙugiyoyi a Kan Sandunan Vela', desc: 'Ruwan lauje a kan sanduna suna yanke igiyoyin duk wanda ke gefe' },
+      fenders: { name: 'Matashin Fatar Sa', desc: 'Fatattun da aka cika da ulu da aka rataye a gefe suna shan bugawa' },
+    },
+    napoleonic: {
+      ram: { name: 'Gaba Mai Tagulla & Gwiwar Ƙarfe', desc: 'Gaba mai ninki biyu da ke rushe allo da gudu' },
+      spikes: { name: 'Ragamar Kamawa & Mashi', desc: 'Raga da shingen mashi a kan hanya suna raunata masu kamawa' },
+      fenders: { name: 'Masu Kariyar Igiya & Sanduna', desc: 'Masu kariya da sandunan turewa suna nisantar da sauran jiragen' },
+    },
+    barbary: {
+      ram: { name: 'Gaba Mai Rufin Tagulla', desc: 'Kaifaffen gaban schooner, mai goyon baya don bugun kwalekwalen bindiga' },
+      spikes: { name: 'Ragamar Kamawa & Mashi', desc: 'Shingen mashi a kan hanya don ’yan fashi' },
+      fenders: { name: 'Ragamar Gadaje', desc: 'Naɗaɗɗun gadaje a ragamar hanya suna dakatar da harbi da tsage-tsage' },
+    },
+    viking: {
+      ram: { name: 'Gaba Mai Ɗaurin Ƙarfe', desc: 'Ɗaurin ƙarfe a kan dogon gaba — hau ka karya allunanta' },
+      spikes: { name: 'Shingen Mashi a Kan Hanya', desc: 'Mashin da aka daidaita tsakanin garkuwoyi suna huda duk wanda ke gefe' },
+      fenders: { name: 'Allunan Oak Masu Kauri', desc: 'Kauri na oak suna ɗaukar bugawa maimakon allo' },
+    },
+    ironclad: {
+      ram: { name: 'Gaban Karo na Ƙarfe', desc: 'Dabarar Virginia: huda ta a ƙasa da layin ruwa' },
+      spikes: { name: 'Bututun Tururin Tukunya', desc: 'Tururi mai rai da aka kai hanya yana ƙone masu kamawa — ma’aikatanta suna watsewa' },
+      fenders: { name: 'Rigunan Ƙarfen Hanya', desc: 'Ƙarfen da ya karkata a kan layin ruwa yana kawar da karos da harbi' },
+    },
+    hanse: {
+      ram: { name: 'Gaban Cog Mai Rufi', desc: 'Nauyin gaban cog, mai shiri don karo' },
+      spikes: { name: 'Sandunan Luje', desc: 'Ruwan lauje a kan sanduna suna yanke igiyoyin duk wanda ke gefe' },
+      fenders: { name: 'Masu Kariyar Buhunan Ulu', desc: 'Buhunan ulun Ingila da aka rataye a gefe — kayan Ƙungiyar kanta' },
+    },
+    portugal: {
+      ram: { name: 'Bakin Carrack', desc: 'Babban baki mai goyon baya don rushe dhows' },
+      spikes: { name: 'Ƙugiyoyin Yanke', desc: 'Ƙugiyoyin da suka lanƙwasa suna yayyage igiyoyin duk wanda ke gefe' },
+      fenders: { name: 'Katangun Ballin Auduga', desc: 'Ballin audugar Indiya da aka ɗaure a tsakiya' },
+    },
+    armada: {
+      ram: { name: 'Bakin Ƙarfe na Galleass', desc: 'Ƙahoni ƙarfe na galleass yana huda allo a ƙasa da kauri' },
+      spikes: { name: 'Ragamar Kamawa da Mashi', desc: 'Raga da mashi a tsakiya suna raunata masu kamawa' },
+      fenders: { name: 'Sandunan Ƙugiyar Jiragen Wuta', desc: 'Sanduna don ture jiragen wutar Gravelines' },
+    },
+    dutch: {
+      ram: { name: 'Gwiwar Gaban Oak', desc: 'Gaban oak mai ninki biyu don bin ganima' },
+      spikes: { name: 'Hanyar Mashin Kamawa', desc: 'Mashin da aka jera a kan hanya suna huda masu kamawa' },
+      fenders: { name: 'Tabarman Kariya na Hemp', desc: 'Kauri na hemp da aka saƙa da aka rataye a gefe' },
+    },
+    predread: {
+      ram: { name: 'Gaban Karo', desc: 'Kowane jirgin yaƙi na 1905 yana ɗauke da karo — yi amfani da shi' },
+      spikes: { name: 'Sandunan Ragar Torpedo', desc: 'Sandunan da aka miƙa da ragar ƙarfe suna makale duk wanda ke gefe' },
+      fenders: { name: 'Ɗamaran Ƙarfen Harvey', desc: 'Sulke mai tauri a fuska a kan layin ruwa' },
+    },
+    ww1: {
+      ram: { name: 'Gaban Karo Mai Ƙarfi', desc: 'Masu hallakawa sun bugi jiragen ƙarƙashin ruwa — gaba da aka gina don hakan' },
+      spikes: { name: 'Paravanes Masu Fashewa', desc: 'Cajin da aka ja daga gaba suna fashewa a jiki — ma’aikata suna tangal-tangal' },
+      fenders: { name: 'Kumburin Hana Torpedo', desc: 'Jiki na waje mai kumburi yana shan bugawa da fashewa' },
+    },
+    ww2: {
+      ram: { name: 'Gaban Karo Mai Ƙarfafa', desc: 'Kamar USS Borie da U-405: hau ka murƙushe ta' },
+      spikes: { name: 'Hanyar Cajin Zurfi', desc: 'Cajin da aka birgima daga kusa — firgici yana watse da ma’aikatanta' },
+      fenders: { name: 'Katangun Tsage-tsage', desc: 'Katangun tsage-tsage a kan gada da bindigogi' },
+    },
+    hormuz: {
+      ram: { name: 'Rufin Gaba Mai Ƙarfafa', desc: 'Gaba mai rufi don bin kwalekwale masu sauri' },
+      spikes: { name: 'Akwatin Nakiyoyin Taɓawa', desc: 'Nakiyoyi a kan hanya suna fashewa a jiki' },
+      fenders: { name: 'Farantin Sulken Kevlar', desc: 'Farantin haɗaɗɗu a kan gada da layin ruwa' },
+    },
+    falklands: {
+      ram: { name: 'Gaba Mai Ƙarfin Ƙanƙara', desc: 'Gaban Atlantika ta Kudu, mai ƙarfin da ya isa karo' },
+      spikes: { name: 'Masu Harba Chaff na Corvus', desc: 'Chaff da wuta daga kusa suna makantar da ma’aikatanta' },
+      fenders: { name: 'Farantin Kevlar na Tsage-tsage', desc: 'An ƙara bayan Sheffield: sulken tsage-tsage a kan muhimman wurare' },
+    },
+    somali: {
+      ram: { name: 'Farantin Gaba na Ƙarfe da aka Walda', desc: 'Farantin ƙarfe da aka walda a gaban jirgin uwa — buga ka kama' },
+      spikes: { name: 'Matakalar Kamawa masu Ƙugiya', desc: 'Matakalar aluminium masu ƙugiya a kan hanyarta suna makalewa suna rage gudunta' },
+      fenders: { name: 'Masu Kariyar Tayoyin Mota', desc: 'Tsofaffin tayoyi da aka ɗaure da sarƙa a gefaye suna ɗaukar bugawa' },
+    },
+    roman: {
+      ram: { name: 'Bakin Tagulla', desc: 'Karon tagulla mai fikafikai uku — huda ta a ƙasa da layin ruwa' },
+      spikes: { name: 'Gadar Kamawa ta Corvus', desc: 'Gadar da ke da ƙaya tana faɗuwa a kan benenta tana riƙe ta' },
+      fenders: { name: 'Kaurin Oak', desc: 'Kauraye masu nauyi a kan layin ruwa suna ɗaukar karo' },
+    },
+    greek: {
+      ram: { name: 'Embolon na Tagulla', desc: 'Karon Salamis: da cikakken bugun filafilai yana rushe jiki' },
+      spikes: { name: 'Sandunan Epotides', desc: 'Sanduna daga gaba suna yanke filafilan duk wanda ke gefe' },
+      fenders: { name: 'Igiyoyin Ɗaure Jiki', desc: 'Igiyoyin ɗaure jiki suna riƙe shi tare yayin da aka buge shi' },
+    },
+    macedon: {
+      ram: { name: 'Babban Karo & Proembolion', desc: 'Babban karo da na biyu a kansa don manyan jiragen' },
+      spikes: { name: 'Ƙugiyoyin Hannun Ƙarfe', desc: 'Hannun ƙarfe a sarƙoƙi suna kama duk wanda ke gefe' },
+      fenders: { name: 'Kauraye Biyu & Labulen Fata', desc: 'Kauraye biyu da fatattu a kan akwatin filafilai' },
+    },
+    phoenicia: {
+      ram: { name: 'Karon Tagulla na Hancin Alade', desc: 'Kaifaffen karon jiragen alarz na Taya' },
+      spikes: { name: 'Hanya Mai Ratayen Garkuwoyi', desc: 'Garkuwoyi da kawunan mashi da aka rataye a kan hanya' },
+      fenders: { name: 'Kaurin Alarz', desc: 'Kaurin alarz na Lebanon a kan layin ruwa' },
+    },
+    egypt: {
+      ram: { name: 'Sandunan Gaba na Kan Zaki', desc: 'Gaban kan zaki na Medinet Habu, mai goyon baya don karo' },
+      spikes: { name: 'Ƙugiyoyin Kama a Kan Sanduna', desc: 'Ƙugiyoyi a kan sanduna suna jan mahara gefe suna riƙe su' },
+      fenders: { name: 'Katangun Ɗaurin Takarda', desc: 'Labulan takarda da aka ɗaure a kan hanya' },
+    },
+    byzantium: {
+      ram: { name: 'Bakin Ƙahoni', desc: 'Ƙahonin dromon yana hauwa yana karya filafilanta' },
+      spikes: { name: 'Hanyar Wutar Siphons na Hannu', desc: 'Siphons na hannu a kan hanya suna fesa wuta ga duk wanda ke gefe' },
+      fenders: { name: 'Jin Jikin da aka Jiƙa da Vinegar', desc: 'Jin da aka jiƙa da vinegar — tsohuwar kariya daga wutar Girka' },
+    },
+    lepanto: {
+      ram: { name: 'Ƙahonin Jirgi (Sperone)', desc: 'Ƙahonin ƙarfe yana hau gaban ta yana rushe filafilanta' },
+      spikes: { name: 'Pavesade & Mashin Kamawa', desc: 'Mashi a bayan garkuwoyi suna huda masu kamawa' },
+      fenders: { name: 'Raga & Katangu', desc: 'Ragamar kamawa da katangu a kan rambades' },
+    },
+    ottoman: {
+      ram: { name: 'Ƙahonin Kadırga', desc: 'Ƙahonin Ottoman yana karya filafilan jiragen Kirista' },
+      spikes: { name: 'Sarƙoƙin Ƙugiya', desc: 'Ƙugiyoyi a sarƙoƙi suna kulle duk wanda ke gefe' },
+      fenders: { name: 'Pavisade na Ballin Ulu', desc: 'Ballin ulu da aka ɗaure a bayan hanya' },
+    },
+    arab: {
+      ram: { name: 'Hular Gaban Teak', desc: 'Gaban teak mai hula don bin ɓarayi' },
+      spikes: { name: 'Akwatin Tukunyar Man', desc: 'Tukunyar wutar ƙasa a kan hanya suna fashewa a jiki' },
+      fenders: { name: 'Masu Kariyar Igiyar Kwakwa', desc: 'Masu kariyar zarin kwakwa, kamar igiyar da ke ɗinka jiki' },
+    },
+    chola: {
+      ram: { name: 'Gaba Mai Hular Ƙarfe', desc: 'Hular ƙarfe a kan babban gaban Coromandel' },
+      spikes: { name: 'Hanya Mai Ƙayoyin Ƙarfe', desc: 'Ƙayoyin ƙarfe a kan hanya don prahus' },
+      fenders: { name: 'Masu Kariyar Kwakwa', desc: 'Masu kariyar zarin kwakwa a gefaye' },
+    },
+    chinese: {
+      ram: { name: 'Gaban Karo na Mengchong', desc: 'Gaban masu karo mai rufin fata na jiragen kogi' },
+      spikes: { name: 'Akwatin Mashin Wuta', desc: 'Mashin wuta a kan hanya suna tofa harshen wuta daga kusa' },
+      fenders: { name: 'Labulan Fata', desc: 'Danshin fata a kan ɓangaren sama' },
+    },
+    vietnam: {
+      ram: { name: 'Gaban Sanduna Masu Kawunan Ƙarfe', desc: 'Sandunan Bạch Đằng, an ɗaura su a gabanka kanka' },
+      spikes: { name: 'Rigunan Sandunan Bamboo', desc: 'Kaifaffen bamboo a kan layin ruwa' },
+      fenders: { name: 'Masu Kariyar Ɗaurin Bamboo', desc: 'Ɗaurukan koren bamboo da aka ɗaure' },
+    },
+    japanese: {
+      ram: { name: 'Gaba Mai Rufin Ƙarfe', desc: 'Jiragen ƙarfe na Nobunaga: gaba mai sulke don karo' },
+      spikes: { name: 'Ƙugiyoyin Kumade', desc: 'Ƙugiyoyin ƙahonin beyar suna jan duk wanda ke gefe' },
+      fenders: { name: 'Ɗaurin Bamboo na Takeba', desc: 'Ɗaurin bamboo da ke dakatar da kibiyoyi da bugawa' },
+    },
+    korea: {
+      ram: { name: 'Karon Kan Dodanni', desc: 'Kan dodanni — karo, ka shake ma’aikatanta da hayakin sulfur' },
+      spikes: { name: 'Rufin Kunkuru Mai Ƙayoyin Ƙarfe', desc: 'Ƙayoyin ƙarfe a kan rufi suna yayyage duk wanda ya zo gefe' },
+      fenders: { name: 'Sulken Faranti Mai Kusurwa Shida', desc: 'Farantin ƙarfe a kan jiki da rufi' },
+    },
+    maori: {
+      ram: { name: 'Gaban Tauihu Mai Sassaka', desc: 'Mutum-mutumin da aka sassaka, mai goyon baya don turawa cikin waka' },
+      spikes: { name: 'Hanyar Mashin Taiaha', desc: 'Mashin da aka daidaita a kan hanya' },
+      fenders: { name: 'Ɗaurin Igiyar Flax', desc: 'Ɗaurin flax na harakeke suna ɗaukar bugawa' },
+    },
+    hawaii: {
+      ram: { name: 'Gaban Koa', desc: 'Gaban itacen koa don turawa tsakanin jiragen' },
+      spikes: { name: 'Hanya Mai Haƙoran Shark', desc: 'Ruwan haƙoran shark na leiomano a kan hanya' },
+      fenders: { name: 'Masu Kariyar Tabarman Hala', desc: 'Saƙaƙƙun tabarma na pandanus a kan gefaye' },
+    },
+    maya: {
+      ram: { name: 'Gaban Itace Mai Tauri', desc: 'Gaban chicozapote don bugun kwalekwale' },
+      spikes: { name: 'Hanyar Gefen Obsidian', desc: 'Ruwan obsidian da aka sa a kan hanya' },
+      fenders: { name: 'Labulan Auduga Mai Ciko', desc: 'Sulken auduga mai ciko da aka rataye a kan gefaye' },
+    },
+    aztec: {
+      ram: { name: 'Gaban Cypress', desc: 'Gaban itacen ahuehuete mai goyon baya don karo' },
+      spikes: { name: 'Hanyar Ruwan Obsidian', desc: 'Ruwan macuahuitl da aka sa a kan hanya' },
+      fenders: { name: 'Rigunan Ichcahuipilli', desc: 'Sulken auduga mai ciko da aka yafa a kan gefaye' },
+    },
+    inca: {
+      ram: { name: 'Gungumen Gaban Itace Mai Tauri', desc: 'Nauyin gungumen itace mai tauri da aka ɗaure ta gaba' },
+      spikes: { name: 'Shingen Sanduna Masu Kawunan Ƙashi', desc: 'Sanduna masu kawunan ƙashi a gefen kwalekwale' },
+      fenders: { name: 'Ɗaurin Ciyawar Totora', desc: 'Ɗaurin ciyawar totora da aka ɗaure kewaye da kwalekwale' },
+    },
+  },
+};
+
+const yo: FittingsDict = {
+  lead: { ram: 'Iwájú', spikes: 'Ẹ̀gbẹ́', fenders: 'Ìṣọ́' },
+  tag: { breach: ' · ó ń hù ú', tangle: ' · ó ń fà á lọ́ra', fire: ' · ó ń dáná sun ún', shock: ' · ó ń dá àwọn atukọ̀ rẹ̀ láàmú' },
+  eras: {
+    golden: {
+      ram: { name: 'Iwájú Tí Irin Bò', desc: 'Tì ẹ̀yìn tí irin bò sínú ara ní kíákíá' },
+      spikes: { name: 'Ìkọ̀ Lórí Òpó', desc: 'Ohunkóhun tó bá kan ẹ̀gbẹ́ ni a máa dì, fọ́, kí a sì fà á lọ́ra' },
+      fenders: { name: 'Àwọn Ìdábòbò Okùn & Páálí Ìtì', desc: 'Àwọn ìdábòbò okùn àtijọ́ àti páálí gígùn máa ń jìnnà àwọn ìkọlù àti ọkọ̀ iná sí' },
+    },
+    exploration: {
+      ram: { name: 'Ẹnu Tí A Fún Lókun', desc: 'Ẹnu tí a tì lẹ́yìn tó máa fọ́ ara ní kíákíá' },
+      spikes: { name: 'Ìkọ̀ Lórí Àwọn Òpó Aṣọ', desc: 'Abẹ dàńdá lórí àwọn òpó máa ń gé okùn ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Àwọn Ìrọ̀mọ́ Awọ Màlúù', desc: 'Awọ tí a fi ìrù kún tí a só lẹ́gbẹ̀ẹ́ máa ń fa ìlù' },
+    },
+    napoleonic: {
+      ram: { name: 'Ẹ̀yìn Bàbà & Orúnkún Irin', desc: 'Ẹ̀yìn tó ní ìlọ́po méjì tó máa fọ́ pátákó ní kíákíá' },
+      spikes: { name: 'Àwọ̀n Gbígbà & Ọ̀kọ̀', desc: 'Àwọ̀n àti ọgbà ọ̀kọ̀ lẹ́bàá òpó máa ń ṣe àwọn agbà ní farapa' },
+      fenders: { name: 'Àwọn Ìdábòbò Okùn & Páálí', desc: 'Àwọn ìdábòbò àti páálí ìtì máa ń jìnnà àwọn ara ọkọ̀ mìíràn sí' },
+    },
+    barbary: {
+      ram: { name: 'Iwájú Tí Bàbà Bò', desc: 'Iwájú schooner tó mú, tí a tì lẹ́yìn fún kíkọlu ọkọ̀ ìbọn' },
+      spikes: { name: 'Àwọ̀n Gbígbà & Ọ̀kọ̀', desc: 'Ọgbà ọ̀kọ̀ lẹ́bàá òpó fún àwọn ajànilérù' },
+      fenders: { name: 'Àwọ̀n Ìbusùn', desc: 'Àwọn ìbusùn tí a yípo nínú àwọ̀n òpó máa ń dá ìbọn àti àjá dúró' },
+    },
+    viking: {
+      ram: { name: 'Ẹ̀yìn Tí A Fi Irin Dì', desc: 'Ìdè irin lórí ẹ̀yìn gíga — gùn sókè kí o sì fọ́ pátákó rẹ̀' },
+      spikes: { name: 'Ọgbà Ọ̀kọ̀ Lórí Òpó Àṣà', desc: 'Àwọn ọ̀kọ̀ tí a tò láàrín àwọn àṣà máa ń gún ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Pátákó Oaku Tó Nipọn', desc: 'Ìdè oaku tó nipọn máa ń gba ìlù dípò pátákó' },
+    },
+    ironclad: {
+      ram: { name: 'Iwájú Ìkọlù Irin', desc: 'Ẹ̀tàn Virginia: hù ú lábẹ́ ìlà omi' },
+      spikes: { name: 'Àwọn Hóósì Ìróbì', desc: 'Ìróbì ààyè tí a fà sí òpó máa ń sun àwọn agbà — àwọn atukọ̀ rẹ̀ máa ń túká' },
+      fenders: { name: 'Aṣọ Irin Ojú-irin', desc: 'Irin tó tẹ̀ lókè ìlà omi máa ń yí àwọn ìkọlù àti ìbọn padà' },
+    },
+    hanse: {
+      ram: { name: 'Ẹ̀yìn Cog Tí A Bò', desc: 'Ẹ̀yìn cog tó wúwo, tí a pèsè fún ìkọlù' },
+      spikes: { name: 'Àwọn Òpó Abẹ Dàńdá', desc: 'Abẹ lórí àwọn òpó máa ń rẹ́ okùn ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Àwọn Ìdábòbò Àpò Ìrù', desc: 'Àwọn àpò ìrù Gẹ̀ẹ́sì tí a só lẹ́gbẹ̀ẹ́ — ẹrù Ligi fúnrarẹ̀' },
+    },
+    portugal: {
+      ram: { name: 'Ẹnu Carrack', desc: 'Ẹnu ńlá tí a tì lẹ́yìn láti fọ́ àwọn dhow' },
+      spikes: { name: 'Ìkọ̀ Gígé', desc: 'Abẹ ìkọ̀ máa ń fà okùn ẹnikẹ́ni tó wà ní ẹ̀gbẹ́ ya' },
+      fenders: { name: 'Odi Ìdì Òwú', desc: 'Àwọn ìdì òwú Íńdíà tí a dì ní ẹ̀gbẹ́' },
+    },
+    armada: {
+      ram: { name: 'Ẹnu Irin Galleass', desc: 'Ìkánkán irin galleass máa ń hu pátákó lábẹ́ ìdè' },
+      spikes: { name: 'Àwọ̀n Gbígbà Pẹ̀lú Ọ̀kọ̀', desc: 'Àwọ̀n àti ọ̀kọ̀ ní ẹ̀gbẹ́ máa ń ṣe àwọn agbà ní farapa' },
+      fenders: { name: 'Páálí Ìkọ̀ Ọkọ̀ Iná', desc: 'Páálí láti tì àwọn ọkọ̀ iná Gravelines' },
+    },
+    dutch: {
+      ram: { name: 'Orúnkún Ẹ̀yìn Oaku', desc: 'Ẹ̀yìn oaku tó ní ìlọ́po méjì fún rírẹ ìkógun' },
+      spikes: { name: 'Òpó Ọ̀kọ̀ Gbígbà', desc: 'Àwọn ọ̀kọ̀ tí a tò lẹ́bàá òpó máa ń gún àwọn agbà' },
+      fenders: { name: 'Ẹní Ìdábòbò Hemp', desc: 'Ẹní hemp tó nipọn tí a hun tí a só lẹ́gbẹ̀ẹ́' },
+    },
+    predread: {
+      ram: { name: 'Iwájú Ìkọlù', desc: 'Gbogbo ọkọ̀ ìjà 1905 ní ìkọlù — lò ó' },
+      spikes: { name: 'Páálí Àwọ̀n Torpedo', desc: 'Páálí tí a yọ jáde àti àwọ̀n irin máa ń dì ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Ìdè Irin Harvey', desc: 'Ihámọ́ra líle lójú lẹ́bàá ìlà omi' },
+    },
+    ww1: {
+      ram: { name: 'Iwájú Ìkọlù Tí A Múle', desc: 'Àwọn apanirun kọlu àwọn ọkọ̀ abẹ́-omi — iwájú tí a kọ́ fún èyí' },
+      spikes: { name: 'Paravane Tí Ńbú', desc: 'Ẹrù tí a fà láti iwájú máa ń bú sí ara — àwọn atukọ̀ máa ń mì tìtì' },
+      fenders: { name: 'Ìwú Lòdì sí Torpedo', desc: 'Ara òde tó wú máa ń fa ìlù àti ìbú' },
+    },
+    ww2: {
+      ram: { name: 'Ẹ̀yìn Ìkọlù Tí A Fún Lókun', desc: 'Bíi USS Borie sí U-405: gùn sókè kí o sì fọ́ ọ' },
+      spikes: { name: 'Òpó Bómù Ibú', desc: 'Bómù tí a yí láti ìsúnmọ́ — ìpayà máa ń tú àwọn atukọ̀ rẹ̀ ká' },
+      fenders: { name: 'Ẹní Àjá', desc: 'Ẹní àjá lórí afárá àti ìbọn' },
+    },
+    hormuz: {
+      ram: { name: 'Ìbòrí Iwájú Tí A Múle', desc: 'Iwájú tí a bò fún rírẹ àwọn ọkọ̀ kíákíá' },
+      spikes: { name: 'Àkójọ Maini Ìfọwọ́kàn', desc: 'Àwọn maini lórí òpó máa ń bú sí ara' },
+      fenders: { name: 'Pánẹ́lì Ihámọ́ra Kevlar', desc: 'Àwọn pánẹ́lì àdàlú lórí afárá àti ìlà omi' },
+    },
+    falklands: {
+      ram: { name: 'Iwájú Tí A Múle fún Yìnyín', desc: 'Iwájú Atlantiki Gúúsù, tó lágbára tó fún ìkọlù' },
+      spikes: { name: 'Àwọn Ayọn Chaff Corvus', desc: 'Chaff àti ìmọ́lẹ̀ láti ìsúnmọ́ máa ń fọ́ àwọn atukọ̀ rẹ̀ lójú' },
+      fenders: { name: 'Pánẹ́lì Kevlar Lòdì sí Àjá', desc: 'A fi kún lẹ́yìn Sheffield: ihámọ́ra àjá lórí àwọn ohun pàtàkì' },
+    },
+    somali: {
+      ram: { name: 'Pátákó Iwájú Irin Tí A Hun', desc: 'Pátákó ìdọ̀tí tí a hun sí iwájú ọkọ̀ ìyá — kọlu kí o sì gbà' },
+      spikes: { name: 'Àkàbà Gbígbà Ìkọ̀', desc: 'Àwọn àkàbà aluminiomu ìkọ̀ lórí òpó rẹ̀ máa ń dì í wọ́n sì máa ń fà á lọ́ra' },
+      fenders: { name: 'Àwọn Ìdábòbò Tááyà Ọkọ̀', desc: 'Àwọn tááyà àtijọ́ tí a fi ẹ̀wọ̀n dè lẹ́gbẹ̀ẹ́ máa ń gba ìlù' },
+    },
+    roman: {
+      ram: { name: 'Ẹnu Ìdẹ', desc: 'Ìkọlù ìdẹ olóró mẹ́ta — hù ú lábẹ́ ìlà omi' },
+      spikes: { name: 'Afárá Gbígbà Corvus', desc: 'Afárá elẹ́gún máa ń ṣubú lórí pẹpẹ rẹ̀ yóò sì dì í mú' },
+      fenders: { name: 'Ìdè Oaku', desc: 'Ìdè líle lẹ́bàá ìlà omi máa ń gba ìkọlù' },
+    },
+    greek: {
+      ram: { name: 'Embolon Ìdẹ', desc: 'Ìkọlù Salamis: ní fífà kíkún ó máa fọ́ ara' },
+      spikes: { name: 'Àwọn Òpó Epotides', desc: 'Àwọn òpó láti iwájú máa ń rẹ́ abẹ̀ ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Okùn Dídì Ara', desc: 'Okùn dídì ara máa ń dì í papọ̀ nígbà tí a bá lù ú' },
+    },
+    macedon: {
+      ram: { name: 'Ìkọlù Ńlá & Proembolion', desc: 'Ìkọlù pàtàkì àti kejì lókè rẹ̀ fún àwọn ọkọ̀ wúwo' },
+      spikes: { name: 'Ìkọ̀ Ọwọ́ Irin', desc: 'Àwọn ọwọ́ irin lórí ẹ̀wọ̀n máa ń mú ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Ìdè Méjì & Aṣọ Awọ', desc: 'Ìdè méjì àti awọ lórí àpótí abẹ̀' },
+    },
+    phoenicia: {
+      ram: { name: 'Ìkọlù Ìdẹ Imú Ẹlẹ́dẹ̀', desc: 'Ìkọlù tó mú ti àwọn ọkọ̀ kedari Taya' },
+      spikes: { name: 'Òpó Tí Àṣà Rọ̀ Mọ́', desc: 'Àwọn àṣà àti orí ọ̀kọ̀ tí a só lẹ́bàá òpó' },
+      fenders: { name: 'Ìdè Kedari', desc: 'Ìdè kedari Lebanoni lẹ́bàá ìlà omi' },
+    },
+    egypt: {
+      ram: { name: 'Òpó Iwájú Orí Kìnìún', desc: 'Iwájú orí kìnìún Medinet Habu, tí a tì lẹ́yìn fún ìkọlù' },
+      spikes: { name: 'Ìkọ̀ Ìdìmú Lórí Òpó', desc: 'Ìkọ̀ lórí òpó máa ń fà àwọn ajalè sí ẹ̀gbẹ́ wọ́n sì máa ń dì wọ́n mú' },
+      fenders: { name: 'Odi Ìdì Papyrus', desc: 'Aṣọ papyrus tí a dì lẹ́bàá òpó' },
+    },
+    byzantium: {
+      ram: { name: 'Ẹnu Ìkánkán', desc: 'Ìkánkán dromon máa ń gùn sókè yóò sì ṣẹ́ abẹ̀ rẹ̀' },
+      spikes: { name: 'Òpó Iná Fèrè Ọwọ́', desc: 'Àwọn fèrè ọwọ́ lẹ́bàá òpó máa ń fọ́n iná sí ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Ìmọ̀lẹ̀ Tí A Fi Káánpà Rẹ̀', desc: 'Ìmọ̀lẹ̀ tí a fi káánpà rẹ̀ — ààbò àtijọ́ lòdì sí iná Gíríkì' },
+    },
+    lepanto: {
+      ram: { name: 'Ìkánkán Ọkọ̀ (Sperone)', desc: 'Ìkánkán irin máa ń gùn sórí iwájú rẹ̀ yóò sì fọ́ abẹ̀ rẹ̀' },
+      spikes: { name: 'Pavesade & Ọ̀kọ̀ Gbígbà', desc: 'Àwọn ọ̀kọ̀ lẹ́yìn àwọn àṣà máa ń gún àwọn agbà' },
+      fenders: { name: 'Àwọ̀n & Ẹní', desc: 'Àwọ̀n gbígbà àti ẹní lórí àwọn rambade' },
+    },
+    ottoman: {
+      ram: { name: 'Ìkánkán Kadırga', desc: 'Ìkánkán Ottoman máa ń ṣẹ́ abẹ̀ àwọn ọkọ̀ Kìrìsìtẹ́ẹ̀nì' },
+      spikes: { name: 'Ẹ̀wọ̀n Ìkọ̀', desc: 'Ìkọ̀ lórí ẹ̀wọ̀n máa ń tì ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Pavisade Ìdì Ìrù', desc: 'Àwọn ìdì ìrù tí a dì lẹ́yìn òpó' },
+    },
+    arab: {
+      ram: { name: 'Fìlà Ẹ̀yìn Teak', desc: 'Ẹ̀yìn teak tí a fi fìlà bò fún rírẹ àwọn olè' },
+      spikes: { name: 'Àkójọ Ìkòkò Epo', desc: 'Àwọn ìkòkò iná amọ̀ lórí òpó máa ń bú sí ara' },
+      fenders: { name: 'Àwọn Ìdábòbò Okùn Àgbon', desc: 'Àwọn ìdábòbò okùn àgbon, bí okùn tó ran ara' },
+    },
+    chola: {
+      ram: { name: 'Ẹ̀yìn Tí Fìlà Irin Bò', desc: 'Fìlà irin lórí ẹ̀yìn Coromandel ńlá' },
+      spikes: { name: 'Òpó Ẹ̀gún Irin', desc: 'Àwọn ẹ̀gún irin lẹ́bàá òpó fún àwọn prahu' },
+      fenders: { name: 'Àwọn Ìdábòbò Àgbon', desc: 'Àwọn ìdábòbò okùn àgbon lẹ́gbẹ̀ẹ́' },
+    },
+    chinese: {
+      ram: { name: 'Iwájú Ìkọlù Mengchong', desc: 'Iwájú àwọn akọlu tí awọ tútù bò ti àwọn ọkọ̀ odò' },
+      spikes: { name: 'Àkójọ Ọ̀kọ̀ Iná', desc: 'Àwọn ọ̀kọ̀ iná lórí òpó máa ń tu iná jáde láti ìsúnmọ́' },
+      fenders: { name: 'Aṣọ Awọ Tútù', desc: 'Awọ tútù tí ó tutù lórí apá òkè' },
+    },
+    vietnam: {
+      ram: { name: 'Iwájú Ìkọ̀ Orí Irin', desc: 'Àwọn ìkọ̀ Bạch Đằng, tí a dì mọ́ iwájú tirẹ fúnrarẹ̀' },
+      spikes: { name: 'Aṣọ Ìkọ̀ Oparun', desc: 'Oparun tó mú lẹ́bàá ìlà omi' },
+      fenders: { name: 'Àwọn Ìdábòbò Ìdì Oparun', desc: 'Àwọn ìdì oparun aláwọ̀ ewé tí a dì' },
+    },
+    japanese: {
+      ram: { name: 'Iwájú Tí Irin Bò', desc: 'Àwọn ọkọ̀ irin Nobunaga: iwájú ihámọ́ra fún ìkọlù' },
+      spikes: { name: 'Ìkọ̀ Kumade', desc: 'Ìkọ̀ èékánná bẹ́ẹ̀rì máa ń fà ẹnikẹ́ni tó wà ní ẹ̀gbẹ́' },
+      fenders: { name: 'Ìdì Oparun Takeba', desc: 'Àwọn ìdì oparun tó máa dá ọfà àti ìlù dúró' },
+    },
+    korea: {
+      ram: { name: 'Ìkọlù Orí Dragoni', desc: 'Orí dragoni — kọlu, kí o sì fi ẹ̀fín sulfur fún àwọn atukọ̀ rẹ̀' },
+      spikes: { name: 'Òrùlé Ìjàpá Ẹ̀gún Irin', desc: 'Àwọn ẹ̀gún irin lórí òrùlé máa ń fà ẹnikẹ́ni tó bá dé ẹ̀gbẹ́ ya' },
+      fenders: { name: 'Ihámọ́ra Pátákó Onígun Mẹ́fà', desc: 'Àwọn pátákó irin lórí ara àti òrùlé' },
+    },
+    maori: {
+      ram: { name: 'Iwájú Tauihu Tí A Gbẹ́', desc: 'Ère tí a gbẹ́, tí a tì lẹ́yìn fún títì sínú waka' },
+      spikes: { name: 'Òpó Ọ̀kọ̀ Taiaha', desc: 'Àwọn ọ̀kọ̀ tí a tò lẹ́bàá òpó' },
+      fenders: { name: 'Ìdè Okùn Ọ̀gbọ̀', desc: 'Àwọn ìdè ọ̀gbọ̀ harakeke máa ń gba ìlù' },
+    },
+    hawaii: {
+      ram: { name: 'Iwájú Koa', desc: 'Iwájú igi koa fún títì láàrín àwọn ara' },
+      spikes: { name: 'Òpó Eyín Ẹja', desc: 'Abẹ eyín ẹja leiomano lẹ́bàá òpó' },
+      fenders: { name: 'Àwọn Ìdábòbò Ẹní Hala', desc: 'Ẹní pandanus tí a hun lórí ẹ̀gbẹ́' },
+    },
+    maya: {
+      ram: { name: 'Iwájú Igi Líle', desc: 'Iwájú chicozapote fún kíkọlu àwọn ọkọ̀ kékeré' },
+      spikes: { name: 'Òpó Etí Obsidian', desc: 'Abẹ obsidian tí a dì lẹ́bàá òpó' },
+      fenders: { name: 'Aṣọ Òwú Tí A Rán', desc: 'Ihámọ́ra òwú tí a rán tí a só lẹ́gbẹ̀ẹ́' },
+    },
+    aztec: {
+      ram: { name: 'Iwájú Cypress', desc: 'Iwájú igi ahuehuete tí a tì lẹ́yìn fún ìkọlù' },
+      spikes: { name: 'Òpó Abẹ Obsidian', desc: 'Abẹ macuahuitl tí a dì lẹ́bàá òpó' },
+      fenders: { name: 'Aṣọ Ichcahuipilli', desc: 'Ihámọ́ra òwú tí a rán tí a yí lẹ́gbẹ̀ẹ́' },
+    },
+    inca: {
+      ram: { name: 'Igi Iwájú Igi Líle', desc: 'Igi líle tó wúwo tí a dì ká iwájú' },
+      spikes: { name: 'Ọgbà Òpó Orí Egungun', desc: 'Àwọn òpó orí egungun lẹ́bàá ọkọ̀' },
+      fenders: { name: 'Ìdì Koríko Totora', desc: 'Àwọn ìdì koríko totora tí a dì yí ọkọ̀ ká' },
+    },
+  },
+};
+
+export const fittings: Dict<FittingsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi, ar, sw, ha, yo };

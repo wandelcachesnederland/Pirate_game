@@ -476,4 +476,176 @@ const vi: PerilDict = {
   },
 };
 
-export const peril: Dict<PerilDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };
+const ar: PerilDict = {
+  stepTag: 'الخطوة 4 من 7 · الخطر',
+  heading: 'اختر مستوى الخطر',
+  hint: 'كلما اشتد الخطر زادت الغنيمة · ← → أو 1–5، ثم Enter',
+  gold: '×{{mult}} ذهب',
+  meterGuns: 'مدافع العدو',
+  meterHull: 'بدن العدو',
+  meterNumbers: 'أعداد العدو',
+  meterPlunder: 'الغنيمة',
+  landlubber: {
+    name: 'بحّار مبتدئ',
+    tagline: 'بحر هادئ لتتعلم الحبال — أعداء قليلون، بطيئون في الرمي، سريعون في إنزال أعلامهم.',
+    motto: 'مياه هادئة',
+    bestFor: 'للرحلات الأولى',
+  },
+  swashbuckler: {
+    name: 'مبارز',
+    tagline: 'قتال عادل، والحظ مائل قليلاً فقط.',
+    motto: 'قتال عادل',
+    bestFor: 'للإحماء',
+  },
+  buccaneer: {
+    name: 'قرصان',
+    tagline: 'الرحلة كما أُبحرت — لا رحمة تُعطى ولا تُنتظر.',
+    motto: 'لا رحمة',
+    bestFor: 'الرحلة الكلاسيكية',
+    ribbon: 'كلاسيكي',
+  },
+  dreadCaptain: {
+    name: 'القبطان المرعب',
+    tagline: 'أعداء متمرسون، وقصف أسرع، وأعلام لا تُنزَل إلا في اللحظة الأخيرة.',
+    motto: 'أعداء متمرسون',
+    bestFor: 'للمخضرمين',
+  },
+  kingOfTheSeas: {
+    name: 'ملك البحار',
+    tagline: 'كل شراع صيّاد، وكل حصن قبر — حديد وذهب بمقدار متساوٍ.',
+    motto: 'حديد وذهب',
+    bestFor: 'للأساطير فقط',
+    ribbon: 'الأغنى',
+  },
+};
+
+const sw: PerilDict = {
+  stepTag: 'Hatua ya 4 kati ya 7 · Hatari',
+  heading: 'Chagua Hatari Yako',
+  hint: 'Hatari kubwa hulipa mateka mengi · ← → au 1–5, kisha Enter',
+  gold: '×{{mult}} dhahabu',
+  meterGuns: 'Mizinga ya adui',
+  meterHull: 'Miili ya adui',
+  meterNumbers: 'Idadi ya adui',
+  meterPlunder: 'Mateka',
+  landlubber: {
+    name: 'Mgeni wa Bahari',
+    tagline: 'Bahari tulivu ya kujifunzia — maadui wachache, wepesi kupiga, wepesi kushusha bendera.',
+    motto: 'Maji matulivu',
+    bestFor: 'Safari za kwanza',
+  },
+  swashbuckler: {
+    name: 'Mshujaa wa Upanga',
+    tagline: 'Pigano la haki, ingawa bahati imeegemea kidogo.',
+    motto: 'Pigano la haki',
+    bestFor: 'Kujipasha moto',
+  },
+  buccaneer: {
+    name: 'Mharamia',
+    tagline: 'Safari kama ilivyosafiriwa — hakuna huruma, wala kutarajia.',
+    motto: 'Hakuna huruma',
+    bestFor: 'Safari ya kawaida',
+    ribbon: 'Kawaida',
+  },
+  dreadCaptain: {
+    name: 'Nahodha wa Kutisha',
+    tagline: 'Maadui magumu, mizinga ya kasi, na bendera hushushwa pumzi ya mwisho tu.',
+    motto: 'Maadui magumu',
+    bestFor: 'Kwa wazoefu',
+  },
+  kingOfTheSeas: {
+    name: 'Mfalme wa Bahari',
+    tagline: 'Kila tanga ni mwindaji, kila ngome ni kaburi — chuma na dhahabu kwa usawa.',
+    motto: 'Chuma na dhahabu',
+    bestFor: 'Kwa magwiji tu',
+    ribbon: 'Tajiri zaidi',
+  },
+};
+
+const ha: PerilDict = {
+  stepTag: 'Mataki 4 na 7 · Haɗari',
+  heading: 'Zaɓi Haɗarinka',
+  hint: 'Girman haɗari, girman ganima · ← → ko 1–5, sannan Enter',
+  gold: '×{{mult}} zinariya',
+  meterGuns: 'Bindigogin maƙiya',
+  meterHull: 'Jikin maƙiya',
+  meterNumbers: 'Yawan maƙiya',
+  meterPlunder: 'Ganima',
+  landlubber: {
+    name: 'Ɗan Ƙasa',
+    tagline: 'Teku mai natsuwa don koyo — maƙiya kaɗan, a hankali suke harbi, da sauri suke sauke tuta.',
+    motto: 'Ruwa mai natsuwa',
+    bestFor: 'Tafiye-tafiyen farko',
+  },
+  swashbuckler: {
+    name: 'Ɗan Takobi',
+    tagline: 'Faɗa na gaskiya, kodayake sa’a ta karkata kaɗan.',
+    motto: 'Faɗa na gaskiya',
+    bestFor: 'Ɗumamar jiki',
+  },
+  buccaneer: {
+    name: 'Ɓarawon Teku',
+    tagline: 'Tafiya kamar yadda aka yi ta — babu jinƙai, babu tsammani.',
+    motto: 'Babu jinƙai',
+    bestFor: 'Tafiyar gargajiya',
+    ribbon: 'Gargajiya',
+  },
+  dreadCaptain: {
+    name: 'Kyaftin Mai Ban Tsoro',
+    tagline: 'Maƙiya masu tauri, harbi mai sauri, tuta ba ta sauka sai a numfashi na ƙarshe.',
+    motto: 'Maƙiya masu tauri',
+    bestFor: 'Kwararru',
+  },
+  kingOfTheSeas: {
+    name: 'Sarkin Tekuna',
+    tagline: 'Kowace vela mafarauci ce, kowace ganuwa kabari ce — ƙarfe da zinariya daidai.',
+    motto: 'Ƙarfe da zinariya',
+    bestFor: 'Tatsuniyoyi kaɗai',
+    ribbon: 'Mafi Arziƙi',
+  },
+};
+
+const yo: PerilDict = {
+  stepTag: 'Ìgbésẹ̀ 4 nínú 7 · Ewu',
+  heading: 'Yan Ewu Rẹ',
+  hint: 'Ewu tó jinlẹ̀ san ìkógun tó pọ̀ · ← → tàbí 1–5, lẹ́yìn náà Enter',
+  gold: '×{{mult}} wúrà',
+  meterGuns: 'Ìbọn ọ̀tá',
+  meterHull: 'Ara ọkọ̀ ọ̀tá',
+  meterNumbers: 'Iye ọ̀tá',
+  meterPlunder: 'Ìkógun',
+  landlubber: {
+    name: 'Ọmọ Ilẹ̀',
+    tagline: 'Òkun tútù láti kọ́ iṣẹ́ ọkọ̀ — ọ̀tá díẹ̀, wọ́n lọ́ra láti yínbọn, wọ́n yára láti sọ àsíá kalẹ̀.',
+    motto: 'Omi tútù',
+    bestFor: 'Àwọn ìrìn àkọ́kọ́',
+  },
+  swashbuckler: {
+    name: 'Akọni Idà',
+    tagline: 'Ìjà tító, tí oríire sì tẹ̀ sí apá kan díẹ̀.',
+    motto: 'Ìjà tító',
+    bestFor: 'Ìmúrasílẹ̀',
+  },
+  buccaneer: {
+    name: 'Olè Òkun',
+    tagline: 'Ìrìn náà gẹ́gẹ́ bí a ṣe rìn ín — kò sí àánú fífún, kò sí àánú bíbèèrè.',
+    motto: 'Kò sí àánú',
+    bestFor: 'Ìrìn àtijọ́',
+    ribbon: 'Àtijọ́',
+  },
+  dreadCaptain: {
+    name: 'Kápítánù Aláruugbó',
+    tagline: 'Àwọn ọ̀tá alágbára, ìbọn kíákíá, àsíá kì yóò sọkalẹ̀ títí di ẹ̀mí ìkẹyìn.',
+    motto: 'Àwọn ọ̀tá alágbára',
+    bestFor: 'Àwọn akọni',
+  },
+  kingOfTheSeas: {
+    name: 'Ọba Òkun',
+    tagline: 'Gbogbo aṣọ-ọkọ̀ ni ọdẹ, gbogbo odi ni sàréè — irin àti wúrà dọ́gba.',
+    motto: 'Irin àti wúrà',
+    bestFor: 'Àwọn àtànwó nìkan',
+    ribbon: 'Ọlọ́rọ̀ jù',
+  },
+};
+
+export const peril: Dict<PerilDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi, ar, sw, ha, yo };

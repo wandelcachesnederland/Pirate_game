@@ -1,6 +1,6 @@
 /** Shared locale plumbing types + document metadata strings. */
 
-export type LocaleId = 'en' | 'es' | 'fr' | 'de' | 'nl' | 'pt' | 'ja' | 'zh' | 'id' | 'th' | 'vi';
+export type LocaleId = 'en' | 'es' | 'fr' | 'de' | 'nl' | 'pt' | 'ja' | 'zh' | 'id' | 'th' | 'vi' | 'ar' | 'sw' | 'ha' | 'yo';
 
 /** One dictionary per supported locale; every non-English dict must match EN exactly. */
 export type Dict<T> = Record<LocaleId, T>;
@@ -95,4 +95,36 @@ const vi: MetaDict = {
   chooseLanguage: 'Chọn ngôn ngữ của bạn',
 };
 
-export const meta: Dict<MetaDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };
+const ar: MetaDict = {
+  title: 'برودسايد! — سوط البحر الكاريبي الإسباني',
+  description:
+    'برودسايد! — لعبة أركيد لمعارك القراصنة البحرية. أبحر في البحر الكاريبي الإسباني، وأطلق القصف الجانبي وانهب الذهب.',
+  language: 'اللغة',
+  chooseLanguage: 'اختر لغتك',
+};
+
+const sw: MetaDict = {
+  title: 'Broadside! — Janga la Karibea ya Kihispania',
+  description:
+    'Broadside! — mchezo wa mapigano ya maharamia baharini. Safiri Karibea ya Kihispania, fyatua mizinga ya ubavuni na twaa dhahabu.',
+  language: 'Lugha',
+  chooseLanguage: 'Chagua lugha yako',
+};
+
+const ha: MetaDict = {
+  title: 'Broadside! — Azabar Tekun Karibiya ta Sipaniya',
+  description:
+    'Broadside! — wasan yaƙin ɓarawon teku a teku. Yi tafiya a Tekun Karibiya ta Sipaniya, harba manyan bindigogi kuma ka kwace zinariya.',
+  language: 'Harshe',
+  chooseLanguage: 'Zaɓi harshenka',
+};
+
+const yo: MetaDict = {
+  title: 'Broadside! — Ìdààmú Òkun Karíbíà Sípánì',
+  description:
+    'Broadside! — eré ìjà-òkun àwọn olè òkun. Kọ ọkọ̀ rẹ ká Òkun Karíbíà Sípánì, ṣí ìbọn ẹ̀gbẹ́-ọkọ̀, kó wúrà jà.',
+  language: 'Èdè',
+  chooseLanguage: 'Yan èdè rẹ',
+};
+
+export const meta: Dict<MetaDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi, ar, sw, ha, yo };
