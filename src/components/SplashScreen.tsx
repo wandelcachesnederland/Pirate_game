@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { FONT, SQUIRREL, SQUIRREL_PALETTE, textWidth } from '../game/splash/pixels';
+import { paintSplashFrame, restFrame, splashFrame, type SplashFrame } from '../game/splash/anim';
 import { FANFARE_HIT, SplashFanfare } from '../game/splash/fanfare';
 
-/** How long the logo holds (from the first note) before it starts to fade. */
-const HOLD_MS = 4400;
+/** How long the card runs (from the first note) before it starts to fade. */
+const HOLD_MS = 5000;
 /** Logo and music fade out together over this long. */
 const FADE_MS = 1400;
 /** A skipped sting still fades, just quicker. */
 const SKIP_FADE_MS = 500;
-
-const TITLE = 'BIT SQUIRREL';
-/** Banded 8-bit title colours, top row to bottom row of the 7-pixel glyphs. */
-const TITLE_BANDS = ['#fff6d0', '#ffe39a', '#ffc85a', '#ffa23a', '#f5782c', '#dc5220', '#b0341a'];
 
 interface Props {
   /** Whether the player wants music at all (saved setting). */
@@ -24,63 +20,25 @@ interface Props {
 
 type Phase = 'waiting' | 'playing' | 'fading';
 
-/** Draw title + squirrel into a tiny canvas; CSS scales it up with crisp pixels. */
-function drawLogo(canvas: HTMLCanvasElement) {
-  const tw = textWidth(TITLE);
-  // the mascot is drawn with chunkier pixels than the lettering, arcade-marquee style
-  const k = 2;
-  const sw = SQUIRREL[0].length * k;
-  const pad = 3;
-  const gap = 6;
-  const w = Math.max(tw, sw) + pad * 2 + 1;
-  const h = pad + 7 + gap + SQUIRREL.length * k + pad;
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, w, h);
-
-  // title: drop shadow first, then the colour bands
-  const tx = Math.floor((w - tw) / 2);
-  const ty = pad;
-  const glyphs = (dx: number, dy: number, color: (row: number) => string) => {
-    let x = tx + dx;
-    for (const ch of TITLE) {
-      const g = FONT[ch] ?? FONT[' '];
-      g.forEach((row, ry) => {
-        for (let rx = 0; rx < row.length; rx++) {
-          if (row[rx] !== 'X') continue;
-          ctx.fillStyle = color(ry);
-          ctx.fillRect(x + rx, ty + dy + ry, 1, 1);
-        }
-      });
-      x += g[0].length + 1;
-    }
-  };
-  glyphs(1, 1, () => '#5a1408');
-  glyphs(0, 0, (ry) => TITLE_BANDS[ry]);
-
-  // the squirrel
-  const sx = Math.floor((w - sw) / 2);
-  const sy = pad + 7 + gap;
-  SQUIRREL.forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) {
-      const c = SQUIRREL_PALETTE[row[x]];
-      if (!c) continue;
-      ctx.fillStyle = c;
-      ctx.fillRect(sx + x * k, sy + y * k, k, k);
-    }
-  });
+/** The plate is drawn in blocks, so most frames repeat: only paint a change. */
+function signature(f: SplashFrame): string {
+  let s = `${f.dx}|${f.dy}|${f.tail}|${f.blink ? 1 : 0}|${f.letters.join('')}|${f.fx.length}`;
+  for (const x of f.fx) s += `${x.x},${x.y};`;
+  return s;
 }
 
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
 /**
- * The studio card shown at start-up: the Bit Squirrel logo with its
- * wall-of-sound sting. Plays for a few seconds, then logo and music fade out
- * together onto the title screen. Any key or tap skips it.
+ * The studio card shown at start-up: the Bit Squirrel mascot trots onto an
+ * empty plate, flicks its tail and blinks, and the studio name stamps down one
+ * letter per beat of the sting — ending on the still logo. Then logo and music
+ * fade out together onto the title screen. Any key or tap skips it.
  *
  * Browsers only let sound start after a gesture. If autoplay is blocked the
- * logo waits with a blinking "press any key" — that press starts the sting.
+ * mascot waits on its own plate with a blinking "press any key" — that press
+ * starts the sting and the whole card with it.
  */
 export function SplashScreen({ music, onFadeStart, onDone }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -88,13 +46,40 @@ export function SplashScreen({ music, onFadeStart, onDone }: Props) {
   const [fadeMs, setFadeMs] = useState(FADE_MS);
   const [hit, setHit] = useState(false);
   const phaseRef = useRef<Phase>('waiting');
+  const beganAt = useRef(0);
+  const reduced = useRef(prefersReducedMotion());
   const cb = useRef({ onFadeStart, onDone });
   cb.current = { onFadeStart, onDone };
 
+  // ---- the animation itself: a clock in, a plate out
   useEffect(() => {
-    if (canvasRef.current) drawLogo(canvasRef.current);
-  }, []);
+    const cv = canvasRef.current;
+    if (!cv) return;
+    if (reduced.current || phase === 'fading') {
+      paintSplashFrame(cv, restFrame());
+      return;
+    }
+    // waiting: the mascot alone on its plate, alive; playing: the whole card
+    const from = phase === 'playing' ? beganAt.current : performance.now();
+    let raf = 0;
+    let last = '';
+    let painted = 0;
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      if (document.hidden) return;
+      if (now - painted < 16) return;
+      painted = now;
+      const frame = splashFrame(now - from, phase === 'playing');
+      const sig = signature(frame);
+      if (sig === last) return;
+      last = sig;
+      paintSplashFrame(cv, frame);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [phase]);
 
+  // ---- the sting, and the hand that fades both away
   useEffect(() => {
     const fanfare = music ? new SplashFanfare() : null;
     const timers: number[] = [];
@@ -116,10 +101,9 @@ export function SplashScreen({ music, onFadeStart, onDone }: Props) {
       timers.push(window.setTimeout(() => cb.current.onDone(), ms));
     };
 
-    let beganAt = 0;
     const begin = () => {
       if (disposed || phaseRef.current !== 'waiting') return;
-      beganAt = performance.now();
+      beganAt.current = performance.now();
       fanfare?.play();
       setP('playing');
       timers.push(window.setTimeout(() => setHit(true), FANFARE_HIT * 1000 + 60));
@@ -148,7 +132,7 @@ export function SplashScreen({ music, onFadeStart, onDone }: Props) {
         });
         // play even if resume is slow to report: the timeline starts now
         window.setTimeout(begin, 300);
-      } else if (phaseRef.current === 'playing' && performance.now() - beganAt > 450) {
+      } else if (phaseRef.current === 'playing' && performance.now() - beganAt.current > 450) {
         // (a single tap fires pointerup AND touchend — don't let it start and skip at once)
         fade(SKIP_FADE_MS);
       }
@@ -179,11 +163,8 @@ export function SplashScreen({ music, onFadeStart, onDone }: Props) {
       aria-label="Bit Squirrel presents"
     >
       <div className="bitsq-scanlines pointer-events-none absolute inset-0" aria-hidden />
-      <div className="flex flex-col items-center gap-6">
-        <canvas
-          ref={canvasRef}
-          className={`bitsq-logo ${phase !== 'waiting' ? 'bitsq-logo-in' : ''} ${hit ? 'bitsq-logo-hit' : ''}`}
-        />
+      <div className={`bitsq-card-in flex flex-col items-center gap-6 ${phase === 'waiting' ? 'bitsq-card-wait' : ''}`}>
+        <canvas ref={canvasRef} className={`bitsq-logo ${hit && !reduced.current ? 'bitsq-logo-hit' : ''}`} />
         <div className="bitsq-caption h-6">
           {phase === 'waiting' ? (
             <span className="bitsq-blink">Press any key or tap</span>
