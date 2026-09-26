@@ -39,6 +39,66 @@ export type ShipKind =
   | 'xebec'
   | 'lugger'
   | 'gunboat'
+  // Age of Exploration — Iberian hulls of the 15th–16th centuries
+  | 'caravel'
+  | 'carrack'
+  | 'nao'
+  | 'pinnace'
+  // Napoleonic — rated ships of the line and Company traders
+  | 'seventyFour'
+  | 'firstRate'
+  | 'indiaman'
+  | 'gunbrig'
+  // Viking Age — clinker longships and traders
+  | 'snekkja'
+  | 'knarr'
+  | 'dreki'
+  | 'norseLongship'
+  // Ironclad Era — steam, ram and armour
+  | 'monitor'
+  | 'casemateIronclad'
+  | 'steamFrigate'
+  | 'ramShip'
+  | 'supplySteamer'
+  // Heritage extras — period craft missing from thin rosters
+  | 'liburna'
+  | 'bireme'
+  | 'sambuk'
+  | 'fuchuan'
+  | 'germCruiser'
+  | 'ijnCruiser'
+  // Phoenicia
+  | 'hippos'
+  | 'pentekonter'
+  | 'tyrianKing'
+  // Hanseatic
+  | 'cog'
+  | 'holk'
+  | 'nef'
+  | 'hansakogge'
+  // Portuguese India
+  | 'fusta'
+  | 'caravelaLatina'
+  | 'nauCapitana'
+  // Spanish Armada
+  | 'galleass'
+  | 'flyboat'
+  | 'urca'
+  | 'armadaCapitana'
+  // Dutch Golden Age
+  | 'jacht'
+  | 'pinas'
+  | 'spiegelretour'
+  // Pre-dreadnought
+  | 'tb1890'
+  | 'protectedCruiser'
+  | 'collier'
+  | 'borodino'
+  // Falklands
+  | 'argCorvette'
+  | 'argDestroyer'
+  | 'argSub'
+  | 'belgrano'
   // Punic Wars — Carthage and the Cilician pirates
   | 'carthGalley'
   | 'carthTrader'
@@ -243,7 +303,16 @@ export type EraId =
   | 'ww1'
   | 'ww2'
   | 'hormuz'
-  | 'barbary';
+  | 'barbary'
+  // flagged missing periods, now playable
+  | 'phoenicia'
+  | 'hanse'
+  | 'portugal'
+  | 'armada'
+  | 'dutch'
+  | 'ottoman'
+  | 'predread'
+  | 'falklands';
 
 /**
  * The voyage's peril, chosen on the start screen. Buccaneer is the voyage as

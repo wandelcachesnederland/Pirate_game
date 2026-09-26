@@ -82,6 +82,158 @@ export const SAIL_ROSTER: EraRoster = {
   ],
 };
 
+export const EXPLORATION_ROSTER: EraRoster = {
+  early: [
+    ['pinnace', 'pinnace', 'nao'],
+    ['caravel', 'caravel', 'pinnace'],
+    ['fireship', 'fireship', 'caravel'],
+    ['carrack', 'caravel', 'nao', 'pinnace'],
+    ['carrack'],
+  ],
+  boss: 'carrack',
+  jackpot: 'nao',
+  trader: 'nao',
+  pool: [
+    { kind: 'caravel', cost: 1.4, weight: 3 },
+    { kind: 'pinnace', cost: 1.0, weight: 3 },
+    { kind: 'carrack', cost: 3.6, weight: 2, minWave: 5 },
+    { kind: 'nao', cost: 1.6, weight: 1 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 3 },
+    { kind: 'lugger', cost: 1.0, weight: 1, minWave: 5 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A nao convoy — the spices of the Indies!',
+    'Caravels give chase!',
+    'Beware the fire ships!',
+    'The Casa de Contratación sends its wolves!',
+    'A great carrack approaches!',
+  ],
+  bossTitle: 'The Indies fleet sails — with a treasure nao!',
+  lines: [
+    'More lateens on the horizon!',
+    'They want your charts, Captain!',
+    'No quarter given!',
+    'Blood in the water...',
+    'The Crown has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const NAPOLEONIC_ROSTER: EraRoster = {
+  early: [
+    ['gunbrig', 'merchant', 'cutter'],
+    ['brig', 'gunbrig', 'cutter'],
+    ['fireship', 'fireship', 'brig'],
+    ['frigate', 'corvette', 'gunbrig'],
+    ['seventyFour'],
+  ],
+  boss: 'firstRate',
+  jackpot: 'indiaman',
+  trader: 'indiaman',
+  pool: [
+    { kind: 'cutter', cost: 1.4, weight: 2 },
+    { kind: 'gunbrig', cost: 1.6, weight: 3 },
+    { kind: 'brig', cost: 2.0, weight: 3 },
+    { kind: 'corvette', cost: 2.6, weight: 2 },
+    { kind: 'frigate', cost: 3.2, weight: 2 },
+    { kind: 'seventyFour', cost: 4.4, weight: 1, minWave: 7 },
+    { kind: 'bombketch', cost: 2.8, weight: 1, minWave: 6 },
+    { kind: 'fireship', cost: 1.2, weight: 2 },
+    { kind: 'indiaman', cost: 2.2, weight: 1, noBossWave: true },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A Company convoy — take the Indiaman!',
+    'Gun-brigs give chase!',
+    'Beware the fire ships!',
+    'A frigate squadron has arrived!',
+    'A seventy-four approaches!',
+  ],
+  bossTitle: 'A first-rate flagship sails — with an East Indiaman!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Captain!',
+    'England expects!',
+    'Blood in the water...',
+    'The Admiralty has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const VIKING_ROSTER: EraRoster = {
+  early: [
+    ['knarr', 'knarr', 'snekkja'],
+    ['snekkja', 'snekkja', 'norseLongship'],
+    ['fireship', 'fireship', 'snekkja'],
+    ['norseLongship', 'snekkja', 'knarr', 'norseLongship'],
+    ['dreki'],
+  ],
+  boss: 'dreki',
+  jackpot: 'knarr',
+  trader: 'knarr',
+  pool: [
+    { kind: 'snekkja', cost: 1.1, weight: 3 },
+    { kind: 'norseLongship', cost: 2.0, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'knarr', cost: 0.9, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A knarr convoy — take the walrus ivory!',
+    'Snekkjur give chase!',
+    'Beware the fire ships!',
+    'The jarl sends his wolves!',
+    'A dreki dragon-ship approaches!',
+  ],
+  bossTitle: 'The dragon-ships sail — with a laden knarr!',
+  lines: [
+    'More oars on the horizon!',
+    'They want your head, Hersir!',
+    'Odin owns you all!',
+    'Blood in the water...',
+    'The thing has doubled your bounty!',
+    'Raiders close in from all sides!',
+  ],
+};
+
+export const IRONCLAD_ROSTER: EraRoster = {
+  early: [
+    ['supplySteamer', 'supplySteamer', 'monitor'],
+    ['monitor', 'ramShip', 'supplySteamer'],
+    ['ramShip', 'ramShip', 'monitor'],
+    ['steamFrigate', 'monitor', 'supplySteamer', 'ramShip'],
+    ['casemateIronclad'],
+  ],
+  boss: 'casemateIronclad',
+  jackpot: 'supplySteamer',
+  trader: 'supplySteamer',
+  pool: [
+    { kind: 'monitor', cost: 2.2, weight: 3 },
+    { kind: 'ramShip', cost: 1.8, weight: 3 },
+    { kind: 'steamFrigate', cost: 3.0, weight: 2, minWave: 4 },
+    { kind: 'supplySteamer', cost: 1.2, weight: 1 },
+    { kind: 'gunboat', cost: 1.0, weight: 2 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A supply steamer — cut the coal!',
+    'Monitors give chase!',
+    'Beware the rams!',
+    'A steam frigate has arrived!',
+    'A casemate ironclad approaches!',
+  ],
+  bossTitle: 'The iron fleet sails — with a laden steamer!',
+  lines: [
+    'More smoke on the horizon!',
+    'They want your hull, Captain!',
+    'Damn the torpedoes!',
+    'Blood in the water...',
+    'The Navy Department has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
 export const ROMAN_ROSTER: EraRoster = {
   early: [
     ['carthTrader', 'carthTrader', 'carthGalley'],
@@ -96,6 +248,7 @@ export const ROMAN_ROSTER: EraRoster = {
   pool: [
     { kind: 'carthGalley', cost: 2.2, weight: 3 },
     { kind: 'cilician', cost: 1.3, weight: 3 },
+    { kind: 'liburna', cost: 1.0, weight: 2 },
     { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
     { kind: 'carthTrader', cost: 0.8, weight: 1 },
     { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
@@ -132,6 +285,7 @@ export const GREEK_ROSTER: EraRoster = {
   pool: [
     { kind: 'phoenTrireme', cost: 2.2, weight: 3 },
     { kind: 'ionianGalley', cost: 1.3, weight: 3 },
+    { kind: 'bireme', cost: 1.1, weight: 2 },
     { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
     { kind: 'persTransport', cost: 0.8, weight: 1 },
     { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
@@ -168,6 +322,7 @@ export const ARAB_ROSTER: EraRoster = {
   pool: [
     { kind: 'warDhow', cost: 2.2, weight: 3 },
     { kind: 'ghurab', cost: 1.3, weight: 3 },
+    { kind: 'sambuk', cost: 1.2, weight: 2 },
     { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
     { kind: 'baghlah', cost: 1.2, weight: 1 },
     { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
@@ -204,6 +359,7 @@ export const CHINESE_ROSTER: EraRoster = {
   pool: [
     { kind: 'warlordJunk', cost: 2.6, weight: 3 },
     { kind: 'wokouJunk', cost: 1.6, weight: 3 },
+    { kind: 'fuchuan', cost: 2.0, weight: 2 },
     { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
     { kind: 'grainJunk', cost: 1.2, weight: 1 },
     { kind: 'fishingCanoe', cost: 0.6, weight: 1, minWave: 6 },
@@ -728,6 +884,7 @@ export const WW1_ROSTER: EraRoster = {
     { kind: 'germDrifter', cost: 1.2, weight: 2 },
     { kind: 'supplyShip', cost: 0.9, weight: 1 },
     { kind: 'auxCruiser', cost: 2.8, weight: 2, minWave: 5 },
+    { kind: 'germCruiser', cost: 3.4, weight: 1, minWave: 6 },
     { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
   ],
   titles: [
@@ -763,6 +920,7 @@ export const WW2_ROSTER: EraRoster = {
   pool: [
     { kind: 'ijnDestroyer', cost: 2.6, weight: 3 },
     { kind: 'ijnEscort', cost: 1.6, weight: 2 },
+    { kind: 'ijnCruiser', cost: 3.6, weight: 1, minWave: 6 },
     { kind: 'ijnSub', cost: 1.9, weight: 2, minWave: 3 },
     { kind: 'maru', cost: 1.1, weight: 1 },
     { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
@@ -859,12 +1017,268 @@ export const BARBARY_ROSTER: EraRoster = {
   ],
 };
 
+export const PHOENICIA_ROSTER: EraRoster = {
+  early: [
+    ['hippos', 'hippos', 'pentekonter'],
+    ['pentekonter', 'bireme', 'hippos'],
+    ['fireship', 'fireship', 'pentekonter'],
+    ['bireme', 'pentekonter', 'hippos', 'bireme'],
+    ['tyrianKing'],
+  ],
+  boss: 'tyrianKing',
+  jackpot: 'hippos',
+  trader: 'hippos',
+  pool: [
+    { kind: 'pentekonter', cost: 1.2, weight: 3 },
+    { kind: 'bireme', cost: 1.6, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'hippos', cost: 0.9, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A hippos convoy — Tyrian purple aboard!',
+    'Pentekonters give chase!',
+    'Beware the fire rafts!',
+    'Sidon sends its wolves!',
+    "The King of Tyre's galley approaches!",
+  ],
+  bossTitle: 'Tyre sails — with a treasure hippos!',
+  lines: [
+    'More oars on the horizon!',
+    'They want your cedar, Captain!',
+    'For the temples of Melqart!',
+    'Blood in the water...',
+    'The king has doubled your bounty!',
+    'Raiders close in from all sides!',
+  ],
+};
+
+export const HANSE_ROSTER: EraRoster = {
+  early: [
+    ['holk', 'holk', 'cog'],
+    ['cog', 'nef', 'holk'],
+    ['fireship', 'fireship', 'cog'],
+    ['nef', 'cog', 'holk', 'cog'],
+    ['hansakogge'],
+  ],
+  boss: 'hansakogge',
+  jackpot: 'holk',
+  trader: 'holk',
+  pool: [
+    { kind: 'cog', cost: 1.8, weight: 3 },
+    { kind: 'nef', cost: 2.2, weight: 2 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 4 },
+    { kind: 'holk', cost: 1.1, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A Baltic convoy — take the stockfish!',
+    'Cogs give chase!',
+    'Beware the fire ships!',
+    'Lübeck sends its wolves!',
+    "The admiral's kogge approaches!",
+  ],
+  bossTitle: 'The Hansa sails — with a laden holk!',
+  lines: [
+    'More cogs on the horizon!',
+    'They want your head, Skipper!',
+    'From the Sound to Novgorod!',
+    'Blood in the water...',
+    'The Kontor has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const PORTUGAL_ROSTER: EraRoster = {
+  early: [
+    ['nao', 'nao', 'fusta'],
+    ['caravelaLatina', 'fusta', 'nao'],
+    ['fireship', 'fireship', 'caravelaLatina'],
+    ['carrack', 'fusta', 'nao', 'caravelaLatina'],
+    ['nauCapitana'],
+  ],
+  boss: 'nauCapitana',
+  jackpot: 'nao',
+  trader: 'nao',
+  pool: [
+    { kind: 'fusta', cost: 1.1, weight: 3 },
+    { kind: 'caravelaLatina', cost: 1.5, weight: 3 },
+    { kind: 'carrack', cost: 3.4, weight: 2, minWave: 5 },
+    { kind: 'nao', cost: 1.6, weight: 1 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 3 },
+    { kind: 'warDhow', cost: 2.0, weight: 2, minWave: 6 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A spice convoy — pepper from Calicut!',
+    'Fustas give chase!',
+    'Beware the fire ships!',
+    'The Estado da Índia has arrived!',
+    'A nau capitana approaches!',
+  ],
+  bossTitle: 'The India fleet sails — with a treasure nao!',
+  lines: [
+    'More lateens on the horizon!',
+    'They want your charts, Capitão!',
+    'For the King of Portugal!',
+    'Blood in the water...',
+    'Manuel has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const ARMADA_ROSTER: EraRoster = {
+  early: [
+    ['urca', 'urca', 'flyboat'],
+    ['galleass', 'flyboat', 'urca'],
+    ['fireship', 'fireship', 'galleass'],
+    ['galleass', 'carrack', 'urca', 'flyboat'],
+    ['armadaCapitana'],
+  ],
+  boss: 'armadaCapitana',
+  jackpot: 'urca',
+  trader: 'urca',
+  pool: [
+    { kind: 'flyboat', cost: 1.2, weight: 3 },
+    { kind: 'galleass', cost: 3.0, weight: 2 },
+    { kind: 'carrack', cost: 3.4, weight: 2, minWave: 5 },
+    { kind: 'urca', cost: 1.4, weight: 1 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 3 },
+    { kind: 'galleon', cost: 5.0, weight: 1, minWave: 8, noBossWave: true },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A supply urca — cut the Armada’s bread!',
+    'Flyboats give chase!',
+    'Beware the fire ships of Gravelines!',
+    'Galleasses of Naples have arrived!',
+    'The capitana approaches!',
+  ],
+  bossTitle: 'The Great Armada sails — with a treasure urca!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Captain!',
+    'God blew, and they were scattered!',
+    'Blood in the water...',
+    'The Queen has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const DUTCH_ROSTER: EraRoster = {
+  early: [
+    ['merchant', 'merchant', 'jacht'],
+    ['jacht', 'pinas', 'merchant'],
+    ['fireship', 'fireship', 'pinas'],
+    ['pinas', 'jacht', 'merchant', 'pinas'],
+    ['spiegelretour'],
+  ],
+  boss: 'spiegelretour',
+  jackpot: 'merchant',
+  trader: 'merchant',
+  pool: [
+    { kind: 'jacht', cost: 1.2, weight: 3 },
+    { kind: 'pinas', cost: 2.4, weight: 3 },
+    { kind: 'fireship', cost: 1.2, weight: 2, minWave: 3 },
+    { kind: 'merchant', cost: 0.8, weight: 1 },
+    { kind: 'frigate', cost: 3.2, weight: 1, minWave: 7 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A fluyt convoy — the riches of Batavia!',
+    'Yachts give chase!',
+    'Beware the fire ships!',
+    'A pinas squadron has arrived!',
+    'A spiegelretourschip approaches!',
+  ],
+  bossTitle: 'The VOC sails — with a treasure fluyt!',
+  lines: [
+    'More sails on the horizon!',
+    'They want your head, Kapitein!',
+    'Remember the Medway!',
+    'Blood in the water...',
+    'The States have doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const PREDREAD_ROSTER: EraRoster = {
+  early: [
+    ['collier', 'collier', 'tb1890'],
+    ['tb1890', 'tb1890', 'collier'],
+    ['protectedCruiser', 'tb1890', 'collier'],
+    ['protectedCruiser', 'protectedCruiser', 'collier', 'tb1890'],
+    ['borodino'],
+  ],
+  boss: 'borodino',
+  jackpot: 'collier',
+  trader: 'collier',
+  pool: [
+    { kind: 'tb1890', cost: 1.4, weight: 3 },
+    { kind: 'protectedCruiser', cost: 2.8, weight: 2 },
+    { kind: 'collier', cost: 1.2, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A collier convoy — cut the coal!',
+    'Torpedo boats give chase!',
+    'Cruisers on the beam!',
+    'The Combined Fleet is out!',
+    'A Borodino-class approaches!',
+  ],
+  bossTitle: 'The Baltic Fleet sails — with a collier train!',
+  lines: [
+    'More smoke on the horizon!',
+    'They want your hull, Captain!',
+    'Tōgō has crossed the T!',
+    'Blood in the water...',
+    'The Tsar has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
+export const FALKLANDS_ROSTER: EraRoster = {
+  early: [
+    ['tanker', 'tanker', 'argCorvette'],
+    ['argCorvette', 'argCorvette', 'tanker'],
+    ['argSub', 'argSub', 'argCorvette'],
+    ['argDestroyer', 'argCorvette', 'tanker', 'argSub'],
+    ['belgrano'],
+  ],
+  boss: 'belgrano',
+  jackpot: 'supertanker',
+  trader: 'tanker',
+  pool: [
+    { kind: 'argCorvette', cost: 1.6, weight: 3 },
+    { kind: 'argDestroyer', cost: 2.8, weight: 2, minWave: 4 },
+    { kind: 'argSub', cost: 2.0, weight: 2, minWave: 3 },
+    { kind: 'tanker', cost: 1.8, weight: 1 },
+    { kind: 'rowboat', cost: 0.5, weight: 1, minWave: 7 },
+  ],
+  titles: [
+    'A tanker run — hit the logistics!',
+    'Corvettes give chase!',
+    'Submarine warning — torpedoes!',
+    'A Type 42 is in the screen!',
+    'The cruiser Belgrano approaches!',
+  ],
+  bossTitle: 'The Task Force sails — with a laden tanker!',
+  lines: [
+    'More wakes on the horizon!',
+    'They want your ship, Captain!',
+    'Gotcha!',
+    'Blood in the water...',
+    'Whitehall has doubled your bounty!',
+    'Hunters close in from all sides!',
+  ],
+};
+
 export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   golden: SAIL_ROSTER,
-  exploration: SAIL_ROSTER,
-  napoleonic: SAIL_ROSTER,
-  viking: SAIL_ROSTER,
-  ironclad: SAIL_ROSTER,
+  exploration: EXPLORATION_ROSTER,
+  napoleonic: NAPOLEONIC_ROSTER,
+  viking: VIKING_ROSTER,
+  ironclad: IRONCLAD_ROSTER,
   roman: ROMAN_ROSTER,
   greek: GREEK_ROSTER,
   arab: ARAB_ROSTER,
@@ -886,4 +1300,12 @@ export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   ww2: WW2_ROSTER,
   hormuz: HORMUZ_ROSTER,
   barbary: BARBARY_ROSTER,
+  phoenicia: PHOENICIA_ROSTER,
+  hanse: HANSE_ROSTER,
+  portugal: PORTUGAL_ROSTER,
+  armada: ARMADA_ROSTER,
+  dutch: DUTCH_ROSTER,
+  ottoman: LEPANTO_ROSTER,
+  predread: PREDREAD_ROSTER,
+  falklands: FALKLANDS_ROSTER,
 };

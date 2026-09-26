@@ -19,6 +19,12 @@ import { SEA_WOLF } from './seaWolf';
 import { USS_ENTERPRISE } from './ussEnterprise';
 import { USS_KESTREL } from './ussKestrel';
 import { USS_REVENANT } from './ussRevenant';
+import { HANSE_COG } from './hanseCog';
+import { SAO_GABRIEL } from './saoGabriel';
+import { REVENGE } from './revenge';
+import { ZEVEN_PROVINCIEN } from './zevenProvincien';
+import { MIKASA } from './mikasa';
+import { HMS_ARROW } from './hmsArrow';
 import {
   ARAB_BOOM,
   AZTEC_CANOE,
@@ -35,6 +41,8 @@ import {
   MACEDON_SIXTEEN,
   MAORI_WAKA,
   MAYA_TULUM,
+  OTTOMAN_KADIRGA,
+  PHOENICIA_BIREME,
   ROMAN_QUINQUEREME,
   VIETNAM_JUNK,
 } from '../heritage';
@@ -315,6 +323,86 @@ export const ERA_SHIPS: EraShip[] = [
     group: 'Heritage Seas',
     homeWaters: 'Lake Texcoco',
   },
+  {
+    id: 'phoenicia',
+    region: 'mediterranean',
+    era: 'Phoenician Seas',
+    year: '800 BC',
+    blurb: 'Tyrian bireme: cedar hull, purple sail, first of the long traders.',
+    def: PHOENICIA_BIREME,
+    group: 'Heritage Seas',
+    homeWaters: 'the Levantine coast',
+  },
+  {
+    id: 'hanse',
+    region: 'northSea',
+    era: 'Hanseatic League',
+    year: '1360',
+    blurb: 'Baltic cog: high sides, one square sail, the Kontor’s wolf.',
+    def: HANSE_COG,
+    group: 'Age of Sail',
+    homeWaters: 'the Baltic approaches',
+  },
+  {
+    id: 'portugal',
+    region: 'arabian',
+    era: 'Estado da Índia',
+    year: '1502',
+    blurb: 'Portuguese nau: lateen scouts, heavy guns, the pepper run.',
+    def: SAO_GABRIEL,
+    group: 'Age of Sail',
+    homeWaters: 'the Malabar Coast',
+  },
+  {
+    id: 'armada',
+    region: 'biscay',
+    era: 'Spanish Armada',
+    year: '1588',
+    blurb: 'Race-built galleon: weatherly, quick guns — God blew.',
+    def: REVENGE,
+    group: 'Age of Sail',
+    homeWaters: 'the Channel',
+  },
+  {
+    id: 'dutch',
+    region: 'northSea',
+    era: 'Dutch Golden Age',
+    year: '1666',
+    blurb: 'Zeven Provinciën: orange trim, a forest of guns off the Texel.',
+    def: ZEVEN_PROVINCIEN,
+    group: 'Age of Sail',
+    homeWaters: 'the Texel',
+  },
+  {
+    id: 'ottoman',
+    region: 'ionian',
+    era: 'Kapudan Pasha',
+    year: '1538',
+    blurb: "Barbarossa's kadirga: Preveza, the League in your teeth.",
+    def: OTTOMAN_KADIRGA,
+    group: 'Heritage Seas',
+    homeWaters: 'the Ionian Sea',
+  },
+  {
+    id: 'predread',
+    region: 'koreaStrait',
+    era: 'Tsushima',
+    year: '1905',
+    blurb: 'Pre-dreadnought Mikasa: cross the T, coal smoke, 12-inch guns.',
+    def: MIKASA,
+    group: 'Steel Navies',
+    homeWaters: 'the Tsushima Strait',
+  },
+  {
+    id: 'falklands',
+    region: 'coralSea',
+    era: 'Falklands War',
+    year: '1982',
+    blurb: 'Type 21 frigate: Exocets, Type 42s, the South Atlantic winter.',
+    def: HMS_ARROW,
+    group: 'Steel Navies',
+    homeWaters: 'the Falkland Sound',
+  },
 ];
 
 // Keep picker portraits and reports consistent with the era's actual weapons.
@@ -344,5 +432,5 @@ export function eraRegion(id: EraId): RegionId {
   return ERA_REGION[id] ?? ERA_REGION[DEFAULT_ERA];
 }
 
-export { BLACK_GULL, HMS_HAVOC, HMS_VENGEANCE, IRIS_TIR, SANTA_BRISA, SEA_WOLF, USS_ENTERPRISE, USS_KESTREL, USS_REVENANT };
-export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, ROMAN_QUINQUEREME, AZTEC_CANOE, BYZANTIUM_DROMON, CHOLA_TIGER, EGYPT_GALLEY, KOREA_TURTLE, LEPANTO_SULTANA, VIETNAM_JUNK };
+export { BLACK_GULL, HANSE_COG, HMS_ARROW, HMS_HAVOC, HMS_VENGEANCE, IRIS_TIR, MIKASA, REVENGE, SANTA_BRISA, SAO_GABRIEL, SEA_WOLF, USS_ENTERPRISE, USS_KESTREL, USS_REVENANT, ZEVEN_PROVINCIEN };
+export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, OTTOMAN_KADIRGA, PHOENICIA_BIREME, ROMAN_QUINQUEREME, AZTEC_CANOE, BYZANTIUM_DROMON, CHOLA_TIGER, EGYPT_GALLEY, KOREA_TURTLE, LEPANTO_SULTANA, VIETNAM_JUNK };

@@ -9,6 +9,7 @@ import { ASIA_DEFS } from './shipDefs/asia';
 import { PACIFIC_DEFS } from './shipDefs/pacific';
 import { AMERICAS_DEFS } from './shipDefs/americas';
 import { MODERN_DEFS } from './shipDefs/modern';
+import { EXTRA_ERA_DEFS } from './shipDefs/extraEras';
 
 /**
  * Every ship in the game, keyed by kind. The definitions live per sea/era in
@@ -24,6 +25,7 @@ export const SHIP_DEFS: Record<ShipKind, ShipDef> = {
   ...PACIFIC_DEFS,
   ...AMERICAS_DEFS,
   ...MODERN_DEFS,
+  ...EXTRA_ERA_DEFS,
 };
 
 export const UPGRADES: UpgradeDef[] = [

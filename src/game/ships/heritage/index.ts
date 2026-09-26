@@ -22,6 +22,8 @@ import { EGYPT_GALLEY } from './egypt';
 import { CHOLA_TIGER } from './chola';
 import { VIETNAM_JUNK } from './vietnam';
 import { AZTEC_CANOE } from './aztec';
+import { PHOENICIA_BIREME } from './phoenicia';
+import { OTTOMAN_KADIRGA } from './ottoman';
 
 export interface HeritageShip {
   id: string;
@@ -170,6 +172,22 @@ export const HERITAGE_SHIPS: HeritageShip[] = [
     blurb: 'War canoe of the last tlatoani: defend the lake.',
     def: AZTEC_CANOE,
   },
+  {
+    id: 'phoenicia',
+    culture: 'Phoenician',
+    waters: 'Levantine coast',
+    year: '800 BC',
+    blurb: 'Tyrian bireme: cedar, purple sail, the first long-haul traders.',
+    def: PHOENICIA_BIREME,
+  },
+  {
+    id: 'ottoman',
+    culture: 'Ottoman',
+    waters: 'Eastern Mediterranean',
+    year: '1538',
+    blurb: "Barbarossa's kadirga: Preveza, the kapudan pasha's sea.",
+    def: OTTOMAN_KADIRGA,
+  },
 ];
 
 export {
@@ -188,6 +206,8 @@ export {
   MACEDON_SIXTEEN,
   MAYA_TULUM,
   MAORI_WAKA,
+  OTTOMAN_KADIRGA,
+  PHOENICIA_BIREME,
   ROMAN_QUINQUEREME,
   VIETNAM_JUNK,
 };
