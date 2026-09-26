@@ -1,9 +1,10 @@
 import type { Ship } from '../types';
 import { cannonLocalX } from '../sprites';
-import { isIncendiary, projectileFor, usesGunpowder } from '../weapons';
+import { armVolleyNameL, isIncendiary, projectileFor, usesGunpowder } from '../weapons';
 import { angDiff, TAU } from '../math';
 import { HALF_PI, GRAPE, CHASER, P_SMOKE, P_FIRE, P_SPARK, P_RING, P_FLASH, P_ARROW, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, rand, clamp, pick, type Volley } from './constants';
 import { EngineTraits } from './traits';
+import i18n from '../../i18n';
 
 /** Player input and the player's weapons: broadsides, swivel, chasers, grapeshot. */
 export abstract class EngineWeapons extends EngineTraits {
@@ -414,9 +415,9 @@ export abstract class EngineWeapons extends EngineTraits {
       if (fireVolley) this.igniteShip(e, 4, 0.008, true);
       this.sfx.hit(this.volAt(e.x, e.y) * 0.7, this.panAt(e.x));
     }
-    const volley = gunpowder ? 'GRAPE!' : arm.volleyName;
+    const volley = armVolleyNameL(this.eraId);
     if (killed > 0) this.addText(p.x, p.y - 56, volley, '#ffd84d', 26);
     else if (hits > 0) this.addText(p.x, p.y - 56, volley, '#ffd84d', 18);
-    else this.addText(p.x, p.y - 56, 'Nothing within reach', '#e6d3a3', 15);
+    else this.addText(p.x, p.y - 56, i18n.t('hud:event.nothingReach'), '#e6d3a3', 15);
   }
 }

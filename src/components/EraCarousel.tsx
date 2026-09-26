@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { EraId } from '../game/types';
 import { ERA_SHIPS, type EraShip } from '../game/ships/era';
@@ -6,7 +7,6 @@ import { regionById } from '../game/worlds';
 import { bossCassette, cassettesForEra } from '../game/music';
 import { stableSeed } from '../game/portrait';
 import { paintEraScene } from '../game/eraArt';
-import { traitDef } from '../game/eraTraits';
 
 // Import the photographic era stills as data URLs so the single-file build
 // remains self-contained. Eras without a commissioned still keep their
@@ -146,6 +146,8 @@ function Slot({
   on: boolean;
   onPick: (id: EraId) => void;
 }) {
+  const { t } = useTranslation(['eras']);
+  const eraName = t(`eras:${e.id}.name`);
   const still = ERA_STILLS[`../assets/era-stills/${e.id}.jpg`];
   const ref = useCanvasPaint(
     (ctx, cv) => {
@@ -206,8 +208,8 @@ function Slot({
       type="button"
       data-slot={i}
       aria-pressed={on}
-      aria-label={`${e.era}, ${e.year}`}
-      title={`${e.era} — ${e.year}`}
+      aria-label={`${eraName}, ${e.year}`}
+      title={`${eraName} — ${e.year}`}
       onClick={() => onPick(e.id)}
       className="arcade-slot relative shrink-0 overflow-hidden rounded-lg"
     >
@@ -235,6 +237,7 @@ function Slot({
  * height is left, and on a phone the step scrolls.
  */
 export function EraCarousel({ era, onEra }: Props) {
+  const { t } = useTranslation(['eras', 'regions', 'traits']);
   const eraIdx = Math.max(
     0,
     ERA_SHIPS.findIndex((s) => s.id === era),
@@ -272,7 +275,9 @@ export function EraCarousel({ era, onEra }: Props) {
   const [dragX, setDragX] = useState(0);
 
   const shown = ERA_SHIPS[idx];
-  const sea = regionById(shown.region);
+  const seaName = t(`regions:arcade.${shown.region}.name`);
+  const eraName = t(`eras:${shown.id}.name`);
+  const eraBlurb = t(`eras:${shown.id}.blurb`);
   // a photographic still is a bare picture: it needs the plate laid over it
   const stillShown = !!ERA_STILLS[`../assets/era-stills/${shown.id}.jpg`];
   const step = (d: number) =>
@@ -321,7 +326,7 @@ export function EraCarousel({ era, onEra }: Props) {
           <button
             type="button"
             onClick={() => step(-1)}
-            aria-label="Previous era"
+            aria-label={t('eras:ui.prevEra')}
             className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
           >
             <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
@@ -329,14 +334,14 @@ export function EraCarousel({ era, onEra }: Props) {
           <button
             type="button"
             onClick={() => step(1)}
-            aria-label="Next era"
+            aria-label={t('eras:ui.nextEra')}
             className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
           >
             <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
           </button>
         </div>
         <span className="sr-only" aria-live="polite">
-          {shown.era}, {shown.year}. {sea.name}. {shown.blurb}
+          {eraName}, {shown.year}. {seaName}. {eraBlurb}
         </span>
 
         {/* the age's own name plate: what it is and when it was, large. Eras
@@ -349,10 +354,10 @@ export function EraCarousel({ era, onEra }: Props) {
           >
             <div className="era-plate min-w-0">
               <span className="era-plate-tag">
-                Era {String(idx + 1).padStart(2, '0')} / {String(ERA_SHIPS.length).padStart(2, '0')} · {sea.name}
+                {t('eras:ui.eraCount', { n: String(idx + 1).padStart(2, '0'), total: String(ERA_SHIPS.length).padStart(2, '0') })} · {seaName}
               </span>
               <span className="era-plate-name text-[1.25rem] leading-tight sm:text-3xl lg:text-4xl xl:text-[2.75rem]">
-                {shown.era}
+                {eraName}
               </span>
             </div>
             <span className="era-plate-year shrink-0 text-2xl sm:text-4xl lg:text-[2.9rem]">{shown.year}</span>
@@ -363,21 +368,21 @@ export function EraCarousel({ era, onEra }: Props) {
       {/* ---- one line of briefing: the age, its waters, and what plays there ---- */}
       <div className="shrink-0 truncate rounded-md border border-gold/30 bg-black/30 px-2 py-1 text-[0.68rem] leading-snug">
         <span className="italic opacity-85">
-          {shown.blurb}
-          {shown.homeWaters ? ` — the ${shown.homeWaters}.` : ''}
+          {eraBlurb}
+          {shown.homeWaters ? t('eras:ui.watersSuffix', { waters: t(`eras:${shown.id}.waters`) }) : ''}
         </span>
         <span className="opacity-40"> · </span>
-        <span className="text-gold/90">{sea.name}</span>
+        <span className="text-gold/90">{seaName}</span>
         <span className="opacity-40"> · </span>
         <span className="text-sky-200/90">
-          {traitDef(shown.id).name}: {traitDef(shown.id).pitch}
+          {t(`traits:${shown.id}.name`)}: {t(`traits:${shown.id}.pitch`)}
         </span>
         <span className="hidden opacity-40 md:inline"> · </span>
         <span className="hidden opacity-70 md:inline">
           {cassettesForEra(shown.id)
             .map((c) => c.title)
             .join(' · ')}
-          {' — warship: '}
+          {' — '}{t('eras:ui.warship')}{': '}
           {bossCassette(shown.id).title}
         </span>
       </div>
@@ -387,7 +392,7 @@ export function EraCarousel({ era, onEra }: Props) {
         ref={stripRef}
         className="scroll-thin relative flex shrink-0 gap-1.5 overflow-x-auto pb-1"
         role="tablist"
-        aria-label="Era"
+        aria-label={t('eras:ui.ariaTab')}
       >
         {ERA_SHIPS.map((e, i) => (
           <Slot key={e.id} e={e} i={i} on={e.id === era} onPick={onEra} />

@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bird,
   Bomb,
@@ -23,6 +25,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { LOCALES, LOCALE_NAMES, fmt, setLocale, type LocaleId } from '../i18n';
 import { skullsOf } from '../game/difficulty';
 import type { ScoreEntry, Settings } from '../game/storage';
 import type { UpgradeId } from '../game/types';
@@ -59,6 +62,7 @@ export function SoundToggles({
   onChange: (s: Settings) => void;
   dark?: boolean;
 }) {
+  const { t } = useTranslation();
   const base =
     'flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 font-pirate text-lg transition-colors cursor-pointer';
   const on = dark ? 'border-gold bg-gold/20 text-gold' : 'border-ink bg-ink text-parch';
@@ -73,7 +77,7 @@ export function SoundToggles({
         aria-pressed={settings.sfx}
       >
         {settings.sfx ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-        Sound
+        {t('sound')}
       </button>
       <button
         type="button"
@@ -83,8 +87,71 @@ export function SoundToggles({
         aria-pressed={settings.music}
       >
         <Music className="h-4 w-4" />
-        Shanty
+        {t('shanty')}
       </button>
+    </div>
+  );
+}
+
+/** The ship's colours for language: a compact picker across all locales. */
+export function LanguagePicker({ dark = false }: { dark?: boolean }) {
+  const { t, i18n } = useTranslation('meta');
+  const [open, setOpen] = useState(false);
+  const current = (i18n.language as LocaleId) || 'en';
+  return (
+    <div className="relative inline-block">
+      <button
+        type="button"
+        tabIndex={-1}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          'flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 font-pirate text-lg transition-colors cursor-pointer',
+          dark ? 'border-parch/40 text-parch/85' : 'border-ink/40 text-ink/80',
+        )}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title={t('language')}
+      >
+        🌐 {LOCALE_NAMES[current] ?? current}
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          aria-label={t('language')}
+          className={cn(
+            'absolute bottom-full z-30 mb-2 max-h-64 w-52 overflow-y-auto rounded-lg border-2 p-1 text-left shadow-xl',
+            dark ? 'border-gold/50 bg-[#0a1628]' : 'border-ink/40 bg-parch',
+          )}
+        >
+          {LOCALES.map((lng) => (
+            <li key={lng}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={lng === current}
+                tabIndex={-1}
+                onClick={() => {
+                  setLocale(lng);
+                  setOpen(false);
+                }}
+                className={cn(
+                  'flex w-full items-center justify-between rounded px-2 py-1 font-pirate text-lg cursor-pointer',
+                  lng === current
+                    ? dark
+                      ? 'bg-gold/25 text-gold'
+                      : 'bg-ink/15 text-ink'
+                    : dark
+                      ? 'text-parch/85 hover:bg-parch/10'
+                      : 'text-ink/80 hover:bg-ink/10',
+                )}
+              >
+                {LOCALE_NAMES[lng]}
+                {lng === current && <span aria-hidden>✓</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -107,18 +174,17 @@ export function HighScoreTable({
   /** Painted for a cabinet-style dark panel instead of a parchment log. */
   dark?: boolean;
 }) {
+  const { t } = useTranslation('screens');
   const list = scores.slice(0, limit);
   return (
     <div>
       <div className="mb-2 flex items-center justify-center gap-2">
         <Trophy className={cn('h-5 w-5', dark ? 'text-gold' : 'text-gold-deep')} />
-        <h3 className={cn('font-pirate text-2xl sm:text-3xl', dark && 'arcade-marquee')}>Hall of Legends</h3>
+        <h3 className={cn('font-pirate text-2xl sm:text-3xl', dark && 'arcade-marquee')}>{t('scores.hall')}</h3>
         <Trophy className={cn('h-5 w-5', dark ? 'text-gold' : 'text-gold-deep')} />
       </div>
       {list.length === 0 ? (
-        <p className="py-6 text-center italic opacity-70">
-          No legends yet — be the first to plunder the Spanish Main!
-        </p>
+        <p className="py-6 text-center italic opacity-70">{t('scores.empty')}</p>
       ) : (
         <ol className="space-y-1">
           {list.map((s, i) => (
@@ -140,11 +206,11 @@ export function HighScoreTable({
               </span>
               <span className="truncate font-pirate text-lg leading-tight">{s.name}</span>
               <span className="text-xs italic opacity-70">
-                W{s.wave} · {s.sunk}⚓
+                {t('scores.waveShort', { wave: s.wave })} · {s.sunk}⚓
                 {skullsOf(s.difficulty) > 0 && ` · ${'☠'.repeat(skullsOf(s.difficulty))}`}
               </span>
               <span className="min-w-[4.5rem] text-right font-pirate text-xl tabular-nums leading-tight">
-                {s.score.toLocaleString('en-US')}
+                {fmt(s.score)}
               </span>
             </li>
           ))}
@@ -153,4 +219,3 @@ export function HighScoreTable({
     </div>
   );
 }
-

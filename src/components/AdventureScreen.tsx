@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Skull,
   X,
@@ -21,6 +22,7 @@ import {
 } from '../game/adventure/engine';
 import { FOES, REFIT_BY_ID, type RefitId } from '../game/adventure/beasts';
 import { type Settings } from '../game/storage';
+import { fmt } from '../i18n';
 import { VoyageTouchBar, setLiveInput } from './VoyageTouchBar';
 import { cn } from '../utils/cn';
 
@@ -34,6 +36,7 @@ interface Props {
 const TOTAL = FOES.length;
 
 export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
+  const { t } = useTranslation('adventure');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AdventureEngine | null>(null);
   const [hud, setHud] = useState<AdventureHud | null>(null);
@@ -129,19 +132,19 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
           <div className="pointer-events-auto flex flex-wrap items-center gap-x-4 gap-y-2 bg-black/50 px-3 py-2 backdrop-blur-sm">
             <div className="flex items-center gap-1.5 text-emerald-200">
               <Trophy className="h-4 w-4" />
-              <span className="font-pirate text-xl leading-none">{hud.renown.toLocaleString()}</span>
+              <span className="font-pirate text-xl leading-none">{fmt(hud.renown)}</span>
               <span className="text-[0.6rem] uppercase tracking-widest text-parch/60">{hud.rank}</span>
             </div>
             <div className="flex items-center gap-1.5 text-gold">
               <Ship className="h-4 w-4" />
-              <span className="font-pirate text-xl leading-none">{hud.salvage.toLocaleString()}</span>
-              <span className="text-[0.6rem] uppercase tracking-widest text-parch/60">salvage</span>
+              <span className="font-pirate text-xl leading-none">{fmt(hud.salvage)}</span>
+              <span className="text-[0.6rem] uppercase tracking-widest text-parch/60">{t('ui.salvageLbl')}</span>
             </div>
-            <Stat label="Day" value={String(hud.day)} />
-            <Stat label="Felled" value={`${hud.felled}/${TOTAL}`} />
+            <Stat label={t('ui.day')} value={String(hud.day)} />
+            <Stat label={t('ui.felled')} value={`${hud.felled}/${TOTAL}`} />
             {/* hull bar */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[0.6rem] uppercase tracking-widest text-parch/70">Hull</span>
+              <span className="text-[0.6rem] uppercase tracking-widest text-parch/70">{t('ui.hull')}</span>
               <div className="h-3 w-28 overflow-hidden rounded-full border border-parch/40 bg-black/40">
                 <div
                   className="h-full transition-[width] duration-200"
@@ -162,7 +165,7 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
               <div className="flex items-center gap-1 text-red-300 anim-pulse">
                 <Skull className="h-4 w-4" />
                 <span className="text-sm font-pirate">
-                  {hud.threats} {hud.threats === 1 ? 'contact' : 'contacts'}!
+                  {t(hud.threats === 1 ? 'ui.contactOne' : 'ui.contactOther', { n: hud.threats })}
                 </span>
               </div>
             )}
@@ -170,7 +173,7 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
               <button
                 type="button"
                 onClick={() => setShowHelp(true)}
-                aria-label="Controls"
+                aria-label={t('ui.ariaControls')}
                 className="grid h-9 w-9 place-items-center rounded-full border border-gold/50 bg-black/40 text-gold hover:brightness-125"
               >
                 <ScrollText className="h-4 w-4" />
@@ -178,7 +181,7 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
               <button
                 type="button"
                 onClick={togglePause}
-                aria-label="Pause"
+                aria-label={t('ui.ariaPause')}
                 className="grid h-9 w-9 place-items-center rounded-full border border-gold/50 bg-black/40 text-gold hover:brightness-125"
               >
                 <Pause className="h-4 w-4" />
@@ -186,7 +189,7 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
               <button
                 type="button"
                 onClick={onExit}
-                aria-label="Quit to menu"
+                aria-label={t('ui.ariaQuit')}
                 className="grid h-9 w-9 place-items-center rounded-full border border-parch/30 bg-black/40 text-parch/80 hover:brightness-125"
               >
                 <X className="h-4 w-4" />
@@ -201,8 +204,8 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
                 <div className="font-pirate text-lg leading-none text-red-200">{hud.target.name}</div>
                 <div className="flex items-center justify-center gap-2 text-[0.7rem] italic opacity-80">
                   <span>{hud.target.title}</span>
-                  <span>· {hud.target.distance} leagues</span>
-                  <span>· {hud.target.kind === 'beast' ? 'beast' : 'rival'}</span>
+                  <span>· {t('ui.leagues', { dist: hud.target.distance })}</span>
+                  <span>· {t(hud.target.kind === 'beast' ? 'ui.beast' : 'ui.rival')}</span>
                 </div>
                 <div className="mt-1 h-2 w-52 overflow-hidden rounded-full border border-parch/30 bg-black/50">
                   <div
@@ -219,9 +222,7 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
             <div className="pointer-events-none mt-2 flex justify-center">
               <div className="flex items-center gap-2 rounded-full border border-gold/50 bg-black/55 px-3 py-1 text-sm text-gold">
                 <Scroll className="h-3.5 w-3.5" />
-                <span>
-                  Contract: <b className="font-pirate">{hud.contract.name}</b> — {hud.contract.renown} renown
-                </span>
+                <span>{t('ui.chip', { name: hud.contract.name, renown: hud.contract.renown })}</span>
               </div>
             </div>
           )}
@@ -238,12 +239,12 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
                     onClick={dock}
                     className="pointer-events-auto flex items-center gap-2 font-pirate text-lg text-gold"
                   >
-                    <Anchor className="h-4 w-4" /> Put in at {hud.nearestPort.name} — tap or press F
+                    <Anchor className="h-4 w-4" /> {t('ui.dockA', { port: hud.nearestPort.name })}
                   </button>
                 ) : (
                   <span className="italic opacity-80">
                     <Ship className="mr-1 inline h-3.5 w-3.5" />
-                    Making for {hud.nearestPort.name} — take in sail to drop anchor
+                    {t('ui.towardA', { port: hud.nearestPort.name })}
                   </span>
                 )}
               </div>
@@ -277,19 +278,19 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
 
       {/* ---------------- Pause ---------------- */}
       {phase === 'paused' && (
-        <Overlay title="Hove To">
+        <Overlay title={t('ui.hoveTo')}>
           <div className="flex flex-col gap-3">
             <p className="text-center italic opacity-80">
-              The crew rests on their oars, Captain {name || 'stranger'}.
+              {t('ui.rest', { name: name || t('ui.stranger') })}
             </p>
             <MenuButton onClick={togglePause} icon={<Play className="h-5 w-5" />} primary>
-              Resume the Hunt
+              {t('ui.resumeHunt')}
             </MenuButton>
             <MenuButton onClick={newVoyage} icon={<Sailboat className="h-5 w-5" />}>
-              New Voyage
+              {t('ui.newVoyage')}
             </MenuButton>
             <MenuButton onClick={onExit} icon={<X className="h-5 w-5" />}>
-              Quit to Menu
+              {t('ui.quitMenu')}
             </MenuButton>
           </div>
           <Controls />
@@ -298,34 +299,32 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
 
       {/* ---------------- End ---------------- */}
       {(phase === 'over' || phase === 'victory') && hud && (
-        <Overlay title={phase === 'victory' ? 'The Chart Is Yours' : 'Lost With All Hands'} win={phase === 'victory'}>
+        <Overlay title={phase === 'victory' ? t('ui.win') : t('ui.lose')} win={phase === 'victory'}>
           <p className="mb-3 text-center italic opacity-85">
-            {phase === 'victory'
-              ? 'Every lair is empty and every rival is at the bottom. Sail home a legend.'
-              : 'The sea keeps your ship. Somewhere, a lair is still waiting.'}
+            {phase === 'victory' ? t('ui.winLine') : t('ui.loseLine')}
           </p>
           <div className="mx-auto mb-3 grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-            <span className="opacity-70">Renown</span>
-            <span className="text-right font-pirate text-lg text-gold">{hud.stats.renown.toLocaleString()}</span>
-            <span className="opacity-70">Rank</span>
+            <span className="opacity-70">{t('ui.renownLbl')}</span>
+            <span className="text-right font-pirate text-lg text-gold">{fmt(hud.stats.renown)}</span>
+            <span className="opacity-70">{t('ui.rankLbl')}</span>
             <span className="text-right">{hud.rank}</span>
-            <span className="opacity-70">Names crossed off</span>
+            <span className="opacity-70">{t('ui.crossed')}</span>
             <span className="text-right">
               {hud.stats.felled} / {TOTAL}
             </span>
-            <span className="opacity-70">Raiders sunk</span>
+            <span className="opacity-70">{t('ui.raidersLbl')}</span>
             <span className="text-right">{hud.stats.raiders}</span>
-            <span className="opacity-70">Ports called at</span>
+            <span className="opacity-70">{t('ui.portsCalled')}</span>
             <span className="text-right">{hud.stats.ports}</span>
-            <span className="opacity-70">Days at sea</span>
+            <span className="opacity-70">{t('ui.daysSea')}</span>
             <span className="text-right">{hud.stats.days}</span>
           </div>
           <div className="flex flex-col gap-3">
             <MenuButton onClick={newVoyage} icon={<Sailboat className="h-5 w-5" />} primary>
-              New Voyage
+              {t('ui.newVoyage')}
             </MenuButton>
-            <MenuButton onClick={onExit} icon={<X className="h-5 w-5" />}>
-              Quit to Menu
+            <MenuButton onClick={onExit} icon={<X className="h-5 w-5" />} primary={false}>
+              {t('ui.quitMenu')}
             </MenuButton>
           </div>
         </Overlay>
@@ -333,11 +332,11 @@ export function AdventureScreen({ name, settings, onExit, isTouch }: Props) {
 
       {/* ---------------- Help ---------------- */}
       {showHelp && (
-        <Overlay title="Ship's Orders" onClose={() => setShowHelp(false)}>
+        <Overlay title={t('ui.orders')} onClose={() => setShowHelp(false)}>
           <Controls />
           <div className="mt-4 flex justify-center">
             <MenuButton onClick={() => setShowHelp(false)} icon={<X className="h-5 w-5" />}>
-              Close
+              {t('ui.close')}
             </MenuButton>
           </div>
         </Overlay>
@@ -369,20 +368,22 @@ function PortPanel({
   onAbandon: () => void;
   onSetSail: () => void;
 }) {
+  const { t } = useTranslation(['adventure', 'regions']);
   const salvage = hud.salvage;
   return (
     <div className="absolute inset-0 z-50 flex items-stretch justify-center bg-black/55 p-2 sm:p-4">
       <div className="parchment anim-pop flex w-full max-w-2xl flex-col overflow-hidden text-ink">
         <div className="flex items-start justify-between gap-3 border-b-2 border-[#5b3a1a] px-4 py-3">
           <div>
-            <div className="text-[0.6rem] uppercase tracking-[0.2em] opacity-70">Harbour of</div>
+            <div className="text-[0.6rem] uppercase tracking-[0.2em] opacity-70">{t('adventure:ui.harbourOf')}</div>
             <h2 className="font-pirate text-3xl leading-none text-[#3b1d08]">{port.port.name}</h2>
             <div className="text-sm italic opacity-80">
-              {port.region.name} · {port.remaining} {port.remaining === 1 ? 'lair' : 'lairs'} still wakes
+              {t(`regions:chart.${port.port.region}`)} ·{' '}
+              {t(port.remaining === 1 ? 'adventure:ui.lairsOne' : 'adventure:ui.lairsOther', { n: port.remaining })}
             </div>
           </div>
           <button type="button" onClick={onSetSail} className="btn-seal flex shrink-0 items-center gap-2 px-4 py-2 text-lg">
-            <Sailboat className="h-4 w-4" /> Set Sail
+            <Sailboat className="h-4 w-4" /> {t('adventure:ui.setSail')}
           </button>
         </div>
 
@@ -390,39 +391,43 @@ function PortPanel({
           {/* bounty board */}
           <div className="rounded-lg border border-[#5b3a1a] bg-[#ecd49a] p-3">
             <div className="mb-1 flex items-center gap-2 font-pirate text-lg text-[#3b1d08]">
-              <Scroll className="h-4 w-4" /> The Bounty Board
+              <Scroll className="h-4 w-4" /> {t('adventure:ui.bounty')}
             </div>
             {hud.contract ? (
               <div>
                 <p className="text-sm italic">
-                  You sail under contract for <b>{port.activeContract?.name ?? 'a name on the chart'}</b>.{' '}
-                  {port.activeContract?.title && <span>“{port.activeContract.title}”</span>}
+                  {t('adventure:ui.underContract', {
+                    name: port.activeContract?.name ?? t('adventure:ui.aName'),
+                    title: port.activeContract?.title ?? '',
+                  })}
                 </p>
                 <button type="button" onClick={onAbandon} className="btn-wood mt-2 px-3 py-1.5 text-sm">
-                  Tear up the contract
+                  {t('adventure:ui.tearUpBtn')}
                 </button>
               </div>
             ) : port.offer ? (
               <div>
                 <p className="text-sm italic">
-                  “{port.offer.name}” — <b>{port.offer.title}</b>. The harbourmaster will pay{' '}
-                  <b>{port.offer.renown} renown</b> and <b>{port.offer.salvage} salvage</b> for proof.
+                  {t('adventure:ui.offerLine', {
+                    name: port.offer.name,
+                    title: port.offer.title,
+                    renown: port.offer.renown,
+                    salvage: port.offer.salvage,
+                  })}
                 </p>
                 <button type="button" onClick={onTake} className="btn-seal mt-2 px-3 py-1.5 text-sm">
-                  <Swords className="mr-1 inline h-3.5 w-3.5" /> Sign the contract
+                  <Swords className="mr-1 inline h-3.5 w-3.5" /> {t('adventure:ui.sign')}
                 </button>
               </div>
             ) : (
-              <p className="text-sm italic opacity-80">
-                The board is bare — there is nothing left on the chart worth paying for.
-              </p>
+              <p className="text-sm italic opacity-80">{t('adventure:ui.bare')}</p>
             )}
           </div>
 
           {/* shipyard */}
           <div className="mt-3 rounded-lg border border-[#5b3a1a] bg-[#ecd49a] p-3">
             <div className="mb-2 flex items-center gap-2 font-pirate text-lg text-[#3b1d08]">
-              <Waves className="h-4 w-4" /> Shipyard
+              <Waves className="h-4 w-4" /> {t('adventure:ui.shipyard')}
             </div>
             <div className="mb-2">
               <button
@@ -431,7 +436,7 @@ function PortPanel({
                 onClick={onRepair}
                 className="btn-wood px-3 py-1.5 text-sm disabled:opacity-30"
               >
-                Caulk the Hull ({port.repair} salvage)
+                {t('adventure:ui.caulk', { cost: port.repair })}
               </button>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -448,11 +453,11 @@ function PortPanel({
                     className="rounded border border-[#5b3a1a] bg-[#d9bd7e] px-2 py-1.5 text-left text-sm disabled:opacity-40"
                   >
                     <div className="font-pirate leading-tight text-[#3b1d08]">
-                      {def.name} <span className="opacity-70">· {r.level}/{def.max}</span>
+                      {t(`adventure:refits.${r.id}.name`)} <span className="opacity-70">· {r.level}/{def.max}</span>
                     </div>
-                    <div className="text-[0.7rem] opacity-80">{def.desc}</div>
+                    <div className="text-[0.7rem] opacity-80">{t(`adventure:refits.${r.id}.desc`)}</div>
                     <div className="text-[0.7rem] font-semibold text-[#1d6e3a]">
-                      {maxed ? 'No more can be done' : `${r.cost} salvage`}
+                      {maxed ? t('adventure:ui.noMore') : t('adventure:ui.costSalv', { cost: r.cost })}
                     </div>
                   </button>
                 );
@@ -463,10 +468,10 @@ function PortPanel({
 
         <div className="flex items-center justify-between gap-3 border-t-2 border-[#5b3a1a] px-4 py-2 text-sm">
           <div>
-            Renown <b>{hud.renown.toLocaleString()}</b> · Salvage{' '}
-            <b className="text-[#1d6e3a]">{salvage.toLocaleString()}</b>
+            {t('adventure:ui.footerRenown')} <b>{fmt(hud.renown)}</b> · {t('adventure:ui.footerSalvage')}{' '}
+            <b className="text-[#1d6e3a]">{fmt(salvage)}</b>
           </div>
-          <div className="italic opacity-70">Captain {captain || 'stranger'}</div>
+          <div className="italic opacity-70">{t('adventure:ui.captain', { name: captain || t('adventure:ui.stranger') })}</div>
         </div>
       </div>
     </div>
@@ -497,20 +502,17 @@ function Toast({ m }: { m: LogMsg }) {
 }
 
 function Controls() {
+  const { t } = useTranslation('adventure');
   return (
     <div className="max-w-md space-y-1 text-sm leading-snug opacity-90">
-      <p className="mb-1 text-center font-pirate text-xl text-gold">Helm &amp; Hunt</p>
-      <Row k="A / D or ← →" v="Steer the ship" />
-      <Row k="W / S or ↑ ↓" v="Raise / trim the sails" />
-      <Row k="Q / E" v="Fire port / starboard broadside" />
-      <Row k="Space" v="Fire both batteries at whatever is near" />
-      <Row k="F" v="Drop anchor at a port — refit and sign contracts" />
-      <Row k="P / Esc" v="Pause" />
-      <p className="pt-1 italic opacity-75">
-        Ten lairs are marked on the chart: sea beasts and named rivals. Sail within reach and they wake. Take
-        salvage from prizes to refit in port, sign contracts at the bounty board, and cross every name off to
-        win the chart.
-      </p>
+      <p className="mb-1 text-center font-pirate text-xl text-gold">{t('ui.helmHunt')}</p>
+      <Row k="A / D or ← →" v={t('ui.steer')} />
+      <Row k="W / S or ↑ ↓" v={t('ui.sails')} />
+      <Row k="Q / E" v={t('ui.broad')} />
+      <Row k="Space" v={t('ui.spaceA')} />
+      <Row k="F" v={t('ui.anchorA')} />
+      <Row k="P / Esc" v={t('ui.pauseRow')} />
+      <p className="pt-1 italic opacity-75">{t('ui.goalA')}</p>
     </div>
   );
 }
@@ -535,6 +537,7 @@ function Overlay({
   win?: boolean;
   onClose?: () => void;
 }) {
+  const { t } = useTranslation('adventure');
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/65 p-4">
       <div className="arcade-panel anim-pop w-full max-w-md p-5 text-center">
@@ -546,7 +549,7 @@ function Overlay({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('ui.ariaClose')}
             className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full border border-parch/30 text-parch/70 hover:brightness-125"
           >
             <X className="h-4 w-4" />

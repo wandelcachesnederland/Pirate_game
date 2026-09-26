@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
   Dices,
@@ -16,7 +17,8 @@ import type { DifficultyId, EraId } from '../game/types';
 import { DIFFICULTIES, difficultyById } from '../game/difficulty';
 import type { ScoreEntry, Settings } from '../game/storage';
 import { isTypingTarget } from '../game/input';
-import { HighScoreTable, KeyCap, SoundToggles } from './ui';
+import { fmt } from '../i18n';
+import { HighScoreTable, KeyCap, LanguagePicker, SoundToggles } from './ui';
 import { EraCarousel } from './EraCarousel';
 import { HeroShipPicker } from './HeroShipPicker';
 import { TitleStep } from './TitleStep';
@@ -121,6 +123,7 @@ const PIRATE_NAMES = [
 
 /** Step three, filling the screen: the captain signs the book. */
 export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s: string) => void; isTouch: boolean }) {
+  const { t } = useTranslation('menu');
   const inputRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
     if (!isTouch) inputRef.current?.focus();
@@ -135,22 +138,22 @@ export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s
   return (
     <div className="grid h-full place-items-center overflow-y-auto no-scrollbar p-2 sm:p-4">
       <div className="anim-pop w-full max-w-xl text-center">
-        <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 3 of 7 · Sign On</div>
-        <h1 className="title-gold mt-1 text-[3.2rem] leading-[0.9] sm:text-7xl">Broadside!</h1>
+        <div className="arcade-tag text-[0.6rem] sm:text-xs">{t('signon.stepTag')}</div>
+        <h1 className="title-gold mt-1 text-[3.2rem] leading-[0.9] sm:text-7xl">{t('brand')}</h1>
         <div className="mt-1 flex items-center justify-center gap-2 text-parch/90 sm:gap-3">
           <Skull className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span className="font-fell text-[0.6rem] uppercase italic tracking-[0.28em] sm:text-xs">
-            Scourge of the Spanish Main
+            {t('tagline')}
           </span>
           <Skull className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </div>
 
         <div className="arcade-panel mt-4 p-3 text-left sm:mt-6 sm:p-5">
           <div className="marquee-bulbs opacity-70" aria-hidden />
-          <h2 className="arcade-marquee mt-2 text-2xl sm:text-3xl">Sign On</h2>
-          <p className="mb-2 text-[0.72rem] italic opacity-70">The book of legends wants your mark.</p>
+          <h2 className="arcade-marquee mt-2 text-2xl sm:text-3xl">{t('signon.heading')}</h2>
+          <p className="mb-2 text-[0.72rem] italic opacity-70">{t('signon.bookLine')}</p>
           <label htmlFor="captain" className="arcade-tag mb-1 block text-[0.58rem] opacity-90">
-            Captain&apos;s Name
+            {t('signon.captainLabel')}
           </label>
           <div className="flex gap-2">
             <input
@@ -168,23 +171,21 @@ export function SignOnStep({ name, onName, isTouch }: { name: string; onName: (s
             <button
               type="button"
               onClick={rollName}
-              title="A name from the legends"
-              aria-label="Pick a pirate name"
+              title={t('signon.diceTitle')}
+              aria-label={t('signon.diceAria')}
               className="arcade-arrow grid w-12 shrink-0 place-items-center sm:w-14"
             >
               <Dices className="h-6 w-6" />
             </button>
           </div>
           <p className="mt-2 text-center text-[0.74rem] italic leading-snug opacity-80">
-            {isTouch ? 'Then tap Next to choose your peril.' : 'Press Enter (or Next below) when the name suits.'}
+            {isTouch ? t('signon.hintTouch') : t('signon.hintKeys')}
           </p>
           <div className="mt-3 rounded-lg border border-parch/25 bg-black/30 p-2 text-[0.72rem] italic leading-snug opacity-85">
-            Next: your peril — five flags of danger, from a calm cruise to a sea of hunters.
+            {t('signon.nextBox')}
           </div>
         </div>
-        <p className="mt-3 text-[0.7rem] italic opacity-60">
-          New hand aboard? <b>Orders &amp; Legends</b> at the bottom has the controls.
-        </p>
+        <p className="mt-3 text-[0.7rem] italic opacity-60">{t('newHandBottom')}</p>
       </div>
     </div>
   );
@@ -219,21 +220,22 @@ function ChoiceChips({
   showEra?: boolean;
   onJump: (step: Step) => void;
 }) {
+  const { t } = useTranslation(['common', 'peril', 'eras']);
   const peril = difficultyById(difficulty);
   const ship = eraShip(era);
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <button type="button" onClick={() => onJump(3)} title="Change captain" className={CHIP}>
-        {name.trim() || 'Nameless'}
+      <button type="button" onClick={() => onJump(3)} title={t('common:changeCaptain')} className={CHIP}>
+        {name.trim() || t('common:nameless')}
         <Pencil className="h-3.5 w-3.5 opacity-70" />
       </button>
-      <button type="button" onClick={() => onJump(4)} title="Change peril" className={CHIP}>
-        {'☠'.repeat(peril.skulls)} {peril.name}
+      <button type="button" onClick={() => onJump(4)} title={t('common:changePeril')} className={CHIP}>
+        {'☠'.repeat(peril.skulls)} {t(`peril:${difficulty}.name`)}
         <Pencil className="h-3.5 w-3.5 opacity-70" />
       </button>
       {showEra && (
-        <button type="button" onClick={() => onJump(5)} title="Change era" className={CHIP}>
-          {ship.era} · {ship.year}
+        <button type="button" onClick={() => onJump(5)} title={t('common:changeEra')} className={CHIP}>
+          {t(`eras:${era}.name`)} · {ship.year}
           <Pencil className="h-3.5 w-3.5 opacity-70" />
         </button>
       )}
@@ -243,45 +245,42 @@ function ChoiceChips({
 
 /** Step five, filling the screen: the age and the waters it is fought in. */
 export function EraStep({ era, onEra, name, difficulty, onJump }: PickStepProps) {
+  const { t } = useTranslation('eras');
   return (
     <div className="flex h-full min-h-0 flex-col gap-1.5 overflow-y-auto no-scrollbar p-2 sm:gap-2 sm:p-3">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-2 gap-y-1">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 5 of 7 · Era &amp; Waters</div>
-          <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">Choose Your Era</h2>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">{t('ui.stepTag')}</div>
+          <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">{t('ui.heading')}</h2>
         </div>
         <ChoiceChips name={name} difficulty={difficulty} era={era} onJump={onJump} />
       </div>
       <EraCarousel era={era} onEra={onEra} />
-      <p className="shrink-0 text-center text-[0.64rem] italic leading-snug opacity-60">
-        Drag the card, tap a plate or use ← → — the age sets the waters you fight in, the foes you meet and the
-        tapes that play. Her hero hull waits on the next screen.
-      </p>
+      <p className="shrink-0 text-center text-[0.64rem] italic leading-snug opacity-60">{t('ui.hint')}</p>
     </div>
   );
 }
 
 /** Step six, filling the screen: the hero hull you take into those waters. */
 export function ShipStep({ era, onEra, name, difficulty, arcadeMode, onJump }: PickStepProps) {
+  const { t } = useTranslation('eras');
   const isCampaign = arcadeMode === 'campaign';
   return (
     <div className="flex h-full min-h-0 flex-col gap-1.5 overflow-y-auto no-scrollbar p-2 sm:gap-2 sm:p-3">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-2 gap-y-1">
         <div>
           <div className="arcade-tag text-[0.6rem] sm:text-xs">
-            {isCampaign ? 'Step 6 of 7 · Campaign Ship' : 'Step 6 of 7 · Hero Ship'}
+            {isCampaign ? t('shipStep.stepTagCampaign') : t('shipStep.stepTag')}
           </div>
           <h2 className="arcade-marquee text-xl leading-none sm:text-3xl">
-            {isCampaign ? 'Choose Your Campaign Ship' : 'Choose Your Hero Ship'}
+            {isCampaign ? t('shipStep.headingCampaign') : t('shipStep.heading')}
           </h2>
         </div>
         <ChoiceChips name={name} difficulty={difficulty} era={era} showEra={!isCampaign} onJump={onJump} />
       </div>
       <HeroShipPicker era={era} onEra={onEra} />
       <p className="shrink-0 text-center text-[0.64rem] italic leading-snug opacity-60">
-        {isCampaign
-          ? 'This hull will carry you through all 26 eras — every age, same ship, upgrades kept. Set Sail when she suits.'
-          : 'Drag the portrait, tap a hull or use ← → — every number is measured against the whole fleet of heroes, and each hull sails only her own age. Set Sail when she suits.'}
+        {isCampaign ? t('shipStep.hintCampaign') : t('shipStep.hint')}
       </p>
     </div>
   );
@@ -305,6 +304,8 @@ function HelpOverlay({
   onSettings: (s: Settings) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation('screens');
+  const flagship = ERA_FLAGSHIPS[era];
   return (
     <div
       className="anim-fade absolute inset-0 z-20 flex items-center justify-center bg-black/75 p-2 sm:p-4"
@@ -316,54 +317,33 @@ function HelpOverlay({
       >
         <div className="mb-2 flex items-start justify-between gap-3">
           <div>
-            <h2 className="arcade-marquee text-2xl sm:text-4xl">Ship&apos;s Orders</h2>
-            <p className="text-[0.7rem] italic opacity-70">Controls, and the legends of the Spanish Main.</p>
+            <h2 className="arcade-marquee text-2xl sm:text-4xl">{t('help.title')}</h2>
+            <p className="text-[0.7rem] italic opacity-70">{t('help.subtitle')}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('help.close')}
             className="arcade-arrow grid h-10 w-10 shrink-0 place-items-center"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="mb-3 text-sm leading-snug text-parch/90">
-          Before naval cannon your weapons are bows, winch-drawn bolt launchers and sling stones — and,
-          in the Byzantine and Arab seas, Greek fire from bronze siphons and fire arrows. Same controls,
-          no cannonballs. Nothing goes off on impact in those waters: fire is what kills, so a burning
-          hull takes damage over time, and burning naphtha spread by a shot that fell short keeps
-          burning on the water. Boarding takes prisoners. Inhabited islands may share a people or a defence
-          pact: anger one enough to start a fight, and all its kin and allies attack when you approach.
-          Island labels identify their people, alliance and hostility. Leave them alone and tempers cool.
-        </p>
+        <p className="mb-3 text-sm leading-snug text-parch/90">{t('help.intro')}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <section>
             <h3 className="mb-1 flex items-center gap-2 font-pirate text-xl">
               {isTouch ? <Hand className="h-5 w-5" /> : <Keyboard className="h-5 w-5" />}
-              At the Helm
+              {t('help.atHelm')}
             </h3>
             {isTouch ? (
               <ul className="space-y-1 text-[0.95rem] leading-snug">
-                <li>
-                  <b className="font-pirate text-lg">Left thumb:</b> drag anywhere on the left half to steer — push
-                  further for full sail.
-                </li>
-                <li>
-                  <b className="font-pirate text-lg">Right thumb:</b> tap or hold <b>FIRE</b> for a broadside at the
-                  nearest foe.
-                </li>
-                <li>Weapons fire from the ship&apos;s <b>sides</b> — turn broadside to the enemy!</li>
-                <li>
-                  Mauled foes may <b>strike their colours</b> — close in and tap <b>BOARD</b> for the full prize, her
-                  crew and her flag!
-                </li>
-                <li>
-                  Buy <b>Grape &amp; Canister</b> (in early eras <b>Arrow Storm</b>, or a <b>Fire Pot Volley</b> where the siphons are) and a special-fire button appears — one tap sweeps canoes and
-                  boarding parties off your hull. Island war canoes only fight near their own beach, so sail clear of
-                  their waters to shake them off.
-                </li>
+                <li>{t('help.touchSteer')}</li>
+                <li>{t('help.touchFire')}</li>
+                <li>{t('help.touchSides')}</li>
+                <li>{t('help.touchBoard')}</li>
+                <li>{t('help.touchGrape')}</li>
               </ul>
             ) : (
               <ul className="divide-y divide-parch/15">
@@ -372,24 +352,24 @@ function HelpOverlay({
                     <>
                       <KeyCap>A</KeyCap>
                       <KeyCap>D</KeyCap>
-                      <span className="px-0.5 text-xs opacity-60">or</span>
+                      <span className="px-0.5 text-xs opacity-60">{t('help.or')}</span>
                       <KeyCap>←</KeyCap>
                       <KeyCap>→</KeyCap>
                     </>
                   }
-                  label="Steer the ship"
+                  label={t('help.steer')}
                 />
                 <Row
                   keys={
                     <>
                       <KeyCap>W</KeyCap>
                       <KeyCap>S</KeyCap>
-                      <span className="px-0.5 text-xs opacity-60">or</span>
+                      <span className="px-0.5 text-xs opacity-60">{t('help.or')}</span>
                       <KeyCap>↑</KeyCap>
                       <KeyCap>↓</KeyCap>
                     </>
                   }
-                  label="Raise / trim sails"
+                  label={t('help.sails')}
                 />
                 <Row
                   keys={
@@ -398,17 +378,17 @@ function HelpOverlay({
                       <KeyCap>E</KeyCap>
                     </>
                   }
-                  label="Fire port / starboard broadside"
+                  label={t('help.broadsides')}
                 />
                 <Row
                   keys={
                     <>
                       <KeyCap className="px-3">Space</KeyCap>
-                      <span className="px-0.5 text-xs opacity-60">or</span>
-                      <KeyCap>Click</KeyCap>
+                      <span className="px-0.5 text-xs opacity-60">{t('help.or')}</span>
+                      <KeyCap>{t('help.click')}</KeyCap>
                     </>
                   }
-                  label="Smart broadside (auto-aim)"
+                  label={t('help.smart')}
                 />
                 <Row
                   keys={
@@ -416,7 +396,7 @@ function HelpOverlay({
                       <KeyCap>F</KeyCap>
                     </>
                   }
-                  label="Board a surrendered ship"
+                  label={t('help.board')}
                 />
                 <Row
                   keys={
@@ -424,7 +404,7 @@ function HelpOverlay({
                       <KeyCap>R</KeyCap>
                     </>
                   }
-                  label="Grapeshot / Arrow Storm / Fire Pot Volley — sweep the deck (once fitted)"
+                  label={t('help.grape')}
                 />
                 <Row
                   keys={
@@ -434,7 +414,7 @@ function HelpOverlay({
                       <KeyCap>M</KeyCap>
                     </>
                   }
-                  label="Pause · Mute"
+                  label={t('help.pauseMute')}
                 />
               </ul>
             )}
@@ -445,31 +425,20 @@ function HelpOverlay({
             <div className="mt-3 rounded-lg border border-parch/25 bg-black/30 p-2 text-[0.85rem] italic leading-snug">
               <p className="flex items-start gap-2">
                 <Wind className="mt-0.5 h-4 w-4 shrink-0" />
-                {isSteelHull(ERA_FLAGSHIPS[era].hullStyle) ? (
-                  <span>
-                    A <b>powered warship</b> — she burns coal and oil, so the wind means nothing to her. Sink ships in
-                    quick succession to build a <b>plunder streak</b> multiplier!
-                  </span>
-                ) : ERA_FLAGSHIPS[era].oared ? (
-                  <span>
-                    An <b>oared hull</b> — the wind means nothing to her. Row straight at them and sink ships in quick
-                    succession to build a <b>plunder streak</b> multiplier!
-                  </span>
-                ) : (
-                  <span>
-                    Sail <b>with the wind</b> for top speed — watch the compass. Sink ships in quick succession to
-                    build a <b>plunder streak</b> multiplier!
-                  </span>
-                )}
+                <span>
+                  {isSteelHull(flagship.hullStyle)
+                    ? t('help.poweredNote')
+                    : flagship.oared
+                      ? t('help.oaredNote')
+                      : t('help.sailNote')}{' '}
+                  {t('help.streakNote')}
+                </span>
               </p>
             </div>
             <div className="mt-2 rounded-lg border border-parch/25 bg-black/30 p-2 text-[0.85rem] italic leading-snug">
               <p className="flex items-start gap-2">
                 <Flag className="mt-0.5 h-4 w-4 shrink-0" />
-                <span>
-                  A sinking takes most of her treasure down — but a <b>boarded prize</b> pays her full cargo, her
-                  stores, her crew and her <b>colours</b>. Mind treachery, scuttling and fever!
-                </span>
+                <span>{t('help.prizeNote')}</span>
               </p>
             </div>
             <div className="mt-auto pt-3">
@@ -484,24 +453,14 @@ function HelpOverlay({
 
 // ------------------------------------------------------------------ the flow
 
-const STEP_LABEL: Record<Step, string> = {
-  0: 'Attract Mode',
-  1: 'Game Mode',
-  2: 'Arcade Mode',
-  3: 'Sign On',
-  4: 'Peril',
-  5: 'Era',
-  6: 'Hero Ship',
-};
-
 /** The ladder on the cabinet face: one plate per decision after the title. */
-const STEP_PLATES: { n: 1 | 2 | 3 | 4 | 5 | 6; label: string }[] = [
-  { n: 1, label: 'Mode' },
-  { n: 2, label: 'Arcade' },
-  { n: 3, label: 'Sign On' },
-  { n: 4, label: 'Peril' },
-  { n: 5, label: 'Era' },
-  { n: 6, label: 'Hero Ship' },
+const STEP_PLATES: { n: 1 | 2 | 3 | 4 | 5 | 6; key: string }[] = [
+  { n: 1, key: 'mode' },
+  { n: 2, key: 'arcade' },
+  { n: 3, key: 'signOn' },
+  { n: 4, key: 'peril' },
+  { n: 5, key: 'era' },
+  { n: 6, key: 'heroShip' },
 ];
 
 /**
@@ -524,6 +483,7 @@ export function StartScreen({
   onMode,
   nowPlaying,
 }: Props) {
+  const { t } = useTranslation(['menu', 'common', 'screens']);
   const [step, setStep] = useState<Step>(0);
   const [dir, setDir] = useState<'fwd' | 'back'>('fwd');
   const [stage, setStage] = useState<'in' | 'out'>('in');
@@ -648,15 +608,15 @@ export function StartScreen({
         <header className="arcade-panel mx-2 mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-2.5 py-1.5 sm:mx-3 sm:mt-3 sm:px-4">
           <div className="flex items-center gap-2">
             <Skull className="h-4 w-4 text-gold sm:h-5 sm:w-5" />
-            <span className="arcade-marquee text-xl leading-none sm:text-2xl">Broadside!</span>
+            <span className="arcade-marquee text-xl leading-none sm:text-2xl">{t('menu:brand')}</span>
           </div>
           {step === 0 ? (
             <div className="order-last flex w-full items-center justify-center gap-1.5 sm:order-none sm:w-auto">
-              <span className="arcade-tag text-[0.6rem] opacity-70 sm:text-xs">{STEP_LABEL[0]}</span>
+              <span className="arcade-tag text-[0.6rem] opacity-70 sm:text-xs">{t('menu:stepLabel0')}</span>
               {settings.music && nowPlaying && (
                 <span
                   className="flex items-center gap-1 rounded-full border border-gold/40 bg-black/40 px-2 py-0.5 text-[0.56rem] italic text-gold/85 sm:text-[0.62rem]"
-                  title="On the menu's deck"
+                  title={t('menu:deckTitle')}
                 >
                   <Music className="h-3 w-3 shrink-0" />
                   <span className="max-w-[12rem] truncate">{nowPlaying}</span>
@@ -665,17 +625,17 @@ export function StartScreen({
             </div>
           ) : (
             <div className="order-last flex w-full items-center justify-center gap-1 sm:order-none sm:w-auto sm:gap-1.5">
-              {STEP_PLATES.map(({ n, label }, i) => (
+              {STEP_PLATES.map(({ n, key }, i) => (
                 <span key={n} className="flex items-center gap-1 sm:gap-1.5">
                   {i > 0 && <span className="font-pirate text-lg text-gold/70">›</span>}
-                  <StepPlate n={n} label={label} state={plate(n)} onClick={step > n ? () => go(n) : undefined} />
+                  <StepPlate n={n} label={t(`menu:plates.${key}`)} state={plate(n)} onClick={step > n ? () => go(n) : undefined} />
                 </span>
               ))}
             </div>
           )}
           <div className="flex items-center gap-2 text-[0.56rem] sm:text-[0.64rem]">
-            <span className="arcade-tag">Hi-Score {hiScore.toLocaleString()}</span>
-            <span className="arcade-tag anim-blink hidden sm:inline">Insert Coin</span>
+            <span className="arcade-tag">{t('common:hiScore', { score: fmt(hiScore) })}</span>
+            <span className="arcade-tag anim-blink hidden sm:inline">{t('common:insertCoin')}</span>
           </div>
         </header>
 
@@ -719,12 +679,13 @@ export function StartScreen({
               className="btn-wood flex items-center gap-1.5 rounded-full px-3 py-1.5 font-pirate text-lg"
             >
               <BookOpen className="h-4 w-4" />
-              Orders &amp; Legends
+              {t('screens:help.button')}
             </button>
+            <LanguagePicker dark />
           </div>
           {step === 0 ? (
             <div className="arcade-tag text-[0.6rem] opacity-70 sm:text-xs">
-              {isTouch ? '1 coin · 1 play' : 'Enter — start · M — mute'}
+              {isTouch ? t('menu:footer.coinTouch') : t('menu:footer.coinKeys')}
             </div>
           ) : (
             <div className="flex flex-1 items-center justify-end gap-2 sm:flex-none">
@@ -733,7 +694,7 @@ export function StartScreen({
                 onClick={back}
                 className="arcade-arrow px-3 py-1.5 font-pirate text-lg sm:px-4"
               >
-                ◂ Back
+                {t('common:back')}
               </button>
               <button
                 type="button"
@@ -742,20 +703,20 @@ export function StartScreen({
               >
                 <Sailboat className="h-6 w-6 sm:h-7 sm:w-7" />
                 {step === 1
-                  ? 'Arcade ▸'
+                  ? t('menu:launch.arcade')
                   : step === 2
                     ? arcadeMode === 'campaign'
-                      ? 'Campaign ▸'
+                      ? t('menu:launch.campaign')
                       : arcadeMode === 'era'
-                        ? 'Era ▸'
-                        : 'Next ▸'
+                        ? t('menu:launch.era')
+                        : t('menu:launch.next')
                     : step === 3
-                      ? 'Next: Peril ▸'
+                      ? t('menu:launch.nextPeril')
                       : step === 4
-                        ? 'Next: Era ▸'
+                        ? t('menu:launch.nextEra')
                         : step === 5
-                          ? 'Next: Hero Ship ▸'
-                          : 'Set Sail!'}
+                          ? t('menu:launch.nextHeroShip')
+                          : t('menu:launch.sail')}
               </button>
             </div>
           )}

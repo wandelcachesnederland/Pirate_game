@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { paintSplashFrame, restFrame, splashFrame, type SplashFrame } from '../game/splash/anim';
 import { FANFARE_HIT, SplashFanfare } from '../game/splash/fanfare';
 
@@ -41,6 +42,7 @@ const prefersReducedMotion = () =>
  * starts the sting and the whole card with it.
  */
 export function SplashScreen({ music, onFadeStart, onDone }: Props) {
+  const { t } = useTranslation('screens');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [phase, setPhase] = useState<Phase>('waiting');
   const [fadeMs, setFadeMs] = useState(FADE_MS);
@@ -160,16 +162,16 @@ export function SplashScreen({ music, onFadeStart, onDone }: Props) {
         pointerEvents: phase === 'fading' ? 'none' : 'auto',
       }}
       role="img"
-      aria-label="Bit Squirrel presents"
+      aria-label={t('splash.presents')}
     >
       <div className="bitsq-scanlines pointer-events-none absolute inset-0" aria-hidden />
       <div className={`bitsq-card-in flex flex-col items-center gap-6 ${phase === 'waiting' ? 'bitsq-card-wait' : ''}`}>
         <canvas ref={canvasRef} className={`bitsq-logo ${hit && !reduced.current ? 'bitsq-logo-hit' : ''}`} />
         <div className="bitsq-caption h-6">
           {phase === 'waiting' ? (
-            <span className="bitsq-blink">Press any key or tap</span>
+            <span className="bitsq-blink">{t('splash.pressAnyKey')}</span>
           ) : (
-            <span className={hit ? 'bitsq-presents bitsq-presents-on' : 'bitsq-presents'}>presents</span>
+            <span className={hit ? 'bitsq-presents bitsq-presents-on' : 'bitsq-presents'}>{t('splash.presentsShort')}</span>
           )}
         </div>
       </div>

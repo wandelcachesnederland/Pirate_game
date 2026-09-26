@@ -10,6 +10,7 @@
 // Like the Trade engine it owns its own requestAnimationFrame loop, canvas and
 // input, so the arcade combat engine is untouched.
 
+import i18n from '../../i18n';
 import { Input } from '../input';
 import { angDiff, TAU, clamp } from '../math';
 import { WORLD_W, WORLD_H, DEG, isLand, nudgeToSea } from '../chart/world';
@@ -24,7 +25,10 @@ import {
   contractOffer,
   liveFoes,
   nearestFoe,
-  rankFor,
+  foeNameL,
+  foeTaleL,
+  foeTitleL,
+  rankIndexFor,
   refitCost,
   repairCost,
   type Contract,
@@ -210,8 +214,8 @@ export class AdventureEngine {
     this.activePortId = null;
     this.phase = 'sailing';
     this.over = false;
-    this.pushMessage('You weigh anchor at Port Royal with a hold full of shot and no reputation at all.', 'good');
-    this.pushMessage('Ten names are on the chart. Ten lairs. Sail close and they will wake.', 'info');
+    this.pushMessage(i18n.t('adventure:log.weigh'), 'good');
+    this.pushMessage(i18n.t('adventure:log.ten'), 'info');
   }
 
   private makeFoe(def: FoeDef): FoeState {
@@ -380,7 +384,7 @@ export class AdventureEngine {
         f.goingHome = false;
         if (f.def.kind === 'beast') this.audio.roar();
         else this.audio.stinger();
-        this.pushMessage(`${f.def.name} — ${f.def.title}. ${f.def.tale}`, 'fight');
+        this.pushMessage(i18n.t('adventure:log.wake', { name: foeNameL(f.def.id), title: foeTitleL(f.def.id), tale: foeTaleL(f.def.id) }), 'fight');
       }
       if (f.awake && !f.goingHome && (dist > GIVE_UP || lairDist > LEASH_RANGE)) {
         f.goingHome = true;
@@ -431,7 +435,7 @@ export class AdventureEngine {
           p.hp -= f.def.damage * 0.8;
           p.hitFlash = 1;
           this.audio.crunch();
-          this.pushMessage(`${f.def.name} takes the hull in its teeth!`, 'fight');
+          this.pushMessage(i18n.t('adventure:log.teeth', { name: foeNameL(f.def.id) }), 'fight');
         }
       }
     }
@@ -447,13 +451,13 @@ export class AdventureEngine {
       if (this.contract?.foeId === f.def.id) {
         this.renown += this.contract.renown;
         this.salvage += this.contract.salvage;
-        bonus = ` The bounty is paid: +${this.contract.renown} renown, +${this.contract.salvage} salvage.`;
+        bonus = i18n.t('adventure:log.bonus', { renown: this.contract.renown, salvage: this.contract.salvage });
         this.contract = null;
       }
       this.renown += f.def.renown;
       this.salvage += f.def.salvage;
       this.audio.renown();
-      this.pushMessage(`${f.def.name} is finished! +${f.def.renown} renown, +${f.def.salvage} salvage.${bonus}`, 'good');
+      this.pushMessage(i18n.t('adventure:log.finished', { name: foeNameL(f.def.id), renown: f.def.renown, salvage: f.def.salvage, bonus }), 'good');
       this.save();
     }
   }
@@ -550,7 +554,7 @@ export class AdventureEngine {
       this.salvage += loot;
       this.renown += fame;
       this.audio.coin();
-      this.pushMessage(`A raider strikes her colours — ${loot} salvage, +${fame} renown.`, 'good');
+      this.pushMessage(i18n.t('adventure:log.raider', { loot, fame }), 'good');
     }
   }
 
@@ -633,7 +637,7 @@ export class AdventureEngine {
     this.player.vy = 0;
     this.player.sail = 0;
     this.stats.ports.add(portId);
-    this.pushMessage(`Anchor down at ${port.name}. The tavern has a bounty board.`, 'port');
+    this.pushMessage(i18n.t('adventure:log.anchor', { port: port.name }), 'port');
     this.audio.dock();
     this.cb.onPhase?.(this.phase);
     this.save();
@@ -661,7 +665,7 @@ export class AdventureEngine {
     this.salvage -= cost;
     this.player.hp = this.player.maxHp;
     this.audio.coin();
-    this.pushMessage(`Shipwrights caulk the hull for ${cost} salvage.`, 'good');
+    this.pushMessage(i18n.t('adventure:log.caulk', { cost }), 'good');
     this.save();
   }
 
@@ -683,7 +687,7 @@ export class AdventureEngine {
     } else if (id === 'gunners') p.reload = Math.max(0.45, p.reload - 0.12);
     else if (id === 'copper') p.speed += 4;
     this.audio.coin();
-    this.pushMessage(`Refit taken at the yard.`, 'good');
+    this.pushMessage(i18n.t('adventure:log.refitTaken'), 'good');
     this.save();
     return true;
   }
@@ -701,14 +705,14 @@ export class AdventureEngine {
     if (!offer) return;
     this.contract = offer;
     const foe = FOE_BY_ID[offer.foeId];
-    if (foe) this.pushMessage(`Contract signed: ${foe.name}. ${offer.renown} renown on delivery.`, 'port');
+    if (foe) this.pushMessage(i18n.t('adventure:log.contract', { name: foeNameL(foe.id), renown: offer.renown }), 'port');
     this.audio.dock();
     this.save();
   }
 
   abandonContract() {
     if (!this.contract) return;
-    this.pushMessage('You tear up the contract. No bounty for that one.', 'info');
+    this.pushMessage(i18n.t('adventure:log.tearUp'), 'info');
     this.contract = null;
     this.save();
   }
@@ -718,7 +722,7 @@ export class AdventureEngine {
     if (this.player.hp <= 0 && !this.over) {
       this.over = true;
       this.phase = 'over';
-      this.pushMessage('The sea takes your ship, and the chart keeps its secrets.', 'fight');
+      this.pushMessage(i18n.t('adventure:log.seaTakes'), 'fight');
       this.cb.onPhase?.(this.phase);
       this.clearSave();
       return;
@@ -726,7 +730,7 @@ export class AdventureEngine {
     if (this.foes.length === 0 && !this.over) {
       this.over = true;
       this.phase = 'victory';
-      this.pushMessage('Every name on the chart has been crossed out. The chart is yours.', 'good');
+      this.pushMessage(i18n.t('adventure:log.crossed'), 'good');
       this.audio.fanfare();
       this.cb.onPhase?.(this.phase);
       this.clearSave();
@@ -755,8 +759,8 @@ export class AdventureEngine {
     if (!best) return null;
     return {
       id: best.def.id,
-      name: best.def.name,
-      title: best.def.title,
+      name: foeNameL(best.def.id),
+      title: foeTitleL(best.def.id),
       kind: best.def.kind,
       hp: Math.max(0, Math.round(best.hp)),
       maxHp: best.maxHp,
@@ -782,7 +786,7 @@ export class AdventureEngine {
           return foe
             ? {
                 foeId: foe.id,
-                name: foe.name,
+                name: foeNameL(foe.id),
                 renown: this.contract!.renown,
                 salvage: this.contract!.salvage,
               }
@@ -791,7 +795,7 @@ export class AdventureEngine {
       : null;
     return {
       renown: Math.round(this.renown),
-      rank: rankFor(this.renown),
+      rank: i18n.t(`adventure:ranks.${rankIndexFor(this.renown)}`),
       salvage: Math.round(this.salvage),
       day: this.stats.days,
       hp: Math.max(0, Math.round(this.player.hp)),
@@ -835,8 +839,13 @@ export class AdventureEngine {
         level: this.refits[id] ?? 0,
         cost: this.refitCost(id),
       })),
-      offer: offer && offerFoe ? { ...offer, name: offerFoe.name, title: offerFoe.title, tier: offerFoe.tier } : null,
-      activeContract: this.contract ? FOE_BY_ID[this.contract.foeId] ?? null : null,
+      offer: offer && offerFoe ? { ...offer, name: foeNameL(offerFoe.id), title: foeTitleL(offerFoe.id), tier: offerFoe.tier } : null,
+      activeContract: this.contract
+        ? (() => {
+            const foe = FOE_BY_ID[this.contract!.foeId];
+            return foe ? { ...foe, name: foeNameL(foe.id), title: foeTitleL(foe.id) } : null;
+          })()
+        : null,
       remaining: liveFoes(this.defeated).length,
     };
   }
@@ -900,7 +909,7 @@ export class AdventureEngine {
       };
       this.foes = FOES.filter((f) => !this.defeated.has(f.id)).map((def) => this.makeFoe(def));
       if (this.foes.length === 0) return false; // a finished chart is not a save
-      this.pushMessage('The chart remembers you, Captain. Your hunt continues.', 'info');
+      this.pushMessage(i18n.t('adventure:log.remembers'), 'info');
       return true;
     } catch {
       return false;

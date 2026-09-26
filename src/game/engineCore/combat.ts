@@ -6,6 +6,7 @@ import { TAU } from '../math';
 import { fenderFireGuard, fenderGuard } from '../hullFittings';
 import { MAX_PICKUPS, STREAK_TIME, MAX_MULT, CHASER_BIG, BURN_TICK, FIRE_SPREAD, SLICK_LIFE, MAX_SLICKS, P_SMOKE, P_FIRE, P_SPLINTER, P_RING, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, WOOD, rand, clamp, pick, type Ball, type Pickup, type Slick } from './constants';
 import { EngineWorldRender } from './worldRender';
+import i18n, { fmt } from '../../i18n';
 
 /** Projectiles, damage, fire, sinking, boarding, stores and loot. */
 export abstract class EngineCombat extends EngineWorldRender {
@@ -156,14 +157,14 @@ export abstract class EngineCombat extends EngineWorldRender {
       this.firstHit = true;
       s.hitByPlayer = true;
       if (b.chain) {
-        if (s.slowTimer <= 0) this.addText(s.x, s.y + 22, 'SLOWED', '#9fd8ff', 14);
+        if (s.slowTimer <= 0) this.addText(s.x, s.y + 22, i18n.t('hud:combat.slowed'), '#9fd8ff', 14);
         s.slowTimer = 3;
       }
       if (this.screen === 'playing') this.addScore(b.small ? 2 : 5);
       if (this.streakTimer > 0) this.streakTimer = Math.min(STREAK_TIME, this.streakTimer + 1.2);
       this.addTrauma(crit ? 0.2 : b.small ? 0.04 : 0.1);
       this.sfx.hit(this.volAt(b.x, b.y) * (b.small ? 0.6 : 1), this.panAt(b.x));
-      this.addText(b.x + rand(-6, 6), b.y - 12, crit ? `CRIT ${Math.round(dmg)}!` : `${Math.round(dmg)}`, crit ? '#ffcf3a' : '#fff4dc', crit ? 22 : b.small ? 12 : 15);
+      this.addText(b.x + rand(-6, 6), b.y - 12, crit ? i18n.t('hud:combat.crit', { dmg: Math.round(dmg) }) : `${Math.round(dmg)}`, crit ? '#ffcf3a' : '#fff4dc', crit ? 22 : b.small ? 12 : 15);
       this.damageShip(s, dmg, true);
     } else {
       this.hurtPlayer(dmg, Math.cos(dir), Math.sin(dir), false);
@@ -237,11 +238,11 @@ export abstract class EngineCombat extends EngineWorldRender {
     if (byPlayer) s.burnFromPlayer = true;
     if (!fresh) return;
     if (player) {
-      this.addText(s.x, s.y - 58, 'FIRE ABOARD!', '#ff9a3c', 24);
+      this.addText(s.x, s.y - 58, i18n.t('hud:combat.fireAboard'), '#ff9a3c', 24);
       this.flashRed = Math.min(0.7, this.flashRed + 0.22);
       this.addTrauma(0.2);
     } else {
-      this.addText(s.x, s.y - 26, 'AFIRE!', '#ff9a3c', 15);
+      this.addText(s.x, s.y - 26, i18n.t('hud:combat.afire'), '#ff9a3c', 15);
     }
     this.sfx.burn(Math.max(0.4, this.volAt(s.x, s.y)), this.panAt(s.x));
   }
@@ -372,8 +373,8 @@ export abstract class EngineCombat extends EngineWorldRender {
     s.sailTarget = 0.12;
     s.reloadL = Math.max(s.reloadL, 1.5);
     s.reloadR = Math.max(s.reloadR, 1.5);
-    this.addText(s.x, s.y - 32, 'SURRENDERED!', '#ffffff', 26);
-    this.addText(s.x, s.y - 10, 'Close and board her (F) for the full prize!', '#ffe066', 15);
+    this.addText(s.x, s.y - 32, i18n.t('hud:combat.surrendered'), '#ffffff', 26);
+    this.addText(s.x, s.y - 10, i18n.t('hud:combat.boardHer'), '#ffe066', 15);
     this.fxSparkle(s.x, s.y, 10, '#ffffff');
     this.sfx.fanfare();
   }
@@ -385,7 +386,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     // sending one of their boats to the bottom is the grievance that counts
     if (s.homeIsland && s.hitByPlayer) {
       this.provokeBoats(s.homeIsland, PROVOKE.boatSunk);
-      if (s.peaceful) this.addText(s.x, s.y - 34, 'their fishing boat…', '#ffd8a8', 16);
+      if (s.peaceful) this.addText(s.x, s.y - 34, i18n.t('hud:combat.fishingBoat'), '#ffd8a8', 16);
     }
     const big = s.def.length / 60;
     if (blastKindFor(this.eraId) === 'powder') {
@@ -407,15 +408,15 @@ export abstract class EngineCombat extends EngineWorldRender {
           this.stats.maxStreak = Math.max(this.stats.maxStreak, this.mult);
           this.multPulse = 1;
           this.sfx.streak(this.mult);
-          this.addText(this.player.x, this.player.y - 60, `STREAK x${this.mult}!`, '#ff8a3a', 30);
+          this.addText(this.player.x, this.player.y - 60, i18n.t('hud:engine.streakX', { mult: this.mult }), '#ff8a3a', 30);
         }
         this.streakTimer = STREAK_TIME;
         this.launchRowboat(s);
         const pts = this.addScore(s.def.value * (1 + 0.1 * (this.wave - 1)) * this.traitLootMult(s));
-        this.addText(s.x, s.y - 30, `SUNK! +${pts.toLocaleString('en-US')}`, '#ffd84d', s.isBoss ? 36 : 26);
+        this.addText(s.x, s.y - 30, i18n.t('hud:combat.sunk', { pts: fmt(pts) }), '#ffd84d', s.isBoss ? 36 : 26);
         if (s.surrendered) {
           // she struck and was sunk anyway — most of the prize went down with her
-          this.addText(s.x, s.y - 8, 'Her treasure went down with her…', '#e6d3a3', 14);
+          this.addText(s.x, s.y - 8, i18n.t('hud:combat.treasureDown'), '#e6d3a3', 14);
         }
         this.dropLoot(s);
         this.slowMo = s.isBoss ? 1.0 : 0.32;
@@ -423,7 +424,7 @@ export abstract class EngineCombat extends EngineWorldRender {
         this.flashWhite = s.isBoss ? 0.55 : 0.2;
       } else {
         // no magazine below decks: the fire ship is a bonfire, not a bomb
-        this.addText(s.x, s.y - 30, blastKindFor(this.eraId) === 'powder' ? 'KABOOM!' : 'ABLAZE!', '#ff8a3a', 26);
+        this.addText(s.x, s.y - 30, blastKindFor(this.eraId) === 'powder' ? i18n.t('hud:combat.kaboom') : i18n.t('hud:combat.ablaze'), '#ff8a3a', 26);
       }
       this.addTrauma(s.isBoss ? 0.95 : 0.45);
       if (s.def.kind === 'fireship') this.fireBlast(s);
@@ -585,7 +586,7 @@ export abstract class EngineCombat extends EngineWorldRender {
           this.addText(
             this.player.x,
             this.player.y - 52,
-            this.water <= 0 ? 'A man died of thirst!' : 'A man starved!',
+            this.water <= 0 ? i18n.t('hud:combat.thirst') : i18n.t('hud:combat.starved'),
             '#ff9a8a',
             16,
           );
@@ -596,7 +597,7 @@ export abstract class EngineCombat extends EngineWorldRender {
         this.addText(
           this.player.x,
           this.player.y - 70,
-          this.water <= 0 ? 'NO WATER — take a prize!' : 'NO FOOD — take a prize!',
+          this.water <= 0 ? i18n.t('hud:combat.noWater') : i18n.t('hud:combat.noFood'),
           '#ffd84d',
           16,
         );
@@ -607,70 +608,7 @@ export abstract class EngineCombat extends EngineWorldRender {
   }
 
   protected flagName(f: Ship['def']['faction']): string {
-    switch (f) {
-      case 'spain':
-        return 'Spanish';
-      case 'england':
-        return 'English';
-      case 'france':
-        return 'French';
-      case 'merchant':
-        return 'merchant';
-      case 'carthage':
-        return 'Carthaginian';
-      case 'persia':
-        return 'Persian';
-      case 'arab':
-        return 'Arab';
-      case 'china':
-        return 'Chinese';
-      case 'japan':
-        return 'Japanese';
-      case 'maori':
-        return 'Māori';
-      case 'hawaii':
-        return 'Hawaiian';
-      case 'macedon':
-        return 'Macedonian';
-      case 'rhodes':
-        return 'Rhodian';
-      case 'ptolemy':
-        return 'Ptolemaic';
-      case 'maya':
-        return 'Maya';
-      case 'inca':
-        return 'Inca';
-      case 'puna':
-        return 'Pun\u00e1';
-      case 'ottoman':
-        return 'Ottoman';
-      case 'venice':
-        return 'Venetian';
-      case 'korea':
-        return 'Korean';
-      case 'byzantium':
-        return 'Byzantine';
-      case 'egypt':
-        return 'Egyptian';
-      case 'sherden':
-        return 'Sea Peoples';
-      case 'chola':
-        return 'Chola';
-      case 'srivijaya':
-        return 'Srivijayan';
-      case 'daiviet':
-        return 'Vietnamese';
-      case 'aztec':
-        return 'Aztec';
-      case 'somalia':
-        return 'Somali';
-      case 'native':
-        return 'native';
-      case 'fire':
-        return 'fire-ship';
-      default:
-        return 'pirate';
-    }
+    return i18n.t(`hud:factions.${f}`, { defaultValue: i18n.t('hud:factions.pirate') });
   }
 
   /** Swing the boarding party across to a struck ship. */
@@ -679,7 +617,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     if (s.sinking >= 0 || s.captured || !s.surrendered || p.sinking >= 0) return;
     const pCrew = Math.ceil(p.crew);
     if (pCrew < BOARD_MIN_CREW) {
-      this.addText(p.x, p.y - 44, 'Not enough crew to take a prize!', '#ff9a8a', 18);
+      this.addText(p.x, p.y - 44, i18n.t('hud:combat.noCrew'), '#ff9a8a', 18);
       this.sfx.thud(0.6);
       return;
     }
@@ -695,18 +633,18 @@ export abstract class EngineCombat extends EngineWorldRender {
       p.crew -= lost;
       s.crew = Math.max(1, s.crew * 0.6);
       s.surrendered = false;
-      this.addText(s.x, s.y - 32, 'AMBUSH!', '#ff4b3a', 32);
-      this.addText(s.x, s.y - 10, `Treachery! -${lost} of your crew`, '#ff9a8a', 16);
+      this.addText(s.x, s.y - 32, i18n.t('hud:combat.ambush'), '#ff4b3a', 32);
+      this.addText(s.x, s.y - 10, i18n.t('hud:combat.treachery', { lost }), '#ff9a8a', 16);
       this.hurtPlayer((8 + this.wave * 1.5) * this.diff.enemyDamage, nx, ny, false);
       this.boardCandidate = null;
       return;
     }
     if (outcome === 'sabotage') {
       // she blows up alongside — the prize goes down with her
-      this.addText(s.x, s.y - 32, 'SABOTAGE! She blows!', '#ff8a3a', 26);
+      this.addText(s.x, s.y - 32, i18n.t('hud:combat.sabotage'), '#ff8a3a', 26);
       const lost = Math.min(pCrew - 1, 1 + Math.floor(Math.random() * 3));
       p.crew -= lost;
-      this.addText(p.x, p.y - 44, `Boarding party caught! -${lost} crew`, '#ff9a8a', 15);
+      this.addText(p.x, p.y - 44, i18n.t('hud:combat.boardingCaught', { lost }), '#ff9a8a', 15);
       this.sinkShip(s, true);
       this.hurtPlayer((12 + this.wave) * this.diff.enemyDamage, nx, ny, false);
       this.boardCandidate = null;
@@ -728,7 +666,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       this.stats.maxStreak = Math.max(this.stats.maxStreak, this.mult);
       this.multPulse = 1;
       this.sfx.streak(this.mult);
-      this.addText(p.x, p.y - 60, `STREAK x${this.mult}!`, '#ff8a3a', 30);
+      this.addText(p.x, p.y - 60, i18n.t('hud:engine.streakX', { mult: this.mult }), '#ff8a3a', 30);
     }
     this.streakTimer = STREAK_TIME;
     // the full manifest — sinkings only wash up singed scraps (~55%)
@@ -740,7 +678,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     this.goldPopup += pts;
     this.goldPopupTimer = 1.3;
     this.goldPopupPulse = 1;
-    this.addText(s.x, s.y - 34, `PRIZE TAKEN! +${pts.toLocaleString('en-US')}`, '#ffd84d', 28);
+    this.addText(s.x, s.y - 34, i18n.t('hud:combat.prizeTaken', { pts: fmt(pts) }), '#ffd84d', 28);
     // the captain's chest always survives a boarding
     const a = rand(0, TAU);
     const chestGold = Math.round(V * 0.25 + 100 * this.diff.plunder);
@@ -750,7 +688,7 @@ export abstract class EngineCombat extends EngineWorldRender {
     const f = 12 + Math.floor(Math.random() * 14);
     this.water = Math.min(this.maxWater, this.water + w);
     this.food = Math.min(this.maxFood, this.food + f);
-    this.addText(p.x, p.y - 78, `+${w} water  +${f} food`, '#9fe7ff', 15);
+    this.addText(p.x, p.y - 78, i18n.t('hud:combat.storesGet', { w, f }), '#9fe7ff', 15);
     // her company splits: volunteers join, the stubborn go in irons
     const remaining = Math.max(0, Math.ceil(s.crew));
     const joiners = Math.round(remaining * (0.35 + Math.random() * 0.2));
@@ -758,11 +696,11 @@ export abstract class EngineCombat extends EngineWorldRender {
     p.crew = Math.min(150, p.crew + joiners);
     p.maxCrew = Math.max(p.maxCrew, Math.ceil(p.crew));
     this.prisoners += chained;
-    this.addText(p.x, p.y - 98, joiners > 0 ? `+${joiners} crew joined!` : 'No crew left to join', '#7dff9a', 16);
-    if (chained > 0) this.addText(p.x, p.y - 116, `+${chained} prisoners in irons`, '#d8c9a3', 14);
+    this.addText(p.x, p.y - 98, joiners > 0 ? i18n.t('hud:combat.crewJoined', { n: joiners }) : i18n.t('hud:combat.noCrewLeft'), '#7dff9a', 16);
+    if (chained > 0) this.addText(p.x, p.y - 116, i18n.t('hud:combat.irons', { n: chained }), '#d8c9a3', 14);
     // strike her colours and carry them home
     this.flags.push({ faction: s.def.faction, ship: s.def.name, wave: this.wave });
-    this.addText(s.x, s.y - 56, `Captured the ${this.flagName(s.def.faction)} colours!`, '#ffe066', 16);
+    this.addText(s.x, s.y - 56, i18n.t('hud:combat.capturedColours', { flag: this.flagName(s.def.faction) }), '#ffe066', 16);
     this.fxSparkle(s.x, s.y, 22, '#ffe27a');
     this.sfx.chest();
     if (sick) {
@@ -773,7 +711,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       this.water -= dw;
       this.food -= df;
       p.crew -= dl;
-      this.addText(p.x, p.y - 44, `Fever aboard! -${dw} water -${df} food -${dl} crew`, '#c0ff70', 16);
+      this.addText(p.x, p.y - 44, i18n.t('hud:combat.fever', { w: dw, f: df, c: dl }), '#c0ff70', 16);
       this.sfx.thud(0.9);
     }
     this.slowMo = 0.32;
@@ -875,7 +813,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       const pts = this.addLootScore(pk.value);
       this.stats.gold += pk.value;
       this.sfx.chest();
-      this.addText(pk.x, pk.y - 22, `TREASURE! +${pts.toLocaleString('en-US')}`, '#ffd84d', 28);
+      this.addText(pk.x, pk.y - 22, i18n.t('hud:combat.treasure', { pts: fmt(pts) }), '#ffd84d', 28);
       this.fxSparkle(pk.x, pk.y, 16, '#ffe27a');
       this.addTrauma(0.15);
       this.flashWhite = Math.max(this.flashWhite, 0.12);
@@ -883,7 +821,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       const heal = Math.max(0, Math.min(p.maxHp - p.hp, 20 + p.maxHp * 0.08));
       p.hp += heal;
       this.sfx.repair();
-      this.addText(p.x, p.y - 34, heal > 0 ? `+${Math.round(heal)} HULL` : 'HULL FULL', '#7dff9a', 20);
+      this.addText(p.x, p.y - 34, heal > 0 ? i18n.t('hud:combat.hullPlus', { n: Math.round(heal) }) : i18n.t('hud:combat.hullFull'), '#7dff9a', 20);
       this.fxSparkle(p.x, p.y, 12, '#7dff9a');
     }
   }

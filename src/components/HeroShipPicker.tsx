@@ -7,12 +7,12 @@
 // and the report can never disagree.
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { isSteelHull, type EraId } from '../game/types';
 import { ERA_SHIPS, type EraShip } from '../game/ships/era';
-import { shipScores, shipTraits, type ShipScores } from '../game/ships/traits';
-import { armamentFor, usesGunpowder } from '../game/weapons';
-import { traitDef } from '../game/eraTraits';
+import { shipScores, shipTraits, type ShipScores, type TraitChip } from '../game/ships/traits';
+import { armamentFor, armHeavyNameL, armSummaryL, usesGunpowder } from '../game/weapons';
 import { regionById } from '../game/worlds';
 import { makeCanvas } from '../game/canvas';
 import { drawPortraitShip, paintWater, stableSeed } from '../game/portrait';
@@ -23,12 +23,25 @@ interface Props {
   onEra: (id: EraId) => void;
 }
 
-const BARS: [keyof ShipScores, string, string][] = [
-  ['hull', 'Hull', 'linear-gradient(90deg,#e07a4a,#b3261e)'],
-  ['speed', 'Speed', 'linear-gradient(90deg,#77e0c0,#1b7898)'],
-  ['guns', 'Guns', 'linear-gradient(90deg,#ffd863,#c8912a)'],
-  ['helm', 'Helm', 'linear-gradient(90deg,#b9c7f0,#3d55a8)'],
+const BARS: [keyof ShipScores, string][] = [
+  ['hull', 'linear-gradient(90deg,#e07a4a,#b3261e)'],
+  ['speed', 'linear-gradient(90deg,#77e0c0,#1b7898)'],
+  ['guns', 'linear-gradient(90deg,#ffd863,#c8912a)'],
+  ['helm', 'linear-gradient(90deg,#b9c7f0,#3d55a8)'],
 ];
+
+const BAR_LABEL: Record<keyof ShipScores, string> = {
+  hull: 'barHull',
+  speed: 'barSpeed',
+  guns: 'barGuns',
+  helm: 'barHelm',
+};
+
+const GROUP_KEY: Record<string, string> = {
+  'Age of Sail': 'groupSail',
+  'Steel Navies': 'groupSteel',
+  'Heritage Seas': 'groupHeritage',
+};
 
 /** The hull herself, alive on her own water: the game's own portrait painter. */
 function HeroPortrait({ e }: { e: EraShip }) {
@@ -122,6 +135,19 @@ function Figure({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** One scout-report chip: a dictionary line, or the era's real armament name. */
+function Chip({ chip, eraId, good }: { chip: TraitChip; eraId: EraId; good: boolean }) {
+  const { t } = useTranslation('hero');
+  const Icon = good ? Plus : Minus;
+  const text = chip.key === 'armHeavy' ? armHeavyNameL(eraId) : t(`scout.${chip.key}`, chip.params);
+  return (
+    <span className={good ? 'trait-chip trait-good' : 'trait-chip trait-bad'}>
+      <Icon className="mt-0.5 h-3 w-3 shrink-0" />
+      <span>{text}</span>
+    </span>
+  );
+}
+
 /** One plate on the hero roster: the hull, her year, and her four numbers. */
 function HullPlate({
   e,
@@ -134,13 +160,16 @@ function HullPlate({
   on: boolean;
   onPick: (id: EraId) => void;
 }) {
+  const { t } = useTranslation(['eras']);
   const sc = shipScores(e.def);
+  const eraName = t(`eras:${e.id}.name`);
+  const groupName = GROUP_KEY[e.group] ? t(`eras:${GROUP_KEY[e.group]}`) : e.group;
   return (
     <button
       type="button"
       data-hull={i}
       aria-pressed={on}
-      title={`${e.def.name} — ${e.era}, ${e.year}`}
+      title={`${e.def.name} — ${eraName}, ${e.year}`}
       onClick={() => onPick(e.id)}
       className={cn(
         'shrink-0 rounded-lg border-2 px-2 py-1 text-left transition-colors',
@@ -153,10 +182,10 @@ function HullPlate({
         {e.def.name}
       </span>
       <span className="block truncate text-[0.54rem] uppercase tracking-[0.14em] opacity-60">
-        {e.year} · {e.group}
+        {e.year} · {groupName}
       </span>
       <span className="mt-1 flex gap-0.5">
-        {BARS.map(([k, , tint]) => (
+        {BARS.map(([k, tint]) => (
           <span key={k} className="h-1 w-4 overflow-hidden rounded-full bg-black/55">
             <span
               className="block h-full rounded-full transition-[width] duration-500"
@@ -177,6 +206,7 @@ function HullPlate({
  * phone scrolls the step.
  */
 export function HeroShipPicker({ era, onEra }: Props) {
+  const { t } = useTranslation(['hero', 'eras', 'traits']);
   const eraIdx = Math.max(
     0,
     ERA_SHIPS.findIndex((s) => s.id === era),
@@ -219,8 +249,12 @@ export function HeroShipPicker({ era, onEra }: Props) {
   const { strengths, weaknesses } = shipTraits(def, shown.id);
   const arm = armamentFor(shown.id);
   const gunpowder = usesGunpowder(shown.id);
+  const eraName = t(`eras:${shown.id}.name`);
+  const eraBlurb = t(`eras:${shown.id}.blurb`);
+  const groupName = GROUP_KEY[shown.group] ? t(`eras:${GROUP_KEY[shown.group]}`) : shown.group;
   const step = (d: number) =>
     onEra(ERA_SHIPS[(idx + d + ERA_SHIPS.length) % ERA_SHIPS.length].id);
+  const hullKind = isSteelHull(def.hullStyle) ? 'powered' : def.oared ? 'oared' : 'sailing';
 
   return (
     // NOTE: ← → for the hull are handled globally by the start screen so the
@@ -272,7 +306,7 @@ export function HeroShipPicker({ era, onEra }: Props) {
             <button
               type="button"
               onClick={() => step(-1)}
-              aria-label="Previous ship"
+              aria-label={t('hero:picker.prevShip')}
               className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
             >
               <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
@@ -280,7 +314,7 @@ export function HeroShipPicker({ era, onEra }: Props) {
             <button
               type="button"
               onClick={() => step(1)}
-              aria-label="Next ship"
+              aria-label={t('hero:picker.nextShip')}
               className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
             >
               <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
@@ -292,8 +326,15 @@ export function HeroShipPicker({ era, onEra }: Props) {
             </span>
           </div>
           <span className="sr-only" aria-live="polite">
-            {def.name}, {shown.era}, {shown.year}. {def.hp} hull, {def.speed} knots, {def.cannons} a side.{' '}
-            {shown.blurb}
+            {t('hero:picker.srLine', {
+              name: def.name,
+              era: eraName,
+              year: shown.year,
+              hp: def.hp,
+              speed: def.speed,
+              guns: def.cannons,
+              blurb: eraBlurb,
+            })}
           </span>
         </div>
 
@@ -301,24 +342,34 @@ export function HeroShipPicker({ era, onEra }: Props) {
         <div className="scroll-thin flex min-w-0 flex-col gap-1.5 lg:min-h-0 lg:overflow-y-auto">
           <div>
             <div className="font-pirate text-2xl leading-none sm:text-3xl">{def.name}</div>
-            <div className="mt-0.5 text-[0.72rem] text-gold">{arm.summary}</div>
+            <div className="mt-0.5 text-[0.72rem] text-gold">{armSummaryL(shown.id)}</div>
             <div className="text-[0.6rem] uppercase tracking-[0.16em] opacity-65">
-              {shown.era} · {shown.year} · {shown.group}
+              {eraName} · {shown.year} · {groupName}
             </div>
             <p className="mt-1 text-[0.66rem] italic leading-snug opacity-75">
-              {shown.blurb}
-              {shown.homeWaters ? ` — the ${shown.homeWaters}.` : '.'}
+              {eraBlurb}
+              {shown.homeWaters ? t('hero:picker.homeWaters', { waters: t(`eras:${shown.id}.waters`) }) : '.'}
             </p>
             <p className="mt-1 text-[0.66rem] leading-snug text-sky-200/90">
-              {traitDef(shown.id).name}: {traitDef(shown.id).pitch}
+              {t(`traits:${shown.id}.name`)}: {t(`traits:${shown.id}.pitch`)}
             </p>
           </div>
 
           <div className="space-y-1">
-            {BARS.map(([k, label, tint]) => (
+            {BARS.map(([k, tint]) => (
               <StatBar
                 key={k}
-                label={k === 'guns' ? (gunpowder ? 'Guns' : arm.heavy === 'greekFire' ? 'Fire' : arm.heavy === 'stone' ? 'Stones' : 'Bows') : label}
+                label={
+                  k === 'guns'
+                    ? gunpowder
+                      ? t('hero:picker.barGuns')
+                      : arm.heavy === 'greekFire'
+                        ? t('hero:picker.barFire')
+                        : arm.heavy === 'stone'
+                          ? t('hero:picker.barStones')
+                          : t('hero:picker.barBows')
+                    : t(`hero:picker.${BAR_LABEL[k]}`)
+                }
                 v={sc[k]}
                 tint={tint}
               />
@@ -326,60 +377,46 @@ export function HeroShipPicker({ era, onEra }: Props) {
           </div>
 
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-            <Figure label="Hull" value={`${def.hp}`} />
-            <Figure label="Speed" value={`${def.speed} kn`} />
-            <Figure label={gunpowder ? 'Broadside' : arm.heavyName} value={`${def.cannons} a side`} />
-            <Figure label="Reload" value={`${def.reload.toFixed(1)}s`} />
-            <Figure label="Shot" value={`${def.damage} dmg`} />
-            <Figure label="Crew" value={`${def.crew ?? '—'} hands`} />
+            <Figure label={t('hero:picker.figHull')} value={`${def.hp}`} />
+            <Figure label={t('hero:picker.barSpeed')} value={t('hero:picker.figSpeedV', { v: def.speed })} />
+            <Figure
+              label={gunpowder ? t('hero:picker.figBroadside') : armHeavyNameL(shown.id)}
+              value={t('hero:picker.figAside', { n: def.cannons })}
+            />
+            <Figure label={t('hero:picker.figReload')} value={t('hero:picker.figReloadV', { s: def.reload.toFixed(1) })} />
+            <Figure label={t('hero:picker.figShot')} value={t('hero:picker.figShotV', { d: def.damage })} />
+            <Figure
+              label={t('hero:picker.figCrew')}
+              value={def.crew == null ? '—' : t('hero:picker.figCrewV', { c: def.crew })}
+            />
           </div>
 
           <div className="grid gap-1.5 sm:grid-cols-2">
             <div>
-              <div className="arcade-tag mb-1 text-[0.56rem] opacity-90">Strengths</div>
+              <div className="arcade-tag mb-1 text-[0.56rem] opacity-90">{t('hero:picker.strengths')}</div>
               <div className="flex flex-col gap-1">
-                {strengths.map((s) => (
-                  <span key={s} className="trait-chip trait-good">
-                    <Plus className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span>{s}</span>
-                  </span>
+                {strengths.map((s, i) => (
+                  <Chip key={`${s.key}-${i}`} chip={s} eraId={shown.id} good />
                 ))}
               </div>
             </div>
             <div>
-              <div className="arcade-tag mb-1 text-[0.56rem] opacity-90">Weaknesses</div>
+              <div className="arcade-tag mb-1 text-[0.56rem] opacity-90">{t('hero:picker.weaknesses')}</div>
               <div className="flex flex-col gap-1">
-                {weaknesses.map((s) => (
-                  <span key={s} className="trait-chip trait-bad">
-                    <Minus className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span>{s}</span>
-                  </span>
+                {weaknesses.map((s, i) => (
+                  <Chip key={`${s.key}-${i}`} chip={s} eraId={shown.id} good={false} />
                 ))}
               </div>
             </div>
           </div>
 
           <p className="rounded-md border border-parch/25 bg-black/30 px-2 py-1 text-[0.66rem] italic leading-snug opacity-85">
-            {isSteelHull(def.hullStyle) ? (
-              <>
-                A <b>powered warship</b>: she burns coal and oil, so the wind means nothing to her — full speed
-                the moment you order it, and just as hard to bring round.
-              </>
-            ) : def.oared ? (
-              <>
-                An <b>oared hull</b>: the wind means nothing to her. Pull straight at them — and think twice
-                before you turn your broadside away.
-              </>
-            ) : (
-              <>
-                A <b>sailing hull</b>: her speed lives and dies with the wind. Come about onto the enemy and
-                keep the broadside dry.
-              </>
-            )}
+            {t(`hero:picker.${hullKind}A`)} <b>{t(`hero:picker.${hullKind}Lead`)}</b>
+            {': '}{t(`hero:picker.${hullKind}Rest`)}
             {!gunpowder && (
               <>
                 {' '}
-                No powder in these waters: hulls burn and go down by fire — nothing explodes.
+                {t('hero:picker.noPowder')}
               </>
             )}
           </p>
@@ -389,13 +426,13 @@ export function HeroShipPicker({ era, onEra }: Props) {
       {/* ---- the hero roster: every age's flagship on one strip ---- */}
       <div className="shrink-0">
         <div className="arcade-tag mb-1 text-[0.54rem] opacity-80">
-          The Hero Roster · {ERA_SHIPS.length} ages, one flagship apiece — pick her up, take the age
+          {t('hero:picker.roster', { n: ERA_SHIPS.length })}
         </div>
         <div
           ref={stripRef}
           className="scroll-thin flex gap-1.5 overflow-x-auto pb-1"
           role="tablist"
-          aria-label="Hero ship"
+          aria-label={t('hero:picker.heroShipAria')}
         >
           {ERA_SHIPS.map((e, i) => (
             <HullPlate key={e.id} e={e} i={i} on={e.id === era} onPick={onEra} />

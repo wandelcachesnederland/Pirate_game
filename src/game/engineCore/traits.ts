@@ -10,7 +10,7 @@ import {
   ERA_ROSTERS, SAIL_ROSTER,
 } from '../rosters';
 import {
-  traitDef, freshTraitState, freshTraitShip, makeZone, tideIsLow, monsoonAngle,
+  freshTraitState, freshTraitShip, makeZone, tideIsLow, monsoonAngle,
   isNightWave, gaugeMult, rakeMult, armorMult, hailGold, deepDraft, isSubKind,
   type TraitState, type TraitShip,
 } from '../eraTraits';
@@ -18,6 +18,7 @@ import { projectileFor } from '../weapons';
 import { BOARD_RANGE } from '../boarding';
 import { angDiff, TAU } from '../math';
 import { WORLD, rand, clamp } from './constants';
+import i18n, { fmt } from '../../i18n';
 import type { Ball, Slick } from './constants';
 import { EngineShips } from './ships';
 
@@ -158,24 +159,23 @@ export abstract class EngineTraits extends EngineShips {
     const era: EraId = this.eraId;
     const roster = ERA_ROSTERS[era] ?? SAIL_ROSTER;
     if (n === 1) {
-      const def = traitDef(era);
-      this.addText(this.player.x, this.player.y - 90, `${def.name}: ${def.hint}`, '#9fe7ff', 15);
+      this.addText(this.player.x, this.player.y - 90, i18n.t('hud:event.traitIntro', { name: i18n.t(`traits:${era}.name`), hint: i18n.t(`traits:${era}.hint`) }), '#9fe7ff', 15);
     }
     if (era === 'napoleonic') {
       tr.signalT = 20;
-      this.addText(this.player.x, this.player.y - 70, 'SIGNAL: Engage the enemy! (+25% shot)', '#ffd84d', 16);
+      this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.signal'), '#ffd84d', 16);
     }
     if (era === 'ww2') {
       this.addText(
         this.player.x, this.player.y - 70,
-        this.traitNight() ? 'NIGHT ACTION — star shells away! (+25% loot)' : 'DAY ACTION — the fleet stands to.',
+        this.traitNight() ? i18n.t('hud:event.nightEvent') : i18n.t('hud:event.dayEvent'),
         '#cfe6ff', 16,
       );
     }
     if (era === 'chinese' && tr.tribute > 0) {
       this.stats.gold += tr.tribute;
       const pts = this.addLootScore(tr.tribute);
-      this.addText(this.player.x, this.player.y - 70, `TRIBUTE FLEET +${pts.toLocaleString('en-US')}`, '#ffd84d', 18);
+      this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.tributeFleet', { pts: fmt(pts) }), '#ffd84d', 18);
     }
     if (era === 'hawaii' && tr.vassal.length > 0) {
       const g = tr.vassal.length * (60 + n * 15);
@@ -183,20 +183,20 @@ export abstract class EngineTraits extends EngineShips {
       const pts = this.addLootScore(g);
       this.water = Math.min(this.maxWater, this.water + 8 * tr.vassal.length);
       this.food = Math.min(this.maxFood, this.food + 8 * tr.vassal.length);
-      this.addText(this.player.x, this.player.y - 70, `VASSAL ISLES +${pts.toLocaleString('en-US')} (+stores)`, '#ffd84d', 18);
+      this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.vassalIsles', { pts: fmt(pts) }), '#ffd84d', 18);
     }
     if (era === 'golden' && tr.bounty >= 3) {
       const hunters = roster.pool.filter((p) => p.cost >= 1.5 && n >= (p.minWave ?? 0));
       if (hunters.length > 0) {
         const k = hunters[(Math.random() * hunters.length) | 0].kind;
         this.waveQueue.push(k);
-        this.addText(this.player.x, this.player.y - 70, `Bounty hunters sail! (☠${tr.bounty})`, '#ff9a8a', 16);
+        this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.bountyHunters', { n: tr.bounty }), '#ff9a8a', 16);
       }
     }
     if (era === 'macedon' && n >= 6) {
       const lights = [...roster.pool].filter((p) => n >= (p.minWave ?? 0)).sort((a, b) => a.cost - b.cost).slice(0, 2);
       for (const p of lights) this.waveQueue.push(p.kind);
-      if (lights.length > 0) this.addText(this.player.x, this.player.y - 70, 'Light galleys swarm the giant!', '#ff9a8a', 15);
+      if (lights.length > 0) this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.lightGalleys'), '#ff9a8a', 15);
     }
     if (era === 'armada' && n % 5 === 0) {
       const pool = roster.pool.filter((p) => n >= (p.minWave ?? 0));
@@ -225,7 +225,7 @@ export abstract class EngineTraits extends EngineShips {
   protected onTraitWaveClear() {
     this.ensureTraits();
     if (this.eraId === 'ww2' && this.traitNight()) {
-      this.addText(this.player.x, this.player.y - 70, 'Night bonus banked (+25% loot)', '#cfe6ff', 15);
+      this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.nightBonus'), '#cfe6ff', 15);
     }
   }
 
@@ -291,7 +291,7 @@ export abstract class EngineTraits extends EngineShips {
         }
         if (boats) {
           tr.revealT = 2.5;
-          this.addText(p.x, p.y - 70, 'HYDROPHONE CONTACT — boats revealed!', '#9fd8ff', 16);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.hydroEvent'), '#9fd8ff', 16);
           this.sfx.splash(0.7, 0);
         }
       }
@@ -313,7 +313,7 @@ export abstract class EngineTraits extends EngineShips {
               chain: false, small: false, mortar: false,
             });
           }
-          this.addText(p.x, p.y - 70, 'EXOCETS AWAY — comb the wake!', '#ff9a8a', 18);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.exocets'), '#ff9a8a', 18);
           tr.raidAtkT = rand(34, 50);
         }
       } else {
@@ -321,7 +321,7 @@ export abstract class EngineTraits extends EngineShips {
         if (tr.raidAtkT <= 0) {
           tr.raidWarnT = 3;
           tr.raidWarnA = rand(0, TAU);
-          this.addText(p.x, p.y - 70, '⚠ AIR RAID WARNING — Exocets inbound!', '#ff9a8a', 20);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.airRaid'), '#ff9a8a', 20);
           this.sfx.horn();
         }
       }
@@ -333,13 +333,13 @@ export abstract class EngineTraits extends EngineShips {
         tr.diveTick += dt;
         if (tr.diveTick >= 1) {
           tr.diveTick = 0;
-          this.addText(p.x, p.y - 70, `RANSOM +${Math.round(tr.ransomRate)}/s — hold ${Math.ceil(tr.ransomT)}s!`, '#ffd84d', 15);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.ransomTick', { rate: Math.round(tr.ransomRate), t: Math.ceil(tr.ransomT) }), '#ffd84d', 15);
         }
         if (tr.ransomT <= 0) {
           const bonus = Math.round(tr.ransomRate * 5);
           this.stats.gold += bonus;
           const pts = this.addLootScore(bonus);
-          this.addText(p.x, p.y - 70, `RANSOM PAID +${pts.toLocaleString('en-US')}`, '#ffd84d', 22);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.ransomPaid', { pts: fmt(pts) }), '#ffd84d', 22);
           this.sfx.chest();
         }
       }
@@ -351,13 +351,13 @@ export abstract class EngineTraits extends EngineShips {
         if (p.sailTarget > 0.05) {
           tr.anchored = false;
           tr.anchorT = 0;
-          this.addText(p.x, p.y - 60, 'Weigh anchor!', '#9fe7ff', 16);
+          this.addText(p.x, p.y - 60, i18n.t('hud:event.weighAnchor'), '#9fe7ff', 16);
         }
       } else if (p.sailTarget <= 0.05 && spd < 25 && p.sinking < 0) {
         tr.anchorT += dt;
         if (tr.anchorT > 1.2) {
           tr.anchored = true;
-          this.addText(p.x, p.y - 60, 'ANCHORED — floating fortress (+50% shot)', '#ffd84d', 17);
+          this.addText(p.x, p.y - 60, i18n.t('hud:event.anchoredFort'), '#ffd84d', 17);
           this.fxSparkle(p.x, p.y, 10, '#ffd84d');
         }
       } else {
@@ -368,7 +368,7 @@ export abstract class EngineTraits extends EngineShips {
       if (isle >= 0) {
         if (tr.cargo === 0) {
           tr.cargo = 1;
-          this.addText(p.x, p.y - 60, 'TYRIAN PURPLE LOADED — sell at another harbour', '#d8a0ff', 16);
+          this.addText(p.x, p.y - 60, i18n.t('hud:event.purpleLoaded'), '#d8a0ff', 16);
           this.sfx.coin(3);
         } else {
           const gold = Math.round((120 + this.wave * 40) * this.diff.plunder);
@@ -376,7 +376,7 @@ export abstract class EngineTraits extends EngineShips {
           tr.cargoCool = 4;
           this.stats.gold += gold;
           const pts = this.addLootScore(gold);
-          this.addText(p.x, p.y - 60, `PURPLE SOLD +${pts.toLocaleString('en-US')}`, '#ffd84d', 20);
+          this.addText(p.x, p.y - 60, i18n.t('hud:event.purpleSold', { pts: fmt(pts) }), '#ffd84d', 20);
           this.sfx.chest();
         }
       }
@@ -398,7 +398,7 @@ export abstract class EngineTraits extends EngineShips {
           tr.diveTick = 0;
           const g = 25 + this.wave * 6;
           this.stats.gold += g;
-          this.addText(p.x, p.y - 60, `DIVING FOR SPONDYLUS +${g}`, '#ffb0c8', 15);
+          this.addText(p.x, p.y - 60, i18n.t('hud:event.diving', { g }), '#ffb0c8', 15);
           this.sfx.coin(2);
         }
       } else {
@@ -409,14 +409,14 @@ export abstract class EngineTraits extends EngineShips {
     } else if (era === 'japanese') {
       if (this.playerGrappled() && tr.msgT <= 0) {
         tr.msgT = 4;
-        this.addText(p.x, p.y - 60, 'GRAPPLED! Kill her crew or burn clear (T: teppo)', '#ff9a8a', 15);
+        this.addText(p.x, p.y - 60, i18n.t('hud:event.grappled'), '#ff9a8a', 15);
       }
     } else if (era === 'korea') {
       tr.curT -= dt;
       if (tr.curT <= 0) {
         tr.curT = 30;
         tr.curSign *= -1;
-        this.addText(p.x, p.y - 70, `THE TIDE TURNS — flowing ${tr.curSign > 0 ? 'EAST ▶' : '◀ WEST'}`, '#9fd8ff', 18);
+        this.addText(p.x, p.y - 70, i18n.t('hud:event.tideTurns', { dir: tr.curSign > 0 ? i18n.t('hud:event.tideEastGo') : i18n.t('hud:event.tideWestGo') }), '#9fd8ff', 18);
       }
     } else if (era === 'armada') {
       if (tr.galeT > 0) {
@@ -426,7 +426,7 @@ export abstract class EngineTraits extends EngineShips {
         if (tr.galeCool <= 0) {
           tr.galeT = 8;
           tr.galeCool = rand(35, 50);
-          this.addText(p.x, p.y - 70, 'GALE! — every hull driven downwind', '#cfe6ff', 18);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.galeEvent'), '#cfe6ff', 18);
         }
       }
     } else if (era === 'exploration') {
@@ -438,7 +438,7 @@ export abstract class EngineTraits extends EngineShips {
           const g = 120 + this.wave * 20;
           this.stats.gold += g;
           const pts = this.addLootScore(g);
-          this.addText(p.x, p.y - 60, `CHARTED: ${is.settlement.name} +${pts.toLocaleString('en-US')}`, '#9fe7ff', 17);
+          this.addText(p.x, p.y - 60, i18n.t('hud:event.chartedIs', { name: is.settlement.name, pts: fmt(pts) }), '#9fe7ff', 17);
           this.sfx.chest();
         }
       }
@@ -492,7 +492,7 @@ export abstract class EngineTraits extends EngineShips {
     this.fxHit(found.x, found.y, rand(0, TAU), 1.2);
     if (tr.msgT <= 0) {
       tr.msgT = 2;
-      this.addText(found.x, found.y - 30, 'CRUSHED UNDER THE SIXTEEN!', '#ffb347', 16);
+      this.addText(found.x, found.y - 30, i18n.t('hud:event.crushed'), '#ffb347', 16);
     }
   }
 
@@ -534,7 +534,7 @@ export abstract class EngineTraits extends EngineShips {
     }
     if (this.ensureTraits().msgT <= 0) {
       this.ensureTraits().msgT = 6;
-      this.addText(p.x, p.y - 60, 'Pharaoh’s archers loose!', '#ffe066', 14);
+      this.addText(p.x, p.y - 60, i18n.t('hud:event.pharaoh'), '#ffe066', 14);
     }
   }
 
@@ -551,7 +551,7 @@ export abstract class EngineTraits extends EngineShips {
           tr.raidT = 0;
           tr.raidTick = 0;
           tr.raidSpawned = false;
-          this.addText(p.x, p.y - 70, 'STRANDHÖGG! Raid the shore — sail (W) to shove off', '#ffb347', 18);
+          this.addText(p.x, p.y - 70, i18n.t('hud:event.strandhogg'), '#ffb347', 18);
         }
       } else {
         tr.raidT = 0;
@@ -561,7 +561,7 @@ export abstract class EngineTraits extends EngineShips {
     if (p.sailTarget > 0.35 || p.sinking >= 0) {
       tr.raiding = false;
       tr.raidT = 0;
-      if (p.sinking < 0) this.addText(p.x, p.y - 60, 'Back to the ship!', '#9fe7ff', 16);
+      if (p.sinking < 0) this.addText(p.x, p.y - 60, i18n.t('hud:event.backShip'), '#9fe7ff', 16);
       return;
     }
     tr.raidT += dt;
@@ -573,13 +573,13 @@ export abstract class EngineTraits extends EngineShips {
       this.water = Math.min(this.maxWater, this.water + 3);
       this.food = Math.min(this.maxFood, this.food + 3);
       if (Math.floor(tr.raidT) % 3 === 0) {
-        this.addText(p.x, p.y - 60, `Raid +${g} gold (+stores)…`, '#ffb347', 14);
+        this.addText(p.x, p.y - 60, i18n.t('hud:event.raidGold', { g }), '#ffb347', 14);
         this.sfx.coin(2);
       }
     }
     if (tr.raidT > 8 && !tr.raidSpawned) {
       tr.raidSpawned = true;
-      this.addText(p.x, p.y - 80, 'The locals rise! SHOVE OFF!', '#ff9a8a', 20);
+      this.addText(p.x, p.y - 80, i18n.t('hud:event.localsRise'), '#ff9a8a', 20);
       for (let i = 0; i < 2; i++) {
         const a = rand(0, TAU);
         const x = clamp(p.x + Math.cos(a) * 420, -WORLD + 200, WORLD - 200);
@@ -612,7 +612,7 @@ export abstract class EngineTraits extends EngineShips {
         e.reloadL = Math.max(e.reloadL, e.reloadTime);
         e.reloadR = Math.max(e.reloadR, e.reloadTime);
         this.maybeSurrender(e);
-        this.addText(e.x, e.y - 30, 'DIEKPLOUS!', '#9fd8ff', 20);
+        this.addText(e.x, e.y - 30, i18n.t('hud:event.diekplous'), '#9fd8ff', 20);
         this.fxSparkle(e.x, e.y, 8, '#9fd8ff');
         ts.side = side;
         if (tr.msgT <= 0) {
@@ -701,7 +701,7 @@ export abstract class EngineTraits extends EngineShips {
           if (-vn > 120 && s === this.player && this.screen === 'playing' && tr.msgT <= 0) {
             tr.msgT = 2;
             this.hurtPlayer(4, -c.nx, -c.ny, true);
-            this.addText(s.x, s.y - 44, era === 'byzantium' ? 'THE CHAIN!' : 'SHOAL WATER!', '#ff9a8a', 16);
+            this.addText(s.x, s.y - 44, era === 'byzantium' ? i18n.t('hud:event.chain') : i18n.t('hud:event.shoal'), '#ff9a8a', 16);
           }
         }
       }
@@ -743,10 +743,10 @@ export abstract class EngineTraits extends EngineShips {
         if (s === this.player) {
           const d = Math.hypot(s.x - z.x, s.y - z.y) || 1;
           this.hurtPlayer(52, (s.x - z.x) / d, (s.y - z.y) / d, false);
-          this.addText(s.x, s.y - 44, 'MINE!', '#ff9a8a', 22);
+          this.addText(s.x, s.y - 44, i18n.t('hud:combat.mine'), '#ff9a8a', 22);
         } else {
           this.damageShip(s, 78, true);
-          this.addText(s.x, s.y - 30, 'MINED!', '#ffb347', 18);
+          this.addText(s.x, s.y - 30, i18n.t('hud:combat.mined'), '#ffb347', 18);
         }
         continue;
       }
@@ -756,7 +756,7 @@ export abstract class EngineTraits extends EngineShips {
         this.damageShip(s, z.dps * dt, s.team === 1);
         if (z.kind === 'stakes' && tr.msgT <= 0 && Math.random() < dt * 2) {
           tr.msgT = 2.5;
-          this.addText(s.x, s.y - 30, 'IMPALED ON THE STAKES!', '#ffb347', 18);
+          this.addText(s.x, s.y - 30, i18n.t('hud:event.impaled'), '#ffb347', 18);
         }
       }
     }
@@ -776,7 +776,7 @@ export abstract class EngineTraits extends EngineShips {
         this.resolveBoarding(foe); // the bridge is down — walk across
       } else if (this.tr.msgT <= 0) {
         this.tr.msgT = 3;
-        this.addText(foe.x, foe.y - 30, 'CORVUS HOLDS HER!', '#ffe066', 15);
+        this.addText(foe.x, foe.y - 30, i18n.t('hud:event.corvus'), '#ffe066', 15);
       }
     } else if (this.eraId === 'macedon') {
       if (!foe.surrendered && foe.def.length < 50) this.tr.crushId = foe.id;
@@ -821,7 +821,7 @@ export abstract class EngineTraits extends EngineShips {
     if (dist < 420) {
       ts.sub = 2;
       s.sailTarget = 1;
-      this.addText(s.x, s.y - 34, 'SUBMARINE SURFACED!', '#9fd8ff', 20);
+      this.addText(s.x, s.y - 34, i18n.t('hud:event.subSurfaced'), '#9fd8ff', 20);
       this.fxSplash(s.x, s.y, 1.4);
       this.sfx.splash(0.9, this.panAt(s.x));
     }
@@ -875,7 +875,7 @@ export abstract class EngineTraits extends EngineShips {
       b.vx = Math.cos(veer) * sp;
       b.vy = Math.sin(veer) * sp;
       tr.lockCool = 2.5;
-      this.addText(p.x, p.y - 60, 'LOCK BROKEN!', '#7dff9a', 20);
+      this.addText(p.x, p.y - 60, i18n.t('hud:event.lockBroken'), '#7dff9a', 20);
       this.sfx.coin(5);
       return;
     }
@@ -888,7 +888,7 @@ export abstract class EngineTraits extends EngineShips {
     b.vy = Math.sin(na) * sp;
     if (tr.msgT <= 0 && d < 520) {
       tr.msgT = 1.5;
-      this.addText(p.x, p.y - 60, '⚠ MISSILE LOCK — TURN HARD!', '#ff9a8a', 18);
+      this.addText(p.x, p.y - 60, i18n.t('hud:event.missileLock'), '#ff9a8a', 18);
       this.flashRed = Math.min(0.7, this.flashRed + 0.15);
     }
   }
@@ -921,7 +921,7 @@ export abstract class EngineTraits extends EngineShips {
     if (era === 'golden') {
       if (byPlayer && !s.def.trader && !s.peaceful && !s.def.treasure) {
         tr.bounty = Math.min(10, tr.bounty + 1);
-        this.addText(this.player.x, this.player.y - 70, `BOUNTY ☠${tr.bounty} — prizes fatten!`, '#ffd84d', 17);
+        this.addText(this.player.x, this.player.y - 70, i18n.t('hud:status.bountyEvent', { n: tr.bounty }), '#ffd84d', 17);
       }
     } else if (era === 'maori') {
       if (byPlayer) {
@@ -930,7 +930,7 @@ export abstract class EngineTraits extends EngineShips {
         if (this.tsOf(s).marked) {
           tr.mana = Math.min(5, tr.mana + 1);
           tr.manaT = 20;
-          this.addText(this.player.x, this.player.y - 70, `UTU AVENGED — MANA x${tr.mana} (+dmg)`, '#7dff9a', 18);
+          this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.utuAvenged', { n: tr.mana }), '#7dff9a', 18);
         }
       }
     } else if (era === 'hawaii') {
@@ -943,7 +943,7 @@ export abstract class EngineTraits extends EngineShips {
             s.homeIsland.settlement.hostile = false;
             s.homeIsland.settlement.anger = 0;
             s.homeIsland.settlement.calm = 0;
-            this.addText(s.homeIsland.x, s.homeIsland.y - 60, `${s.homeIsland.settlement.name} YIELDS — vassal!`, '#ffd84d', 20);
+            this.addText(s.homeIsland.x, s.homeIsland.y - 60, i18n.t('hud:event.yields', { name: s.homeIsland.settlement.name }), '#ffd84d', 20);
             this.sfx.fanfare();
           }
         }
@@ -953,7 +953,7 @@ export abstract class EngineTraits extends EngineShips {
         const fine = Math.round(400 * this.wave * this.diff.plunder);
         this.score = Math.max(0, this.score - fine);
         this.waveQueue.push('usPatrol');
-        this.addText(this.player.x, this.player.y - 70, `NEUTRAL TANKER HIT! -${fine.toLocaleString('en-US')} — the navy answers`, '#ff9a8a', 18);
+        this.addText(this.player.x, this.player.y - 70, i18n.t('hud:event.neutralTanker', { fine: fmt(fine) }), '#ff9a8a', 18);
       }
     }
   }
@@ -965,13 +965,13 @@ export abstract class EngineTraits extends EngineShips {
       tr.ransomT = 25;
       tr.ransomRate = (18 + this.wave * 7) * this.diff.plunder;
       tr.diveTick = 0;
-      this.addText(s.x, s.y - 56, 'HOSTAGE TAKEN — ransom ticking! Survive!', '#ffd84d', 20);
+      this.addText(s.x, s.y - 56, i18n.t('hud:combat.hostage'), '#ffd84d', 20);
     }
     if (era === 'ottoman' || era === 'lepanto') {
       const p = this.player;
       p.crew = Math.min(150, p.crew + 6);
       p.maxCrew = Math.max(p.maxCrew, Math.ceil(p.crew));
-      this.addText(p.x, p.y - 130, '+6 freed oarsmen joined!', '#7dff9a', 15);
+      this.addText(p.x, p.y - 130, i18n.t('hud:combat.freedOarsmen', { n: 6 }), '#7dff9a', 15);
     }
   }
 
@@ -1008,7 +1008,7 @@ export abstract class EngineTraits extends EngineShips {
       const tr = this.ensureTraits();
       if (tr.msgT <= 0) {
         tr.msgT = 12;
-        this.addText(p.x, p.y - 70, 'SCURVY! The company wastes — take fresh food!', '#ff9a8a', 16);
+        this.addText(p.x, p.y - 70, i18n.t('hud:event.scurvy'), '#ff9a8a', 16);
       }
     }
   }
@@ -1046,7 +1046,7 @@ export abstract class EngineTraits extends EngineShips {
       tr.tribute += t;
       s.peaceful = true;
       s.hitByPlayer = true;
-      this.addText(s.x, s.y - 30, `TRIBUTE PACT +${t}/wave — she sails on`, '#ffd84d', 17);
+      this.addText(s.x, s.y - 30, i18n.t('hud:event.tributePact', { t }), '#ffd84d', 17);
       this.sfx.chest();
       return;
     }
@@ -1058,7 +1058,7 @@ export abstract class EngineTraits extends EngineShips {
       this.food = Math.min(this.maxFood, this.food + 40);
       this.stats.gold += 150;
       const pts = this.addLootScore(150);
-      this.addText(s.x, s.y - 30, `GIFTS OF FIRST CONTACT +${pts.toLocaleString('en-US')} (+stores)`, '#ffd84d', 18);
+      this.addText(s.x, s.y - 30, i18n.t('hud:event.firstContact', { pts: fmt(pts) }), '#ffd84d', 18);
       this.sfx.chest();
       return;
     }
@@ -1071,9 +1071,9 @@ export abstract class EngineTraits extends EngineShips {
         for (let i = 0; i < 2 && pool.length > 0; i++) {
           this.waveQueue.push(pool[(Math.random() * pool.length) | 0].kind);
         }
-        this.addText(s.x, s.y - 30, 'The convoy refuses — they signal for help!', '#ff9a8a', 17);
+        this.addText(s.x, s.y - 30, i18n.t('hud:event.convoyRefuses'), '#ff9a8a', 17);
       } else {
-        this.addText(s.x, s.y - 30, 'She refuses tribute — run her down!', '#ff9a8a', 17);
+        this.addText(s.x, s.y - 30, i18n.t('hud:event.refusesTribute'), '#ff9a8a', 17);
       }
       return;
     }
@@ -1087,7 +1087,7 @@ export abstract class EngineTraits extends EngineShips {
       const a = rand(0, TAU);
       this.addPickup(s.x, s.y, Math.cos(a) * 120, Math.sin(a) * 120, 0, per);
     }
-    this.addText(s.x, s.y - 30, `${era === 'hanse' ? 'TOLL PAID' : 'TRIBUTE'} +${pay.toLocaleString('en-US')} — she sails on`, '#ffd84d', 17);
+    this.addText(s.x, s.y - 30, era === 'hanse' ? i18n.t('hud:event.tollPaid', { pay: fmt(pay) }) : i18n.t('hud:event.tributePaid', { pay: fmt(pay) }), '#ffd84d', 17);
     this.sfx.coin(4);
     void p;
   }
@@ -1101,13 +1101,13 @@ export abstract class EngineTraits extends EngineShips {
       if (tr.sprintCool > 0 || tr.sprintT > 0) return;
       tr.sprintT = 4;
       tr.sprintCool = 30;
-      this.addText(p.x, p.y - 60, 'OAR-SPRINT!', '#9fd8ff', 22);
+      this.addText(p.x, p.y - 60, i18n.t('hud:event.oarSprintGo'), '#9fd8ff', 22);
       this.fxSplash(p.x - Math.cos(p.angle) * p.def.length * 0.5, p.y - Math.sin(p.angle) * p.def.length * 0.5, 1.2);
     } else if (this.eraId === 'chinese') {
       tr.anchored = !tr.anchored;
       tr.anchorT = 0;
       if (tr.anchored) p.sailTarget = 0;
-      this.addText(p.x, p.y - 60, tr.anchored ? 'ANCHORED — floating fortress (+50% shot)' : 'Weigh anchor!', '#ffd84d', 16);
+      this.addText(p.x, p.y - 60, tr.anchored ? i18n.t('hud:event.anchoredFort') : i18n.t('hud:event.weighAnchor'), '#ffd84d', 16);
     } else if (this.eraId === 'japanese') {
       if (tr.teppoCool > 0) return;
       tr.teppoCool = 8;
@@ -1128,7 +1128,7 @@ export abstract class EngineTraits extends EngineShips {
       this.stats.shots += 3;
       this.fxMuzzle(p.x + Math.cos(p.angle) * p.def.length * 0.5, p.y + Math.sin(p.angle) * p.def.length * 0.5, p.angle, true);
       this.sfx.cannon(this.volAt(p.x, p.y), this.panAt(p.x));
-      this.addText(p.x, p.y - 60, 'TEPPO VOLLEY!', '#ffe066', 18);
+      this.addText(p.x, p.y - 60, i18n.t('hud:event.teppoGo'), '#ffe066', 18);
     }
   }
 
@@ -1150,64 +1150,64 @@ export abstract class EngineTraits extends EngineShips {
     const era = this.eraId;
     switch (era) {
       case 'golden':
-        return tr.bounty > 0 ? `BOUNTY ☠${tr.bounty}` : 'FALSE COLOURS — hold fire';
+        return tr.bounty > 0 ? i18n.t('hud:status.bounty', { n: tr.bounty }) : i18n.t('hud:status.falseColours');
       case 'exploration':
-        return `CHARTED ${tr.charted.length}/${this.islands.length}`;
+        return i18n.t('hud:status.charted', { a: tr.charted.length, b: this.islands.length });
       case 'napoleonic':
-        return tr.signalT > 0 ? 'SIGNAL FLYING (+25% shot)' : 'WEATHER GAUGE — fight upwind';
+        return tr.signalT > 0 ? i18n.t('hud:status.signalFlying') : i18n.t('hud:status.weatherGauge');
       case 'barbary':
       case 'hanse':
-        return 'F: HAIL TRADERS';
+        return i18n.t('hud:status.hailTraders');
       case 'viking':
-        return tr.raiding ? 'RAIDING! W: SHOVE OFF' : null;
+        return tr.raiding ? i18n.t('hud:status.raiding') : null;
       case 'ww1':
-        return tr.revealT > 0 ? 'HYDROPHONE CONTACT!' : `PING ${Math.ceil(tr.pingT)}s`;
+        return tr.revealT > 0 ? i18n.t('hud:status.hydroContact') : i18n.t('hud:status.ping', { n: Math.ceil(tr.pingT) });
       case 'ww2':
-        return this.traitNight() ? 'NIGHT ACTION (+25% loot)' : 'DAY ACTION';
+        return this.traitNight() ? i18n.t('hud:status.nightAction') : i18n.t('hud:status.dayAction');
       case 'hormuz': {
         for (const b of this.balls) {
           if (b.team === 1 && b.projectile === 'missile' && Math.hypot(b.x - this.player.x, b.y - this.player.y) < 700) {
-            return '⚠ MISSILE — TURN HARD!';
+            return i18n.t('hud:status.missileWarn');
           }
         }
         return null;
       }
       case 'vietnam':
-        return tideIsLow(tr.t) ? 'TIDE ▼ LOW — STAKES BARE' : 'TIDE ▲ HIGH — stakes drowned';
+        return tideIsLow(tr.t) ? i18n.t('hud:status.tideLow') : i18n.t('hud:status.tideHigh');
       case 'korea':
-        return `TIDE ${tr.curSign > 0 ? '▶ EAST' : '◀ WEST'} ${Math.ceil(tr.curT)}s`;
+        return tr.curSign > 0 ? i18n.t('hud:status.tideEast', { n: Math.ceil(tr.curT) }) : i18n.t('hud:status.tideWest', { n: Math.ceil(tr.curT) });
       case 'arab':
       case 'portugal': {
         const idx = Math.floor((Math.max(1, this.wave) - 1) / 3);
         const next = (idx + 1) * 3 + 1;
-        return `MONSOON ${idx % 2 === 0 ? 'OUTBOUND' : 'HOMEBOUND'} — shifts W${next}`;
+        return i18n.t('hud:status.monsoon', { dir: idx % 2 === 0 ? i18n.t('hud:status.monsoonOut') : i18n.t('hud:status.monsoonHome'), n: next });
       }
       case 'somali':
-        return tr.ransomT > 0 ? `RANSOM +${Math.round(tr.ransomRate)}/s — HOLD!` : null;
+        return tr.ransomT > 0 ? i18n.t('hud:status.ransomHold', { rate: Math.round(tr.ransomRate) }) : null;
       case 'maori':
-        return tr.mana > 0 ? `MANA x${tr.mana}` : 'UTU — sink rivals, kill the marked';
+        return tr.mana > 0 ? i18n.t('hud:status.mana', { n: tr.mana }) : i18n.t('hud:status.utu');
       case 'hawaii': {
         const n = this.islands.filter((i) => i.settlement.inhabited).length;
-        return `ISLES ${tr.vassal.length}/${n} UNITED`;
+        return i18n.t('hud:status.isles', { a: tr.vassal.length, b: n });
       }
       case 'phoenicia':
-        return tr.cargo > 0 ? 'HOLD FULL — sell at a friendly fort' : 'HOLD EMPTY — load at a friendly fort';
+        return tr.cargo > 0 ? i18n.t('hud:status.holdFull') : i18n.t('hud:status.holdEmpty');
       case 'chinese':
-        if (tr.anchored) return 'ANCHORED — fortress (+50%)';
-        return tr.tribute > 0 ? `TRIBUTE +${tr.tribute}/wave` : 'T: ANCHOR · F: HAIL TRADERS';
+        if (tr.anchored) return i18n.t('hud:status.anchored');
+        return tr.tribute > 0 ? i18n.t('hud:status.tributeWave', { n: tr.tribute }) : i18n.t('hud:status.anchorHail');
       case 'ottoman':
-        if (tr.sprintT > 0) return 'SPRINT!';
-        return tr.sprintCool > 24 ? 'OARS SPENT…' : 'T: OAR-SPRINT';
+        if (tr.sprintT > 0) return i18n.t('hud:status.sprint');
+        return tr.sprintCool > 24 ? i18n.t('hud:status.oarsSpent') : i18n.t('hud:status.oarSprint');
       case 'japanese':
-        return tr.teppoCool > 0 ? `TEPPO ${Math.ceil(tr.teppoCool)}s` : 'T: TEPPO VOLLEY';
+        return tr.teppoCool > 0 ? i18n.t('hud:status.teppo', { n: Math.ceil(tr.teppoCool) }) : i18n.t('hud:status.teppoVolley');
       case 'predread':
-        return tr.bracketT > 0 ? 'RANGE BRACKETED (+20%)' : null;
+        return tr.bracketT > 0 ? i18n.t('hud:status.bracketed') : null;
       case 'falklands':
-        return tr.raidWarnT > 0 ? '⚠ RAID INBOUND — COMB THE WAKE!' : null;
+        return tr.raidWarnT > 0 ? i18n.t('hud:status.raidInbound') : null;
       case 'armada':
-        return tr.galeT > 0 ? 'GALE!' : null;
+        return tr.galeT > 0 ? i18n.t('hud:status.gale') : null;
       case 'chola':
-        return this.wave >= 2 && this.wave % 2 === 0 ? 'MONSOON STORM (+15% loot)' : null;
+        return this.wave >= 2 && this.wave % 2 === 0 ? i18n.t('hud:status.monsoonStorm') : null;
       case 'lepanto':
       case 'roman':
       case 'greek':
