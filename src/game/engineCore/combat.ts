@@ -229,7 +229,7 @@ export abstract class EngineCombat extends EngineWorldRender {
   }
 
   /** One tick of fire damage — heat and smoke, not a powder blast. */
-  protected fireDamage(s: Ship, amount: number) {
+  protected fireDamage(s: Ship, amount: number, byPlayer = s.burnFromPlayer) {
     if (amount <= 0) return;
     if (s === this.player) {
       // burning hurts, but it must not rattle the camera every quarter second
@@ -238,7 +238,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       if (Math.random() < 0.2) this.addTrauma(0.04);
       this.damageShip(s, amount, false);
     } else {
-      this.damageShip(s, amount, s.burnFromPlayer);
+      this.damageShip(s, amount, byPlayer);
     }
   }
 
@@ -320,7 +320,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       for (const s of this.ships) {
         if (s.dead || s.sinking >= 0 || s.team === sl.team) continue;
         if (Math.hypot(s.x - sl.x, s.y - sl.y) > sl.r + s.def.length * 0.35) continue;
-        this.fireDamage(s, sl.dps * dt);
+        this.fireDamage(s, sl.dps * dt, sl.team === 0);
         // linger in the flames and they take hold of your own timbers
         if (Math.random() < Math.min(1, dt * 1.6)) this.igniteShip(s, 1.8, 0.006, sl.team === 0);
       }
@@ -512,7 +512,16 @@ export abstract class EngineCombat extends EngineWorldRender {
   }
 
   protected addScore(base: number): number {
-    const pts = Math.round(base * this.mult * this.diff.plunder);
+    return this.recordScore(base * this.diff.plunder);
+  }
+
+  /** Add score for loot whose value was already scaled by the voyage's peril. */
+  protected addLootScore(plunderValue: number): number {
+    return this.recordScore(plunderValue);
+  }
+
+  private recordScore(value: number): number {
+    const pts = Math.round(value * this.mult);
     this.score += pts;
     this.scorePulse = 1;
     return pts;
@@ -650,7 +659,8 @@ export abstract class EngineCombat extends EngineWorldRender {
       return;
     }
     const outcome = rollBoardingOutcome(pCrew, Math.ceil(s.crew));
-    const V = s.def.value * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder;
+    const manifest = s.def.value * (1 + 0.1 * (this.wave - 1));
+    const V = manifest * this.diff.plunder;
     const d = Math.hypot(p.x - s.x, p.y - s.y) || 1;
     const nx = (p.x - s.x) / d;
     const ny = (p.y - s.y) / d;
@@ -698,14 +708,16 @@ export abstract class EngineCombat extends EngineWorldRender {
     // the full manifest — sinkings only wash up singed scraps (~55%)
     const coinTotal = Math.round(V);
     this.stats.gold += coinTotal;
-    const pts = this.addScore(V * 1.2);
+    // V already includes the peril's plunder modifier; only apply the streak
+    // multiplier here so prize scores do not scale by difficulty twice.
+    const pts = this.addLootScore(V * 1.2);
     this.goldPopup += pts;
     this.goldPopupTimer = 1.3;
     this.goldPopupPulse = 1;
     this.addText(s.x, s.y - 34, `PRIZE TAKEN! +${pts.toLocaleString('en-US')}`, '#ffd84d', 28);
     // the captain's chest always survives a boarding
     const a = rand(0, TAU);
-    const chestGold = Math.round(V * 0.25) + 100;
+    const chestGold = Math.round(V * 0.25 + 100 * this.diff.plunder);
     this.addPickup(s.x, s.y, Math.cos(a) * 60, Math.sin(a) * 60, 1, chestGold);
     // her water and bread come across too
     const w = 12 + Math.floor(Math.random() * 14);
@@ -823,7 +835,8 @@ export abstract class EngineCombat extends EngineWorldRender {
   protected collect(pk: Pickup) {
     const p = this.player;
     if (pk.kind === 0) {
-      const pts = this.addScore(pk.value);
+      // Pickup values already include the peril modifier when they are created.
+      const pts = this.addLootScore(pk.value);
       this.stats.gold += pk.value;
       this.coinChain = Math.min(14, this.coinChain + 1);
       this.coinChainTimer = 0.45;
@@ -833,7 +846,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       this.goldPopupTimer = 1.3;
       this.goldPopupPulse = 1;
     } else if (pk.kind === 1) {
-      const pts = this.addScore(pk.value);
+      const pts = this.addLootScore(pk.value);
       this.stats.gold += pk.value;
       this.sfx.chest();
       this.addText(pk.x, pk.y - 22, `TREASURE! +${pts.toLocaleString('en-US')}`, '#ffd84d', 28);

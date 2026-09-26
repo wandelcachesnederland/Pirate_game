@@ -19,7 +19,7 @@ from a USB stick or drop on any static host.
 ```bash
 npm install
 npm run dev      # dev server on http://localhost:5173
-npm test         # rules + headless engine regression tests (75 tests)
+npm test         # rules + headless engine regression tests (84 tests)
 npm run build    # tsc --noEmit + vite build -> dist/index.html (single file)
 npm run preview  # serve the production build
 ```

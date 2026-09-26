@@ -41,6 +41,38 @@ function harness(era: EraId = 'roman') {
   return { e, sounds, particles, messages };
 }
 
+test('invalid runtime era ids fall back instead of selecting prototype properties', () => {
+  const e = Object.create(Engine.prototype) as any;
+  const selected: string[] = [];
+  Object.assign(e, {
+    screen: 'gameover',
+    player: undefined,
+    sfx: { setEra(id: string) { selected.push(id); } },
+  });
+
+  e.setEra('toString' as EraId);
+  assert.equal(e.eraId, 'golden');
+  assert.equal(e.playerDef, ERA_FLAGSHIPS.golden);
+  assert.deepEqual(selected, ['golden']);
+});
+
+test('a restarted voyage resets the wave before generating its chart', () => {
+  const { e } = harness('golden');
+  let waveDuringGeneration = -1;
+  e.wave = 17;
+  e.windAngle = 0;
+  e.resetWorld = () => {
+    waveDuringGeneration = e.wave;
+    e.ships = [];
+  };
+  e.cb = { onScreen() {}, onGameOver() {}, onUpgrade() {} };
+
+  e.startGame();
+
+  assert.equal(waveDuringGeneration, 0);
+  assert.equal(e.wave, 1);
+});
+
 function island(x = 300, y = 0) {
   return {
     x, y, r: 80, maxR: 100, harm: [], angle: 0,
@@ -131,9 +163,14 @@ test('Greek fire that misses keeps burning on the water and burns what crosses i
   e.updateBalls(0.05);
   assert.equal(e.slicks.length, 1);
   let damage = 0;
-  e.damageShip = (_ship: any, amount: number) => { damage += amount; };
+  let creditedToPlayer = false;
+  e.damageShip = (_ship: any, amount: number, byPlayer: boolean) => {
+    damage += amount;
+    creditedToPlayer ||= byPlayer;
+  };
   for (let i = 0; i < 8; i++) e.updateSlicks(0.4);
   assert.ok(damage > 0, 'a hull sitting in the flames is burned');
+  assert.ok(creditedToPlayer, 'a player-fired slick credits its damage to the player');
   assert.ok(enemy.burn > 0, 'and the flames take hold if she lingers');
   // and it burns out in its own time
   for (let i = 0; i < 60; i++) e.updateSlicks(0.2);
@@ -222,6 +259,50 @@ test('hostility spread activates allied forts, not just the original island', ()
   e.fortSalvo = (is: any) => fired.push(is);
   e.updateForts(2);
   assert.deepEqual(fired, [a, b]);
+});
+
+test('peril plunder scales direct awards and pre-scaled loot only once', () => {
+  const { e } = harness('golden');
+  delete e.addScore; // use the engine's real score implementation, not the harness stub
+  e.diff = difficultyById('kingOfTheSeas');
+  e.mult = 1;
+  e.score = 0;
+  e.scorePulse = 0;
+  e.goldPopup = 0;
+  e.goldPopupTimer = 0;
+  e.goldPopupPulse = 0;
+  e.coinChain = 0;
+  e.coinChainTimer = 0;
+  e.flashWhite = 0;
+  e.streakTimer = 0;
+  e.flags = [];
+  e.prisoners = 0;
+  e.water = 100;
+  e.food = 100;
+  e.maxWater = 150;
+  e.maxFood = 150;
+  e.stats.gold = 0;
+  e.stats.boarded = 0;
+
+  assert.equal(e.addScore(100), 150, 'unscaled awards receive the peril factor');
+  e.score = 0;
+  e.collect({ x: 0, y: 0, vx: 0, vy: 0, kind: 0, value: 150, life: 10, seed: 0, magnet: false, mspeed: 0 });
+  assert.equal(e.score, 150, 'a gold pickup already scaled for peril is not scaled again');
+  assert.equal(e.stats.gold, 150);
+
+  e.score = 0;
+  e.collect({ x: 0, y: 0, vx: 0, vy: 0, kind: 1, value: 225, life: 10, seed: 0, magnet: false, mspeed: 0 });
+  assert.equal(e.score, 225, 'a treasure chest already scaled for peril is not scaled again');
+
+  e.score = 0;
+  const prize = e.makeShip('merchant', 10, 0, 0);
+  const baseManifest = prize.def.value * (1 + 0.1 * (e.wave - 1));
+  const plunderedManifest = baseManifest * 1.5;
+  const chestValues: number[] = [];
+  e.addPickup = (...args: unknown[]) => chestValues.push(args[5] as number);
+  e.capturePrize(prize, plunderedManifest, false);
+  assert.equal(e.score, Math.round(plunderedManifest * 1.2), 'the captured manifest bonus only receives one peril factor');
+  assert.equal(chestValues[0], Math.round(plunderedManifest * 0.25 + 100 * 1.5));
 });
 
 test('boarding records prisoners in the inventory and end-of-game stats', () => {

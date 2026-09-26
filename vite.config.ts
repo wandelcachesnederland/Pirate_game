@@ -18,7 +18,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    // allow the sandboxed preview proxy host
-    allowedHosts: true,
+    // allow the sandboxed preview proxy without disabling Vite's host checks
+    allowedHosts: [".e2b.app"],
   },
 });
