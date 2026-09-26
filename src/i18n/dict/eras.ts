@@ -1270,4 +1270,728 @@ const ja: ErasDict = {
   },
 };
 
-export const eras: Dict<ErasDict> = { en, es, fr, de, nl, pt, ja };
+const zh: ErasDict = {
+  ui: {
+    stepTag: '第 5 步，共 7 步 · 时代与水域',
+    heading: '选择时代',
+    hint: '拖卡片、点铭牌或用 ← →——时代决定你作战的水域、遭遇的敌人和播放的磁带。她的英雄船体在下页等你。',
+    prevEra: '上一年代',
+    nextEra: '下一年代',
+    eraCount: '时代 {{n}} / {{total}}',
+    watersSuffix: '——{{waters}}。',
+    warship: '战船',
+    ariaTab: '时代',
+  },
+  shipStep: {
+    stepTag: '第 6 步，共 7 步 · 英雄船',
+    stepTagCampaign: '第 6 步，共 7 步 · 战役船',
+    heading: '选择英雄船',
+    headingCampaign: '选择战役船',
+    hint: '拖肖像、点船体或用 ← →——每个数字都与英雄船队整体对比，每船只航行于自己的时代。选中就起航。',
+    hintCampaign:
+      '这艘船将载你穿越全部 26 个时代——每个年代，同一艘船，升级保留。选中就起航。',
+  },
+  groupSail: '风帆时代',
+  groupSteel: '钢铁海军',
+  groupHeritage: '传承之海',
+  golden: { name: '海盗黄金时代', blurb: '均衡单桅船——稳妥之选。' },
+  exploration: { name: '大航海时代', blurb: '轻快卡拉维拉，炮轻舵快。' },
+  napoleonic: { name: '拿破仑战争', blurb: '巡防舰：每舷 4 炮，射程最远。' },
+  barbary: {
+    name: '巴巴里战争',
+    blurb: '纵帆船：12 炮，迎风快——直抵的黎波里海岸。',
+    waters: '巴巴里海岸',
+  },
+  viking: { name: '维京时代', blurb: '长船：最快的船体，最薄的皮。' },
+  ironclad: { name: '铁甲舰时代', blurb: '蒸汽炮廓舰：装甲，残暴，无帆。' },
+  ww1: {
+    name: '海上大战',
+    blurb: '驱逐舰：速射炮，汽轮机，最薄的钢铁皮。',
+    waters: '多格滩',
+  },
+  ww2: {
+    name: '海上二战',
+    blurb: '弗莱彻级：五座炮塔，雷达，最快的水面炮。',
+    waters: '所罗门群岛',
+  },
+  hormuz: {
+    name: '油轮战争',
+    blurb: '卡曼级导弹艇：先开火，快跑，躲护航舰。',
+    waters: '霍尔木兹海峡',
+  },
+  roman: {
+    name: '第一次布匿战争',
+    blurb: '五列桨船：青铜撞角，红帆，无尽桨。',
+    waters: '地中海',
+  },
+  greek: {
+    name: '希波战争',
+    blurb: '三列桨船：萨拉米斯最快的撞角——纸一样薄的皮。',
+    waters: '地中海',
+  },
+  arab: {
+    name: '季风海',
+    blurb: '远洋单桅船：三角帆，季风快船。',
+    waters: '阿拉伯海岸',
+  },
+  chinese: {
+    name: '明朝宝船远航',
+    blurb: '战船：郑和的水上堡垒。',
+    waters: '新加坡海峡',
+  },
+  japanese: {
+    name: '战国时代',
+    blurb: '安宅船：黑漆炮楼。慢，残暴。',
+    waters: '濑户内海',
+  },
+  maori: {
+    name: '毛利火枪战争',
+    blurb: '瓦卡战舟：大战舟——桨快，缴获炮。',
+    waters: '岛屿湾',
+  },
+  hawaii: {
+    name: '夏威夷统一',
+    blurb: '佩莱莱乌战舟：卡美哈梅哈舰队的快战舟。',
+    waters: '科纳海岸',
+  },
+  macedon: {
+    name: '马其顿海战',
+    blurb: '德米特里的攻城桨帆船：水上最大战船。慢，不可阻挡。',
+    waters: '塞浦路斯萨拉米斯外海',
+  },
+  maya: {
+    name: '玛雅初遇',
+    blurb: '图卢姆大战舟——把陌生人赶出海岸。',
+    waters: '洪都拉斯湾',
+  },
+  inca: {
+    name: '印加太平洋远航',
+    blurb: '图帕克大轻木筏——萨帕·印卡在西海的臂展。',
+    waters: '瓜亚基尔湾',
+  },
+  lepanto: {
+    name: '勒班陀',
+    blurb: '奥斯曼战船：艏炮，桨，接舷兵。神圣同盟在等。',
+    waters: '帕特雷湾',
+  },
+  korea: {
+    name: '壬辰卫国战',
+    blurb: '龟船：铁顶，四面炮。守住海峡。',
+    waters: '鸣梁海峡',
+  },
+  byzantium: {
+    name: '君士坦丁堡之围',
+    blurb: '希腊火战船：把哈里发舰队烧出海峡。',
+    waters: '博斯普鲁斯海峡',
+  },
+  egypt: {
+    name: '迎战海上民族',
+    blurb: '拉美西斯三世的战船：史上第一场海战。',
+    waters: '尼罗河三角洲',
+  },
+  chola: {
+    name: '朱罗横渡海湾',
+    blurb: '朱罗战船：载猛虎横渡孟加拉湾。',
+    waters: '孟加拉湾',
+  },
+  vietnam: {
+    name: '白藤江',
+    blurb: '越南战船：把可汗舰队引进桩阵。',
+    waters: '白藤江',
+  },
+  aztec: {
+    name: '特诺奇蒂特兰陷落',
+    blurb: '夸乌特莫克战舟：血战大湖到底。',
+    waters: '特斯科科湖',
+  },
+  phoenicia: {
+    name: '腓尼基海域',
+    blurb: '推罗双列桨船：雪松船体，紫帆，远洋商船之祖。',
+    waters: '黎凡特海岸',
+  },
+  hanse: {
+    name: '汉萨同盟',
+    blurb: '波罗的海柯克船：高舷，单横帆，商站之狼。',
+    waters: '波罗的海入口',
+  },
+  portugal: {
+    name: '印度之邦',
+    blurb: '葡萄牙大克拉克船：三角帆侦察船，重炮，胡椒航线。',
+    waters: '马拉巴尔海岸',
+  },
+  armada: {
+    name: '西班牙无敌舰队',
+    blurb: '竞速大帆船：迎风，炮快——上帝吹了口气。',
+    waters: '海峡',
+  },
+  dutch: {
+    name: '荷兰黄金时代',
+    blurb: '七省号：橙饰，特塞尔外炮林。',
+    waters: '特塞尔',
+  },
+  ottoman: {
+    name: '海军统帅',
+    blurb: '巴巴罗萨的卡迪尔加船：普雷韦扎，同盟在你齿间。',
+    waters: '爱奥尼亚海',
+  },
+  predread: {
+    name: '对马',
+    blurb: '前无畏舰三笠：抢T横头，煤烟，12英寸炮。',
+    waters: '对马海峡',
+  },
+  falklands: {
+    name: '马岛战争',
+    blurb: '21型护卫舰：飞鱼，42型，南大西洋寒冬。',
+    waters: '福克兰海峡',
+  },
+  somali: {
+    name: '索马里海盗',
+    blurb: '劫持拖网母船：RPG、小艇和梯子——劫苏伊士航线。',
+    waters: '亚丁湾',
+  },
+};
+
+const id: ErasDict = {
+  ui: {
+    stepTag: 'Langkah 5 dari 7 · Zaman & Perairan',
+    heading: 'Pilih Zamanmu',
+    hint: 'Seret kartu, ketuk pelat, atau gunakan ← → — zaman menentukan perairan tempatmu bertempur, musuh yang kautemui, dan kaset yang diputar. Lambung pahlawannya menanti di layar berikut.',
+    prevEra: 'Zaman sebelumnya',
+    nextEra: 'Zaman berikut',
+    eraCount: 'Zaman {{n}} / {{total}}',
+    watersSuffix: ' — {{waters}}.',
+    warship: 'kapal perang',
+    ariaTab: 'Zaman',
+  },
+  shipStep: {
+    stepTag: 'Langkah 6 dari 7 · Kapal Pahlawan',
+    stepTagCampaign: 'Langkah 6 dari 7 · Kapal Kampanye',
+    heading: 'Pilih Kapal Pahlawanmu',
+    headingCampaign: 'Pilih Kapal Kampanyemu',
+    hint: 'Seret potret, ketuk lambung, atau gunakan ← → — tiap angka diukur terhadap seluruh armada pahlawan, dan tiap lambung hanya berlayar di zamannya sendiri. Berlayarlah saat ia cocok.',
+    hintCampaign:
+      'Lambung ini akan membawamu melewati semua 26 zaman — tiap masa, kapal yang sama, peningkatan disimpan. Berlayarlah saat ia cocok.',
+  },
+  groupSail: 'Zaman Layar',
+  groupSteel: 'AL Baja',
+  groupHeritage: 'Lautan Warisan',
+  golden: { name: 'Zaman Keemasan Bajak Laut', blurb: 'Sloop seimbang — tangan aman.' },
+  exploration: { name: 'Zaman Penjelajahan', blurb: 'Karavel lincah, meriam ringan, kemudi cepat.' },
+  napoleonic: { name: 'Perang Napoleon', blurb: 'Fregat: 4 meriam per sisi, jangkauan terjauh.' },
+  barbary: {
+    name: 'Perang Barbary',
+    blurb: 'Sekunar: 12 meriam, lincah dan cepat — ke pantai Tripoli.',
+    waters: 'Pesisir Barbary',
+  },
+  viking: { name: 'Zaman Viking', blurb: 'Longship: lambung tercepat, kulit tertipis.' },
+  ironclad: { name: 'Zaman Ironclad', blurb: 'Kasemat uap: berzirah, brutal, tanpa layar.' },
+  ww1: {
+    name: 'Perang Besar di Laut',
+    blurb: 'Destroyer: meriam cepat, turbin, kulit baja tertipis.',
+    waters: 'Gosong Dogger',
+  },
+  ww2: {
+    name: 'Perang Dunia Kedua di Laut',
+    blurb: 'Kelas Fletcher: lima dudukan, radar, meriam tercepat.',
+    waters: 'Kepulauan Solomon',
+  },
+  hormuz: {
+    name: 'Perang Tanker',
+    blurb: 'Kapal rudal kelas Kaman: tembak dulu, lari cepat, hindari pengawal.',
+    waters: 'Selat Hormuz',
+  },
+  roman: {
+    name: 'Perang Punisia Pertama',
+    blurb: 'Quinquereme: ram perunggu, layar merah, dayung tanpa akhir.',
+    waters: 'Laut Tengah',
+  },
+  greek: {
+    name: 'Perang Persia',
+    blurb: 'Trireme: ram tercepat di Salamis — kulit setipis kertas.',
+    waters: 'Laut Tengah',
+  },
+  arab: {
+    name: 'Lautan Muson',
+    blurb: 'Boom samudra: layar lateen, pelari muson tangkas.',
+    waters: 'Pesisir Arab',
+  },
+  chinese: {
+    name: 'Pelayaran Harta Ming',
+    blurb: 'Jung perang: benteng terapung Zheng He.',
+    waters: 'Selat Singapura',
+  },
+  japanese: {
+    name: 'Zaman Sengoku',
+    blurb: 'Atakebune: puri meriam pernis hitam. Lambat, brutal.',
+    waters: 'Laut Pedalaman Seto',
+  },
+  maori: {
+    name: 'Perang Senapan Māori',
+    blurb: 'Waka taua: kano perang besar — dayung tangkas, meriam rampasan.',
+    waters: 'Teluk Islands',
+  },
+  hawaii: {
+    name: 'Penyatuan Hawaii',
+    blurb: 'Waʻa Peleleu: kano perang tangkas armada Kamehameha.',
+    waters: 'Pesisir Kona',
+  },
+  macedon: {
+    name: 'Makedonia di Laut',
+    blurb: 'Galai pengepungan Demetrius: kapal perang terbesar. Lambat, tak terbendung.',
+    waters: 'lepas Salamis, Siprus',
+  },
+  maya: {
+    name: 'Kontak Pertama Maya',
+    blurb: 'Kano perang besar Tulum — usir orang asing dari pantaimu.',
+    waters: 'Teluk Honduras',
+  },
+  inca: {
+    name: 'Pelayaran Pasifik Inca',
+    blurb: 'Balsa besar Tupac — jangkauan Sapa Inca di laut barat.',
+    waters: 'Teluk Guayaquil',
+  },
+  lepanto: {
+    name: 'Lepanto',
+    blurb: 'Galai perang Ottoman: meriam haluan, dayung, penyerbu. Liga menanti.',
+    waters: 'Teluk Patras',
+  },
+  korea: {
+    name: 'Perang Imjin',
+    blurb: 'Kapal kura-kura: atap besi, meriam di tiap sisi. Tahan selat.',
+    waters: 'Selat Myeongnyang',
+  },
+  byzantium: {
+    name: 'Pengepungan Konstantinopel',
+    blurb: 'Dromon dengan api Yunani: bakar armada Khalifah keluar dari selat.',
+    waters: 'Bosporus',
+  },
+  egypt: {
+    name: 'Melawan Bangsa Laut',
+    blurb: 'Galai perang Ramses III: pertempuran laut pertama dalam sejarah.',
+    waters: 'Delta Nil',
+  },
+  chola: {
+    name: 'Chola Seberang Teluk',
+    blurb: 'Kapal perang Chola: bawa Harimau menyeberangi Teluk Benggala.',
+    waters: 'Teluk Benggala',
+  },
+  vietnam: {
+    name: 'Sungai Bạch Đằng',
+    blurb: 'Jung perang Vietnam: pancing armada Khan ke pancang.',
+    waters: 'Sungai Bạch Đằng',
+  },
+  aztec: {
+    name: 'Jatuhnya Tenochtitlan',
+    blurb: 'Kano perang Cuauhtémoc: bela danau sampai akhir.',
+    waters: 'Danau Texcoco',
+  },
+  phoenicia: {
+    name: 'Lautan Fenisia',
+    blurb: 'Bireme Tirus: lambung cedar, layar ungu, yang pertama dari pedagang jauh.',
+    waters: 'Pesisir Levantine',
+  },
+  hanse: {
+    name: 'Liga Hansa',
+    blurb: 'Kog Baltik: sisi tinggi, satu layar persegi, serigala Kontor.',
+    waters: 'Pintu Baltik',
+  },
+  portugal: {
+    name: 'Estado da Índia',
+    blurb: 'Nau Portugis: pengintai lateen, meriam berat, pelayaran lada.',
+    waters: 'Pesisir Malabar',
+  },
+  armada: {
+    name: 'Armada Spanyol',
+    blurb: 'Galeon balap: lincah, meriam cepat — Tuhan meniup.',
+    waters: 'Selat',
+  },
+  dutch: {
+    name: 'Zaman Keemasan Belanda',
+    blurb: 'Zeven Provinciën: lis oranye, hutan meriam di lepas Texel.',
+    waters: 'Texel',
+  },
+  ottoman: {
+    name: 'Kapudan Pasha',
+    blurb: 'Kadirga Barbarossa: Preveza, Liga di gigimu.',
+    waters: 'Laut Ionia',
+  },
+  predread: {
+    name: 'Tsushima',
+    blurb: 'Pra-dreadnought Mikasa: potong T, asap batu bara, meriam 12 inci.',
+    waters: 'Selat Tsushima',
+  },
+  falklands: {
+    name: 'Perang Falklands',
+    blurb: 'Fregat Tipe 21: Exocet, Tipe 42, musim dingin Atlantik Selatan.',
+    waters: 'Selat Falkland',
+  },
+  somali: {
+    name: 'Bajak Laut Somali',
+    blurb: 'Kapal induk pukat yang dibajak: RPG, skiff, dan tangga — ambil lalu lintas Suez.',
+    waters: 'Teluk Aden',
+  },
+};
+
+const th: ErasDict = {
+  ui: {
+    stepTag: 'ขั้นตอนที่ 5 จาก 7 · ยุค & น่านน้ำ',
+    heading: 'เลือกยุค',
+    hint: 'ลากการ์ด แตะป้าย หรือใช้ ← → — ยุคกำหนดน่านน้ำที่ท่านรบ ศัตรูที่เจอ และเทปที่เล่น ตัวเรือวีรชนของเธอรอหน้าถัดไป',
+    prevEra: 'ยุคก่อน',
+    nextEra: 'ยุคถัดไป',
+    eraCount: 'ยุค {{n}} / {{total}}',
+    watersSuffix: ' — {{waters}}',
+    warship: 'เรือรบ',
+    ariaTab: 'ยุค',
+  },
+  shipStep: {
+    stepTag: 'ขั้นตอนที่ 6 จาก 7 · เรือวีรชน',
+    stepTagCampaign: 'ขั้นตอนที่ 6 จาก 7 · เรือแคมเปญ',
+    heading: 'เลือกเรือวีรชน',
+    headingCampaign: 'เลือกเรือแคมเปญ',
+    hint: 'ลากภาพ แตะตัวเรือ หรือใช้ ← → — ทุกตัวเลขเทียบกับกองเรือวีรชนทั้งกอง แต่ละตัวเรือแล่นเฉพาะยุคตัวเอง ถูกใจแล้วออกเรือ',
+    hintCampaign:
+      'ตัวเรือนี้จะพาท่านผ่าน 26 ยุค — ทุกยุค ลำเดียว อัปเกรดอยู่ครบ ถูกใจแล้วออกเรือ',
+  },
+  groupSail: 'ยุคเรือใบ',
+  groupSteel: 'ทัพเรือเหล็ก',
+  groupHeritage: 'ทะเลมรดก',
+  golden: { name: 'ยุคทองโจรสลัด', blurb: 'สลูปสมดุล — มือชัวร์' },
+  exploration: { name: 'ยุคสำรวจ', blurb: 'คาราเวลคล่อง ปืนเบา หางเสือไว' },
+  napoleonic: { name: 'สงครามนโปเลียน', blurb: 'ฟริเกต: 4 ปืนต่อข้าง ไกลสุด' },
+  barbary: {
+    name: 'สงครามบาร์บารี',
+    blurb: 'สกูนเนอร์: 12 ปืน คล่องไว — สู่ฝั่งตริโปลี',
+    waters: 'ชายฝั่งบาร์บารี',
+  },
+  viking: { name: 'ยุคไวกิ้ง', blurb: 'ลองชิป: ตัวเรือเร็วสุด เปลือกบางสุด' },
+  ironclad: { name: 'ยุคไอรอนแคลด', blurb: 'ป้อมกลไฟ: เกราะ โหด ไร้ใบ' },
+  ww1: {
+    name: 'มหาสงครามทางทะเล',
+    blurb: 'เรือพิฆาต: ปืนยิงเร็ว กังหัน เปลือกเหล็กบางสุด',
+    waters: 'ด็อกเกอร์แบงก์',
+  },
+  ww2: {
+    name: 'สงครามโลกครั้งที่สองทางทะเล',
+    blurb: 'ชั้นเฟลตเชอร์: ห้าป้อม เรดาร์ ปืนเร็วสุด',
+    waters: 'หมู่เกาะโซโลมอน',
+  },
+  hormuz: {
+    name: 'สงครามเรือบรรทุกน้ำมัน',
+    blurb: 'เรือขีปนาวุธชั้นกามาน: ยิงก่อน หนีเร็ว หลบเรือคุ้มกัน',
+    waters: 'ช่องแคบฮอร์มุซ',
+  },
+  roman: {
+    name: 'สงครามพิวนิกครั้งที่หนึ่ง',
+    blurb: 'ควินเควเรม: หัวชนทองสัมฤทธิ์ ใบแดง พายไม่รู้จบ',
+    waters: 'ทะเลเมดิเตอร์เรเนียน',
+  },
+  greek: {
+    name: 'สงครามเปอร์เซีย',
+    blurb: 'ไทรรีม: หัวชนเร็วสุดที่ซาลามิส — เปลือกบางอย่างกระดาษ',
+    waters: 'ทะเลเมดิเตอร์เรเนียน',
+  },
+  arab: {
+    name: 'ทะเลมรสุม',
+    blurb: 'บูมมหาสมุทร: ใบเลทีน นักวิ่งมรสุมไว',
+    waters: 'ชายฝั่งอาหรับ',
+  },
+  chinese: {
+    name: 'เดินเรือมหาสมบัติหมิง',
+    blurb: 'สำเภารบ: ป้อมลอยน้ำเจิ้งเหอ',
+    waters: 'ช่องแคบสิงคโปร์',
+  },
+  japanese: {
+    name: 'ยุคเซ็นโกกุ',
+    blurb: 'อาตาเกะบุเนะ: ปราสาทปืนลงรักดำ ช้า โหด',
+    waters: 'ทะเลในเซโตะ',
+  },
+  maori: {
+    name: 'สงครามปืนเมารี',
+    blurb: 'วากาเตาวา: เรือแคนูรบใหญ่ — พายไว ปืนยึดมา',
+    waters: 'อ่าวเบย์ออฟไอแลนด์ส',
+  },
+  hawaii: {
+    name: 'รวมฮาวาย',
+    blurb: 'วาอาเปเลเลอู: เรือแคนูรบไวของกองเรือคาเมฮาเมฮา',
+    waters: 'ชายฝั่งโคนา',
+  },
+  macedon: {
+    name: 'มาซิโดเนียทางทะเล',
+    blurb: 'แกลลีย์ประชิดเดเมทริอุส: เรือรบใหญ่สุด ช้า หยุดไม่อยู่',
+    waters: 'นอกซาลามิส ไซปรัส',
+  },
+  maya: {
+    name: 'พบครั้งแรกมายา',
+    blurb: 'เรือแคนูรบใหญ่ทูลุม — ไล่คนแปลกหน้าจากฝั่งท่าน',
+    waters: 'อ่าวฮอนดูรัส',
+  },
+  inca: {
+    name: 'เดินเรือแปซิฟิกอินคา',
+    blurb: 'แพบัลซาใหญ่ทูพัค — แขนซาปาอินคาในทะเลตะวันตก',
+    waters: 'อ่าวกัวยากิล',
+  },
+  lepanto: {
+    name: 'เลปันโต',
+    blurb: 'แกลลีย์รบออตโตมัน: ปืนหัว พาย ทหารยึด สันนิบาตรออยู่',
+    waters: 'อ่าวปาทรัส',
+  },
+  korea: {
+    name: 'สงครามอิมจิน',
+    blurb: 'เรือเต่า: หลังคาเหล็ก ปืนทุกด้าน ยึดช่องแคบ',
+    waters: 'ช่องแคบเมียงนยัง',
+  },
+  byzantium: {
+    name: 'ล้อมคอนสแตนติโนเปิล',
+    blurb: 'โดรโมนกรีกไฟ: เผากองเรือกาหลิบออกจากช่องแคบ',
+    waters: 'บอสพอรัส',
+  },
+  egypt: {
+    name: 'สู้ชนเผ่าทะเล',
+    blurb: 'แกลลีย์รบแรมเสสที่ 3: ยุทธนาวีครั้งแรกในประวัติศาสตร์',
+    waters: 'ดินดอนไนล์',
+  },
+  chola: {
+    name: 'โจฬะข้ามอ่าว',
+    blurb: 'เรือรบโจฬะ: พาเสือข้ามอ่าวเบงกอล',
+    waters: 'อ่าวเบงกอล',
+  },
+  vietnam: {
+    name: 'แม่น้ำบักดั่ง',
+    blurb: 'สำเภารบเวียดนาม: ล่อกองเรือข่านเข้าหลักไม้',
+    waters: 'แม่น้ำบักดั่ง',
+  },
+  aztec: {
+    name: 'เสียเตนอชตีตลัน',
+    blurb: 'เรือแคนูรบเกาว์เตม็อก: ป้องทะเลสาบถึงที่สุด',
+    waters: 'ทะเลสาบเตซโกโก',
+  },
+  phoenicia: {
+    name: 'ทะเลฟินีเซีย',
+    blurb: 'ไบรีมไทร์: ตัวเรือซีดาร์ ใบม่วง นักค้าไกลคนแรก',
+    waters: 'ชายฝั่งเลแวนไทน์',
+  },
+  hanse: {
+    name: 'สันนิบาตฮันซา',
+    blurb: 'ค็อกก์บอลติก: ข้างสูง ใบสี่เหลี่ยมใบเดียว หมาป่าแห่งคอนทอร์',
+    waters: 'ทางเข้าบอลติก',
+  },
+  portugal: {
+    name: 'เอสตาดู ดา อินเดีย',
+    blurb: 'นาวโปรตุเกส: สอดแนมเลทีน ปืนหนัก เส้นทางพริกไทย',
+    waters: 'ชายฝั่งมาลาบาร์',
+  },
+  armada: {
+    name: 'อาร์มาดาสเปน',
+    blurb: 'แกลเลียนแข่ง: คล่อง ปืนไว — พระเจ้าเป่า',
+    waters: 'ช่องแคบ',
+  },
+  dutch: {
+    name: 'ยุคทองดัตช์',
+    blurb: 'เซเวน โพรวิินเชียน: แถบส้ม ป่าปืนนอกเท็กเซล',
+    waters: 'เท็กเซล',
+  },
+  ottoman: {
+    name: 'คาปูดันปาชา',
+    blurb: 'กาดีร์กาบาร์บารอสซา: พรีเวซา สันนิบาตในฟันท่าน',
+    waters: 'ทะเลไอโอเนียน',
+  },
+  predread: {
+    name: 'สึชิมะ',
+    blurb: 'พรีเดรดนอตมิกาสะ: ตัดตัว T ควันถ่าน ปืน 12 นิ้ว',
+    waters: 'ช่องแคบสึชิมะ',
+  },
+  falklands: {
+    name: 'สงครามฟอล์กแลนด์',
+    blurb: 'ฟริเกต Type 21: เอ็กโซเซต์ Type 42 หนาวแอตแลนติกใต้',
+    waters: 'ช่องแคบฟอล์กแลนด์',
+  },
+  somali: {
+    name: 'โจรสลัดโซมาลี',
+    blurb: 'เรือแม่เรือลากอวนที่จี้: RPG สกิฟฟ์และบันได — เอาเส้นทางสุเอซ',
+    waters: 'อ่าวเอเดน',
+  },
+};
+
+const vi: ErasDict = {
+  ui: {
+    stepTag: 'Bước 5 / 7 · Thời Đại & Vùng Nước',
+    heading: 'Chọn Thời Đại',
+    hint: 'Kéo thẻ, chạm bảng hoặc dùng ← → — thời quyết định vùng nước bạn đánh, địch bạn gặp và băng nhạc phát. Thân anh hùng của nàng chờ ở màn sau.',
+    prevEra: 'Thời trước',
+    nextEra: 'Thời sau',
+    eraCount: 'Thời {{n}} / {{total}}',
+    watersSuffix: ' — {{waters}}.',
+    warship: 'chiến hạm',
+    ariaTab: 'Thời đại',
+  },
+  shipStep: {
+    stepTag: 'Bước 6 / 7 · Tàu Anh Hùng',
+    stepTagCampaign: 'Bước 6 / 7 · Tàu Chiến Dịch',
+    heading: 'Chọn Tàu Anh Hùng',
+    headingCampaign: 'Chọn Tàu Chiến Dịch',
+    hint: 'Kéo chân dung, chạm thân tàu hoặc dùng ← → — mọi con số đều đo với cả hạm đội anh hùng, mỗi thân chỉ dong thời của mình. Ưng thì ra khơi.',
+    hintCampaign:
+      'Thân này sẽ đưa bạn qua cả 26 thời — mọi thời, một tàu, giữ nâng cấp. Ưng thì ra khơi.',
+  },
+  groupSail: 'Thời Buồm',
+  groupSteel: 'Hải Quân Thép',
+  groupHeritage: 'Biển Di Sản',
+  golden: { name: 'Thời Hoàng Kim Cướp Biển', blurb: 'Sloop cân bằng — lựa chọn an toàn.' },
+  exploration: { name: 'Thời Đại Khám Phá', blurb: 'Caravel nhanh nhẹn, pháo nhẹ, lái lẹ.' },
+  napoleonic: { name: 'Chiến Tranh Napoleon', blurb: 'Frigate: 4 pháo mỗi mạn, tầm xa nhất.' },
+  barbary: {
+    name: 'Chiến Tranh Barbary',
+    blurb: 'Schooner: 12 pháo, lanh lẹ — tới bờ Tripoli.',
+    waters: 'Bờ Biển Barbary',
+  },
+  viking: { name: 'Thời Viking', blurb: 'Thuyền dài: thân nhanh nhất, vỏ mỏng nhất.' },
+  ironclad: { name: 'Thời Tàu Bọc Sắt', blurb: 'Hầm pháo hơi nước: giáp trụ, tàn bạo, không buồm.' },
+  ww1: {
+    name: 'Đại Chiến Trên Biển',
+    blurb: 'Tàu khu trục: pháo bắn nhanh, turbine, vỏ thép mỏng nhất.',
+    waters: 'Bãi Dogger',
+  },
+  ww2: {
+    name: 'Thế Chiến II Trên Biển',
+    blurb: 'Lớp Fletcher: năm bệ pháo, radar, pháo nhanh nhất mặt nước.',
+    waters: 'Quần Đảo Solomon',
+  },
+  hormuz: {
+    name: 'Chiến Tranh Tàu Dầu',
+    blurb: 'Tàu tên lửa lớp Kaman: bắn trước, chạy nhanh, né hộ tống.',
+    waters: 'Eo Biển Hormuz',
+  },
+  roman: {
+    name: 'Chiến Tranh Punic Lần Một',
+    blurb: 'Quinquereme: mũi đâm đồng, buồm đỏ, chèo vô tận.',
+    waters: 'Biển Địa Trung Hải',
+  },
+  greek: {
+    name: 'Chiến Tranh Ba Tư-Hy Lạp',
+    blurb: 'Trireme: mũi đâm nhanh nhất ở Salamis — vỏ mỏng như giấy.',
+    waters: 'Biển Địa Trung Hải',
+  },
+  arab: {
+    name: 'Biển Gió Mùa',
+    blurb: 'Boom đại dương: buồm latin, tàu chạy gió mùa nhanh.',
+    waters: 'Bờ Biển Ả Rập',
+  },
+  chinese: {
+    name: 'Hải Trình Kho Báu Minh',
+    blurb: 'Thuyền chiến: pháo đài nổi của Trịnh Hòa.',
+    waters: 'Eo Biển Singapore',
+  },
+  japanese: {
+    name: 'Thời Sengoku',
+    blurb: 'Atakebune: pháo đài sơn đen. Chậm, tàn bạo.',
+    waters: 'Nội Hải Seto',
+  },
+  maori: {
+    name: 'Chiến Tranh Súng Māori',
+    blurb: 'Waka taua: xuồng chiến lớn — chèo nhanh, pháo chiếm được.',
+    waters: 'Vịnh Đảo',
+  },
+  hawaii: {
+    name: 'Thống Nhất Hawaii',
+    blurb: 'Waʻa Peleleu: xuồng chiến nhanh của hạm đội Kamehameha.',
+    waters: 'Bờ Biển Kona',
+  },
+  macedon: {
+    name: 'Macedonia Trên Biển',
+    blurb: 'Thuyền chèo công thành của Demetrius: chiến hạm lớn nhất. Chậm, không gì cản nổi.',
+    waters: 'ngoài Salamis, Síp',
+  },
+  maya: {
+    name: 'Maya Chạm Trán Đầu Tiên',
+    blurb: 'Xuồng chiến lớn Tulum — đuổi người lạ khỏi bờ bạn.',
+    waters: 'Vịnh Honduras',
+  },
+  inca: {
+    name: 'Hải Trình Thái Bình Dương Inca',
+    blurb: 'Bè lớn Tupac — tầm với của Sapa Inca trên biển tây.',
+    waters: 'Vịnh Guayaquil',
+  },
+  lepanto: {
+    name: 'Lepanto',
+    blurb: 'Thuyền chiến Ottoman: pháo mũi, chèo, quân xung kích. Liên minh đang chờ.',
+    waters: 'Vịnh Patras',
+  },
+  korea: {
+    name: 'Chiến Tranh Imjin',
+    blurb: 'Thuyền rùa: mái sắt, pháo bốn phía. Giữ eo biển.',
+    waters: 'Eo Biển Myeongnyang',
+  },
+  byzantium: {
+    name: 'Vây Hãm Constantinopolis',
+    blurb: 'Dromon lửa Hy Lạp: đốt hạm đội Caliph khỏi eo biển.',
+    waters: 'Bosporus',
+  },
+  egypt: {
+    name: 'Chống Hải Nhân',
+    blurb: 'Thuyền chiến của Ramesses III: trận thủy chiến đầu tiên trong sử.',
+    waters: 'Đồng Bằng Sông Nile',
+  },
+  chola: {
+    name: 'Chola Vượt Vịnh',
+    blurb: 'Chiến thuyền Chola: đưa Hổ vượt Vịnh Bengal.',
+    waters: 'Vịnh Bengal',
+  },
+  vietnam: {
+    name: 'Sông Bạch Đằng',
+    blurb: 'Thuyền chiến Việt: dụ hạm đội Hãn lên bãi cọc.',
+    waters: 'Sông Bạch Đằng',
+  },
+  aztec: {
+    name: 'Sụp Đổ Tenochtitlan',
+    blurb: 'Xuồng chiến của Cuauhtémoc: giữ hồ tới cùng.',
+    waters: 'Hồ Texcoco',
+  },
+  phoenicia: {
+    name: 'Biển Phoenicia',
+    blurb: 'Bireme Tyre: thân tuyết tùng, buồm tím, nhà buôn xa đầu tiên.',
+    waters: 'Bờ Levantine',
+  },
+  hanse: {
+    name: 'Liên Minh Hansa',
+    blurb: 'Cog Baltic: mạn cao, một buồm vuông, sói của Kontor.',
+    waters: 'Cửa Baltic',
+  },
+  portugal: {
+    name: 'Estado da Índia',
+    blurb: 'Nau Bồ Đào Nha: trinh sát latin, pháo nặng, tuyến hồ tiêu.',
+    waters: 'Bờ Malabar',
+  },
+  armada: {
+    name: 'Armada Tây Ban Nha',
+    blurb: 'Galeon đua: lanh lẹ, pháo nhanh — Chúa đã thổi.',
+    waters: 'Eo biển',
+  },
+  dutch: {
+    name: 'Thời Hoàng Kim Hà Lan',
+    blurb: 'Zeven Provinciën: viền cam, rừng pháo ngoài Texel.',
+    waters: 'Texel',
+  },
+  ottoman: {
+    name: 'Kapudan Pasha',
+    blurb: 'Kadirga của Barbarossa: Preveza, Liên minh trong răng bạn.',
+    waters: 'Biển Ionia',
+  },
+  predread: {
+    name: 'Tsushima',
+    blurb: 'Tiền-dreadnought Mikasa: cắt chữ T, khói than, pháo 12 inch.',
+    waters: 'Eo Biển Tsushima',
+  },
+  falklands: {
+    name: 'Chiến Tranh Falklands',
+    blurb: 'Tàu hộ vệ Type 21: Exocet, Type 42, mùa đông Nam Đại Tây Dương.',
+    waters: 'Eo Falkland',
+  },
+  somali: {
+    name: 'Cướp Biển Somali',
+    blurb: 'Tàu mẹ giã cào bị cướp: RPG, xuồng và thang — chặn tuyến Suez.',
+    waters: 'Vịnh Aden',
+  },
+};
+
+export const eras: Dict<ErasDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };

@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { fittingUpgradeForEra, isFittingSlot } from './hullFittings';
 import type { EraId, ProjectileKind, ShipDef, UpgradeDef, UpgradeId } from './types';
 
@@ -265,6 +266,57 @@ const SOMALI_UPGRADES: Partial<Record<UpgradeId, [string, string]>> = {
   grapeshot: ['Full Auto', 'R: every rifle aboard empties a magazine all round'],
   chaser: ['Bow & Stern PKMs', 'Machine guns fore and aft fire on their own'],
 };
+
+export type UpgradeVariant = 'base' | 'mechanical' | 'incendiary' | 'somali';
+
+/** Which upgrades-dictionary table names an era's refit cards. */
+export function upgradeVariant(era: EraId): UpgradeVariant {
+  if (era === 'somali') return 'somali';
+  if (usesGunpowder(era)) return 'base';
+  return isIncendiary(armamentFor(era).heavy) ? 'incendiary' : 'mechanical';
+}
+
+/** Which armaments-dictionary table names an era's guns. */
+function armNs(era: EraId): string {
+  if (era === 'somali') return 'somali';
+  if (usesGunpowder(era)) return 'cannon';
+  return `archery.${era}`;
+}
+
+/** Localized armament strings for an era: picker, orders, notices, HUD. */
+export function armSummaryL(era: EraId): string {
+  return i18n.t(`armaments:${armNs(era)}.summary`);
+}
+export function armHeavyNameL(era: EraId): string {
+  return i18n.t(`armaments:${armNs(era)}.heavyName`);
+}
+export function armLightNameL(era: EraId): string {
+  return i18n.t(`armaments:${armNs(era)}.lightName`);
+}
+export function armWeaponWordL(era: EraId): string {
+  return i18n.t(`armaments:${armNs(era)}.weaponWord`);
+}
+export function armVolleyNameL(era: EraId): string {
+  if (era === 'somali') return i18n.t('armaments:somali.volleyName');
+  if (usesGunpowder(era)) return i18n.t('armaments:cannon.volleyName');
+  return i18n.t('armaments:archeryVolley');
+}
+
+/** Localized upgrade card name for an era (mirrors {@link upgradeForEra}). */
+export function upgradeNameL(id: UpgradeId, era: EraId): string {
+  if (isFittingSlot(id)) {
+    return i18n.t(`fittings:eras.${era}.${id}.name`, {
+      defaultValue: i18n.t(`fittings:eras.golden.${id}.name`),
+    });
+  }
+  if (era === 'somali') {
+    return i18n.t(`upgrades:somali.${id}.name`, { defaultValue: i18n.t(`upgrades:base.${id}.name`) });
+  }
+  if (usesGunpowder(era)) return i18n.t(`upgrades:base.${id}.name`);
+  const arm = armamentFor(era);
+  const ns = isIncendiary(arm.heavy) ? 'incendiary' : 'mechanical';
+  return i18n.t(`upgrades:${ns}.${id}.name`, { defaultValue: i18n.t(`upgrades:base.${id}.name`) });
+}
 
 export function upgradeForEra(def: UpgradeDef, era: EraId): UpgradeDef {
   if (isFittingSlot(def.id)) return fittingUpgradeForEra(def, era);

@@ -1,4 +1,5 @@
 import { Anchor, Crown, Flame, Skull, Swords, type LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { DifficultyId } from '../game/types';
 import { DIFFICULTIES, difficultyById, type DifficultyDef } from '../game/difficulty';
 import { cn } from '../utils/cn';
@@ -10,22 +11,18 @@ interface Props {
 
 interface PerilStyle {
   icon: LucideIcon;
-  motto: string;
-  bestFor: string;
   /** The badge's enamel. */
   gradient: string;
   ring: string;
   glow: string;
   ink: string;
-  ribbon?: string;
+  ribbon?: boolean;
 }
 
 /** Each peril sails under its own colours — the cabinet's five badges. */
 const PERIL_STYLE: Record<DifficultyId, PerilStyle> = {
   landlubber: {
     icon: Anchor,
-    motto: 'Calm waters',
-    bestFor: 'First voyages',
     gradient: 'radial-gradient(circle at 35% 30%, #c8f5e4, #3aa88f 55%, #0e4a40)',
     ring: '#7de8c3',
     glow: 'rgba(80, 230, 190, 0.45)',
@@ -33,8 +30,6 @@ const PERIL_STYLE: Record<DifficultyId, PerilStyle> = {
   },
   swashbuckler: {
     icon: Swords,
-    motto: 'A fair fight',
-    bestFor: 'Warming up',
     gradient: 'radial-gradient(circle at 35% 30%, #e8f7b0, #7ab648 55%, #2c4d15)',
     ring: '#c4ec7a',
     glow: 'rgba(150, 220, 90, 0.45)',
@@ -42,18 +37,14 @@ const PERIL_STYLE: Record<DifficultyId, PerilStyle> = {
   },
   buccaneer: {
     icon: Skull,
-    motto: 'No quarter',
-    bestFor: 'The classic voyage',
     gradient: 'radial-gradient(circle at 35% 30%, #ff8a6a, #c22e1f 55%, #560d07)',
     ring: '#ffd863',
     glow: 'rgba(255, 150, 60, 0.55)',
     ink: '#fff3d6',
-    ribbon: 'Classic',
+    ribbon: true,
   },
   dreadCaptain: {
     icon: Flame,
-    motto: 'Hardened foes',
-    bestFor: 'Veterans',
     gradient: 'radial-gradient(circle at 35% 30%, #dfaaff, #7a2fc0 55%, #280b4e)',
     ring: '#c98aff',
     glow: 'rgba(180, 110, 255, 0.55)',
@@ -61,13 +52,11 @@ const PERIL_STYLE: Record<DifficultyId, PerilStyle> = {
   },
   kingOfTheSeas: {
     icon: Crown,
-    motto: 'Iron & gold',
-    bestFor: 'Legends only',
     gradient: 'radial-gradient(circle at 35% 30%, #fff6c0, #f5b542 48%, #8a4a12 82%)',
     ring: '#ffe98a',
     glow: 'rgba(255, 210, 80, 0.6)',
     ink: '#3a1c05',
-    ribbon: 'Richest',
+    ribbon: true,
   },
 };
 
@@ -125,6 +114,7 @@ const maxOf = (f: (d: DifficultyDef) => number) => Math.max(...DIFFICULTIES.map(
  * colours. One screen, one decision — how dangerous the voyage sails.
  */
 export function PerilStep({ difficulty, onDifficulty }: Props) {
+  const { t } = useTranslation('peril');
   const sel = difficultyById(difficulty);
   const selStyle = PERIL_STYLE[sel.id];
   const SelIcon = selStyle.icon;
@@ -132,18 +122,16 @@ export function PerilStep({ difficulty, onDifficulty }: Props) {
     <div className="flex h-full flex-col gap-2 overflow-y-auto no-scrollbar p-2 sm:gap-3 sm:p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 4 of 7 · Peril</div>
-          <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Your Peril</h2>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">{t('stepTag')}</div>
+          <h2 className="arcade-marquee text-2xl sm:text-4xl">{t('heading')}</h2>
         </div>
-        <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">
-          Deeper peril pays richer plunder · ← → or 1–5, then Enter
-        </span>
+        <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">{t('hint')}</span>
       </div>
 
       <div
         className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 xl:grid-cols-5"
         role="radiogroup"
-        aria-label="Peril"
+        aria-label={t('heading')}
       >
         {DIFFICULTIES.map((d, i) => {
           const s = PERIL_STYLE[d.id];
@@ -154,7 +142,7 @@ export function PerilStep({ difficulty, onDifficulty }: Props) {
               type="button"
               role="radio"
               aria-checked={active}
-              aria-label={`${d.name} — ${s.motto}`}
+              aria-label={`${t(`${d.id}.name`)} — ${t(`${d.id}.motto`)}`}
               onClick={() => onDifficulty(d.id)}
               data-on={active}
               className={cn(
@@ -170,14 +158,14 @@ export function PerilStep({ difficulty, onDifficulty }: Props) {
                   className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 font-pirate text-[0.65rem] leading-tight tracking-widest uppercase"
                   style={{ background: s.ring, color: s.ink }}
                 >
-                  {s.ribbon}
+                  {t(`${d.id}.ribbon`)}
                 </span>
               )}
               <span className="pointer-events-none absolute left-1.5 top-1 font-pirate text-xs opacity-40">
                 {i + 1}
               </span>
               <Emblem d={d} />
-              <span className="font-pirate text-lg leading-tight sm:text-xl">{d.name}</span>
+              <span className="font-pirate text-lg leading-tight sm:text-xl">{t(`${d.id}.name`)}</span>
               <span className={cn('text-[0.7rem] tracking-[0.2em]', active ? 'text-gold' : 'text-parch/45')}>
                 {'☠'.repeat(d.skulls)}
               </span>
@@ -187,9 +175,9 @@ export function PerilStep({ difficulty, onDifficulty }: Props) {
                   active ? 'border-gold/70 text-gold' : 'border-parch/25 text-parch/60',
                 )}
               >
-                ×{d.plunder} gold
+                {t('gold', { mult: d.plunder })}
               </span>
-              <span className="text-[0.68rem] italic leading-tight opacity-75">{s.motto}</span>
+              <span className="text-[0.68rem] italic leading-tight opacity-75">{t(`${d.id}.motto`)}</span>
             </button>
           );
         })}
@@ -202,20 +190,20 @@ export function PerilStep({ difficulty, onDifficulty }: Props) {
         <div className="flex items-center gap-2.5 sm:flex-col sm:text-center">
           <Emblem d={sel} size="lg" />
           <div>
-            <div className="font-pirate text-2xl leading-none sm:text-3xl">{sel.name}</div>
+            <div className="font-pirate text-2xl leading-none sm:text-3xl">{t(`${sel.id}.name`)}</div>
             <div className="mt-0.5 flex items-center gap-1.5 sm:justify-center">
               <SelIcon className="h-3.5 w-3.5" style={{ color: selStyle.ring }} />
-              <span className="text-[0.7rem] uppercase tracking-[0.18em] opacity-80">{selStyle.bestFor}</span>
+              <span className="text-[0.7rem] uppercase tracking-[0.18em] opacity-80">{t(`${sel.id}.bestFor`)}</span>
             </div>
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[0.82rem] italic leading-snug opacity-90 sm:text-[0.9rem]">{sel.tagline}</p>
+          <p className="text-[0.82rem] italic leading-snug opacity-90 sm:text-[0.9rem]">{t(`${sel.id}.tagline`)}</p>
           <div className="mt-2 grid gap-1 sm:grid-cols-2 sm:gap-x-4">
-            <Meter label="Foe guns" v={sel.enemyDamage} min={minOf((d) => d.enemyDamage)} max={maxOf((d) => d.enemyDamage)} tint="linear-gradient(90deg,#ff9a6a,#c22e1f)" />
-            <Meter label="Foe hull" v={sel.enemyHp} min={minOf((d) => d.enemyHp)} max={maxOf((d) => d.enemyHp)} tint="linear-gradient(90deg,#ffd863,#c8912a)" />
-            <Meter label="Foe numbers" v={sel.waveBudget} min={minOf((d) => d.waveBudget)} max={maxOf((d) => d.waveBudget)} tint="linear-gradient(90deg,#c98aff,#5a1fa0)" />
-            <Meter label="Plunder" v={sel.plunder} min={minOf((d) => d.plunder)} max={maxOf((d) => d.plunder)} tint="linear-gradient(90deg,#a8e6c8,#2f9e44)" />
+            <Meter label={t('meterGuns')} v={sel.enemyDamage} min={minOf((d) => d.enemyDamage)} max={maxOf((d) => d.enemyDamage)} tint="linear-gradient(90deg,#ff9a6a,#c22e1f)" />
+            <Meter label={t('meterHull')} v={sel.enemyHp} min={minOf((d) => d.enemyHp)} max={maxOf((d) => d.enemyHp)} tint="linear-gradient(90deg,#ffd863,#c8912a)" />
+            <Meter label={t('meterNumbers')} v={sel.waveBudget} min={minOf((d) => d.waveBudget)} max={maxOf((d) => d.waveBudget)} tint="linear-gradient(90deg,#c98aff,#5a1fa0)" />
+            <Meter label={t('meterPlunder')} v={sel.plunder} min={minOf((d) => d.plunder)} max={maxOf((d) => d.plunder)} tint="linear-gradient(90deg,#a8e6c8,#2f9e44)" />
           </div>
         </div>
       </section>

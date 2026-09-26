@@ -1,4 +1,5 @@
 import { Gamepad2, Hourglass, Map, Lock, Swords, Skull, Anchor, Target } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../utils/cn';
 
 export type ArcadeModeId = 'practice' | 'era' | 'campaign';
@@ -10,59 +11,45 @@ interface Props {
 
 interface ModeDef {
   id: ArcadeModeId;
-  name: string;
-  subtitle: string;
-  desc: string;
-  longDesc: string;
   icon: React.ElementType;
   gradient: string;
   ring: string;
   glow: string;
   enabled: boolean;
-  badge?: string;
 }
 
 const MODES: ModeDef[] = [
   {
     id: 'practice',
-    name: 'Practice',
-    subtitle: 'Learn the Ropes',
-    desc: 'Tutorial & drills',
-    longDesc: 'Learn to sail, aim and board with no pressure — perfect for landlubbers.',
     icon: Target,
     gradient: 'radial-gradient(circle at 35% 30%, #d0c8b8, #8a867e 55%, #4a4840)',
     ring: '#8a867e',
     glow: 'rgba(160,160,160,0.25)',
     enabled: false,
-    badge: 'Coming Soon',
   },
   {
     id: 'era',
-    name: 'Era',
-    subtitle: 'Pick Your Age',
-    desc: 'Single era brawl',
-    longDesc: 'Choose any of the 26 eras, pick your peril and hero ship — endless waves in one age.',
     icon: Hourglass,
     gradient: 'radial-gradient(circle at 35% 30%, #ff8a6a, #c22e1f 55%, #560d07)',
     ring: '#ffd863',
     glow: 'rgba(255, 150, 60, 0.55)',
     enabled: true,
-    badge: 'Play Now',
   },
   {
     id: 'campaign',
-    name: 'Campaign',
-    subtitle: 'Sail Through Time',
-    desc: 'All eras, in order',
-    longDesc: 'Start at 1178 BC and fight through history — 5 waves per era, every age in chronological order.',
     icon: Map,
     gradient: 'radial-gradient(circle at 35% 30%, #a8e6cf, #3aa88f 55%, #0e4a40)',
     ring: '#7de8c3',
     glow: 'rgba(80, 230, 190, 0.45)',
     enabled: true,
-    badge: 'Epic',
   },
 ];
+
+const BADGE_KEY: Record<ArcadeModeId, string> = {
+  practice: 'badgeComing',
+  era: 'badgePlay',
+  campaign: 'badgeEpic',
+};
 
 function ModeEmblem({ mode, disabled = false }: { mode: ModeDef; disabled?: boolean }) {
   const Icon = mode.icon;
@@ -91,15 +78,16 @@ function ModeEmblem({ mode, disabled = false }: { mode: ModeDef; disabled?: bool
 }
 
 export function ArcadeSelectScreen({ onSelect, isTouch }: Props) {
+  const { t } = useTranslation('menu');
   return (
     <div className="flex h-full flex-col gap-2 overflow-y-auto no-scrollbar p-2 sm:gap-3 sm:p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 2 of 7 · Arcade Mode</div>
-          <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Arcade Mode</h2>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">{t('arcade.stepTag')}</div>
+          <h2 className="arcade-marquee text-2xl sm:text-4xl">{t('arcade.heading')}</h2>
         </div>
         <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">
-          {isTouch ? 'Tap Era or Campaign to continue' : 'Enter — choose Era or Campaign · Practice soon'}
+          {isTouch ? t('arcade.hintTouch') : t('arcade.hintKeys')}
         </span>
       </div>
 
@@ -121,50 +109,48 @@ export function ArcadeSelectScreen({ onSelect, isTouch }: Props) {
               )}
               style={enabled ? { boxShadow: `0 0 18px ${m.glow}, 0 0 34px rgba(255,190,60,0.25)` } : undefined}
             >
-              {m.badge && (
-                <span
-                  className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-0.5 font-pirate text-[0.65rem] uppercase tracking-widest sm:text-[0.7rem]"
-                  style={{
-                    background: enabled ? m.ring : '#3a3a3a',
-                    color: enabled ? '#4a1a05' : '#a8a29a',
-                    boxShadow: enabled ? `0 0 10px ${m.glow}` : undefined,
-                  }}
-                >
-                  {enabled ? (
-                    <span className="flex items-center gap-1">
-                      {m.id === 'campaign' ? <Map className="h-3 w-3" /> : <Swords className="h-3 w-3" />} {m.badge}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1">
-                      <Lock className="h-3 w-3" /> {m.badge}
-                    </span>
-                  )}
-                </span>
-              )}
+              <span
+                className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-0.5 font-pirate text-[0.65rem] uppercase tracking-widest sm:text-[0.7rem]"
+                style={{
+                  background: enabled ? m.ring : '#3a3a3a',
+                  color: enabled ? '#4a1a05' : '#a8a29a',
+                  boxShadow: enabled ? `0 0 10px ${m.glow}` : undefined,
+                }}
+              >
+                {enabled ? (
+                  <span className="flex items-center gap-1">
+                    {m.id === 'campaign' ? <Map className="h-3 w-3" /> : <Swords className="h-3 w-3" />} {t(`arcade.${BADGE_KEY[m.id]}`)}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <Lock className="h-3 w-3" /> {t(`arcade.${BADGE_KEY[m.id]}`)}
+                  </span>
+                )}
+              </span>
 
               <ModeEmblem mode={m} disabled={!enabled} />
 
               <div className="mt-1">
                 <div className={cn('font-pirate text-2xl leading-none sm:text-3xl', enabled ? 'text-parch' : 'text-parch/40')}>
-                  {m.name}
+                  {t(`arcade.${m.id}Name`)}
                 </div>
                 <div className={cn('mt-1 font-pirate text-sm uppercase tracking-[0.18em] sm:text-base', enabled ? 'text-gold' : 'text-parch/30')}>
-                  {m.subtitle}
+                  {t(`arcade.${m.id}Sub`)}
                 </div>
               </div>
 
               <div className={cn('mt-1 text-[0.78rem] italic leading-snug sm:text-[0.85rem]', enabled ? 'opacity-90' : 'opacity-50')}>
-                {m.longDesc}
+                {t(`arcade.${m.id}Desc`)}
               </div>
 
               <div className="mt-auto pt-3">
                 {enabled ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/60 bg-black/30 px-3 py-1 font-pirate text-sm text-gold">
-                    <Anchor className="h-4 w-4" /> {m.id === 'era' ? 'Pick Era' : 'Start Campaign'}
+                    <Anchor className="h-4 w-4" /> {m.id === 'era' ? t('arcade.pickEra') : t('arcade.startCampaign')}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-parch/15 bg-black/20 px-3 py-1 font-pirate text-sm text-parch/30">
-                    <Lock className="h-3.5 w-3.5" /> Locked
+                    <Lock className="h-3.5 w-3.5" /> {t('arcade.locked')}
                   </span>
                 )}
               </div>
@@ -172,7 +158,7 @@ export function ArcadeSelectScreen({ onSelect, isTouch }: Props) {
               {!enabled && (
                 <div className="pointer-events-none absolute inset-0 grid place-items-center rounded-[10px] bg-black/40 backdrop-blur-[0.5px]">
                   <span className="rotate-[-12deg] rounded-md border-2 border-parch/20 bg-black/70 px-3 py-1 font-pirate text-lg tracking-widest text-parch/40">
-                    COMING SOON
+                    {t('arcade.comingSoonBanner')}
                   </span>
                 </div>
               )}
@@ -187,13 +173,13 @@ export function ArcadeSelectScreen({ onSelect, isTouch }: Props) {
             <Gamepad2 className="h-5 w-5 text-gold" />
           </span>
           <div className="text-left">
-            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">Arcade ready</div>
-            <div className="text-[0.7rem] italic opacity-75">Era = single age brawl · Campaign = all 26 eras in order, 5 waves each.</div>
+            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">{t('arcade.footerTitle')}</div>
+            <div className="text-[0.7rem] italic opacity-75">{t('arcade.footerNote')}</div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[0.7rem] italic opacity-60">
           <Skull className="h-4 w-4" />
-          <span>Practice is charting — Era & Campaign are boardable.</span>
+          <span>{t('arcade.footerHint')}</span>
         </div>
       </div>
     </div>

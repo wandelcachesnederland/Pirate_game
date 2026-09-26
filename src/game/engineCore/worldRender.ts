@@ -4,6 +4,7 @@ import { drawFlagArt, drawShip, drawShipShadow } from '../sprites';
 import { TAU } from '../math';
 import { WORLD, CHASER, FONT, FELL, P_SMOKE, P_FIRE, P_SPARK, P_SPLINTER, P_DROP, P_RING, P_FOAM, P_PLANK, P_BUBBLE, P_SPARKLE, P_FLASH, P_SAND, P_ARROW, ADDITIVE, clamp } from './constants';
 import { EngineHud } from './hud';
+import i18n from '../../i18n';
 import { fittingsFor } from '../hullFittings';
 
 /** Frame rendering: water, islands, ships, projectiles, particles, then the HUD on top. */
@@ -194,8 +195,8 @@ export abstract class EngineWorldRender extends EngineHud {
         ctx.lineWidth = 4;
         ctx.strokeStyle = '#092434';
         ctx.fillStyle = st.hostile ? '#ffad8d' : '#f3ead2';
-        const label = `${st.fortress ? '⚓ ' : ''}${st.name} · ${st.hostile ? 'HOSTILE' : 'Peaceful'}`;
-        const politics = `${st.fortress ? 'Harbour town · ' : ''}${st.peopleName ?? 'Independent'}${st.allianceName ? ` · ${st.allianceName}` : ''}`;
+        const label = `${st.fortress ? '⚓ ' : ''}${st.name} · ${st.hostile ? i18n.t('hud:isles.hostile') : i18n.t('hud:isles.peaceful')}`;
+        const politics = `${st.fortress ? `${i18n.t('hud:isles.harbourTown')} · ` : ''}${st.peopleName ?? i18n.t('hud:isles.independent')}${st.allianceName ? ` · ${st.allianceName}` : ''}`;
         ctx.strokeText(label, is.x, is.y + is.maxR + 24);
         ctx.fillText(label, is.x, is.y + is.maxR + 24);
         ctx.font = `13px ${FELL}`;
@@ -801,7 +802,7 @@ export abstract class EngineWorldRender extends EngineHud {
         const pulse = 0.72 + 0.28 * Math.sin(this.realTime * 6);
         ctx.font = `${Math.max(6, Math.round(11 * inv))}px ${FONT}`;
         ctx.textAlign = 'center';
-        const label = 'SURRENDERED!';
+        const label = i18n.t('hud:combat.surrendered');
         const tw = ctx.measureText(label).width + 10 * inv;
         const bx = s.x - tw / 2;
         const by = tagY - fh - 14 * inv;

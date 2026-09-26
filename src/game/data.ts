@@ -1,4 +1,5 @@
 import type { EraId, ShipDef, ShipKind, UpgradeDef } from './types';
+import i18n from '../i18n';
 import { ERA_ROSTERS, SAIL_ROSTER } from './rosters';
 import { SAIL_DEFS } from './shipDefs/sail';
 import { SMALL_CRAFT_DEFS } from './shipDefs/smallCraft';
@@ -57,6 +58,22 @@ export const UPGRADES: UpgradeDef[] = [
 
 export function waveTitle(n: number): string {
   return waveTitleFor('golden', n);
+}
+
+/** Roster key for localized wave titles: golden -> sail, ottoman -> lepanto. */
+function rosterKeyL(era: EraId): string {
+  if (era === 'golden') return 'sail';
+  if (era === 'ottoman') return 'lepanto';
+  return era;
+}
+
+/** Localized wave banner subtitle (mirrors {@link waveTitleFor}). */
+export function waveTitleL(era: EraId, n: number): string {
+  const r = ERA_ROSTERS[era] ?? SAIL_ROSTER;
+  const k = rosterKeyL(era);
+  if (n >= 1 && n <= 5) return i18n.t(`rosters:${k}.titles.${n - 1}`, { defaultValue: r.titles[n - 1] });
+  if (n % 5 === 0) return i18n.t(`rosters:${k}.bossTitle`, { defaultValue: r.bossTitle });
+  return i18n.t(`rosters:${k}.lines.${n % r.lines.length}`, { defaultValue: r.lines[n % r.lines.length] });
 }
 
 export function waveTitleFor(era: EraId, n: number): string {

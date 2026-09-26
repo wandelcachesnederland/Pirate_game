@@ -1,11 +1,12 @@
 import { type Ship, isSteelHull } from '../types';
-import { regionById } from '../worlds';
 import { drawCoin, rr } from '../render';
 import { drawFlagArt } from '../sprites';
 import { TAU } from '../math';
-import { traitDef } from '../eraTraits';
 import { STREAK_TIME, FONT, FELL, clamp } from './constants';
 import { EngineFx } from './fx';
+import i18n, { fmt } from '../../i18n';
+import { armWeaponWordL } from '../weapons';
+import { shipKindNameL } from '../names';
 
 /** Screen-space HUD: score, stores, compass, prompts, banners and hints. */
 export abstract class EngineHud extends EngineFx {
@@ -28,7 +29,7 @@ export abstract class EngineHud extends EngineFx {
     const v = Math.round(this.displayScore);
     if (v !== this.scoreStrVal) {
       this.scoreStrVal = v;
-      this.scoreStr = v.toLocaleString('en-US');
+      this.scoreStr = fmt(v);
     }
     return this.scoreStr;
   }
@@ -45,7 +46,7 @@ export abstract class EngineHud extends EngineFx {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = `${Math.round(21 * u * pop)}px ${FONT}`;
-    const txt = `+${this.goldPopup.toLocaleString('en-US')}`;
+    const txt = `+${fmt(this.goldPopup)}`;
     this.outlined(ctx, txt, sx + 8 * u, sy, '#ffe066', 4);
     const tw = ctx.measureText(txt).width;
     drawCoin(ctx, sx + 8 * u - tw / 2 - 11 * u, sy, this.realTime, 1, 7 * u);
@@ -84,7 +85,7 @@ export abstract class EngineHud extends EngineFx {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = `${Math.round(18 * u)}px ${FONT}`;
-    this.outlined(ctx, 'PLUNDER!', sx, y - 16 * u, '#ffd84d', 4);
+    this.outlined(ctx, i18n.t('hud:hud.plunder'), sx, y - 16 * u, '#ffd84d', 4);
   }
 
   protected drawIndicators(ctx: CanvasRenderingContext2D) {
@@ -157,7 +158,7 @@ export abstract class EngineHud extends EngineFx {
     const by = y0 + 14 * u;
     ctx.font = `${Math.round(14 * u)}px ${FONT}`;
     ctx.textAlign = 'left';
-    this.outlined(ctx, 'HULL', bx + 2, y0 + 4 * u, '#f3e2b3', 3);
+    this.outlined(ctx, i18n.t('hud:hud.hull'), bx + 2, y0 + 4 * u, '#f3e2b3', 3);
     rr(ctx, bx - 3, by - 3, barW + 6, barH + 6, 7 * u);
     ctx.fillStyle = 'rgba(24,12,4,0.82)';
     ctx.fill();
@@ -187,8 +188,8 @@ export abstract class EngineHud extends EngineFx {
     // ---- reload
     const ry = by + barH + 13 * u;
     const segW = (barW - 8) / 2;
-    this.drawReloadBar(ctx, bx, ry, segW, 'PORT', p.reloadL, p.reloadTime);
-    this.drawReloadBar(ctx, bx + segW + 8, ry, segW, 'STBD', p.reloadR, p.reloadTime);
+    this.drawReloadBar(ctx, bx, ry, segW, i18n.t('hud:hud.port'), p.reloadL, p.reloadTime);
+    this.drawReloadBar(ctx, bx + segW + 8, ry, segW, i18n.t('hud:hud.stbd'), p.reloadR, p.reloadTime);
 
     // ---- compass + sail gauge
     const cr = 26 * u;
@@ -207,7 +208,7 @@ export abstract class EngineHud extends EngineFx {
     ctx.textAlign = 'center';
     this.outlined(
       ctx,
-      p.def.oared ? 'OARS' : isSteelHull(p.def.hullStyle) ? 'STEAM' : 'SAIL',
+      p.def.oared ? i18n.t('hud:hud.oars') : isSteelHull(p.def.hullStyle) ? i18n.t('hud:hud.steam') : i18n.t('hud:hud.sail'),
       gx + gw / 2,
       ccy + cr + 9 * u,
       '#f3e2b3',
@@ -216,7 +217,7 @@ export abstract class EngineHud extends EngineFx {
     const kn = Math.round(Math.hypot(p.vx, p.vy) / 14);
     ctx.textAlign = 'left';
     ctx.font = `${Math.round(13 * u)}px ${FONT}`;
-    this.outlined(ctx, `${kn} kn`, gx + gw + 8 * u, ccy, '#f3e2b3', 3);
+    this.outlined(ctx, i18n.t('hud:hud.knots', { kn }), gx + gw + 8 * u, ccy, '#f3e2b3', 3);
 
     // ---- ship's stores — the manifest, always in sight
     this.drawStores(ctx, bx, ccy + cr + 26 * u, barW);
@@ -239,7 +240,7 @@ export abstract class EngineHud extends EngineFx {
       this.outlined(ctx, mstr, rx, my, this.mult > 1 ? '#ff8a3a' : '#f3e2b3', 4);
       const mw = ctx.measureText(mstr).width;
       ctx.font = `${Math.round(12 * u)}px ${FONT}`;
-      this.outlined(ctx, 'STREAK', rx - mw - 6 * u, my + 1, '#e6d3a3', 3);
+      this.outlined(ctx, i18n.t('hud:hud.streak'), rx - mw - 6 * u, my + 1, '#e6d3a3', 3);
       const tbw = 80 * u;
       const k = this.streakTimer / STREAK_TIME;
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -251,14 +252,14 @@ export abstract class EngineHud extends EngineFx {
 
     // ---- wave
     const remaining = this.countEnemies() + this.waveQueue.length;
-    const waveStr = `Wave ${this.wave}`;
-    const remStr = this.waveClearing ? 'Victory!' : `${remaining} ship${remaining === 1 ? '' : 's'} remain`;
+    const waveStr = i18n.t('hud:hud.wave', { n: this.wave });
+    const remStr = this.waveClearing ? i18n.t('hud:hud.victory') : i18n.t(remaining === 1 ? 'hud:hud.remainOne' : 'hud:hud.remainOther', { n: remaining });
     const boss = this.findBoss();
     // the voyage's peril, piped under the wave: skull pips and the rank
-    const pipStr = `${'☠'.repeat(this.diff.skulls)} ${this.diff.name}`;
+    const pipStr = `${'☠'.repeat(this.diff.skulls)} ${i18n.t(`peril:${this.diff.id}.name`)}`;
     // campaign line
     const campaignLine = this.campaignActive
-      ? `Campaign ${this.campaignIndex + 1}/${this.campaignEras.length} · ${this.campaignWavesClearedInEra}/${this.campaignWavesPerEra} waves`
+      ? i18n.t('hud:hud.campaign', { i: this.campaignIndex + 1, len: this.campaignEras.length, c: this.campaignWavesClearedInEra, q: this.campaignWavesPerEra })
       : null;
     if (narrow) {
       ctx.textAlign = 'right';
@@ -300,7 +301,7 @@ export abstract class EngineHud extends EngineFx {
       const byy = y0 + (narrow ? 118 : 62) * u;
       ctx.font = `${Math.round(15 * u)}px ${FONT}`;
       ctx.textAlign = 'center';
-      this.outlined(ctx, `☠ ${boss.def.name} ☠`, W / 2, byy - 10 * u, '#ff9a8a', 3);
+      this.outlined(ctx, i18n.t('hud:hud.boss', { name: shipKindNameL(boss.def.kind, boss.def.name) }), W / 2, byy - 10 * u, '#ff9a8a', 3);
       ctx.fillStyle = 'rgba(20,10,4,0.85)';
       ctx.fillRect(bxx - 3, byy - 3, bw + 6, bh + 6);
       ctx.fillStyle = '#f7e3a1';
@@ -318,7 +319,7 @@ export abstract class EngineHud extends EngineFx {
       ctx.textAlign = 'center';
       ctx.font = `${Math.round(13 * u)}px ${FONT}`;
       const ty = narrow ? my + 40 * u : y0 + (boss ? 100 : 76) * u;
-      this.outlined(ctx, `${traitDef(this.eraId).name} — ${tline}`, W / 2, ty, '#9fd8ff', 3);
+      this.outlined(ctx, i18n.t('hud:hud.traitLine', { trait: i18n.t(`traits:${this.eraId}.name`), line: tline }), W / 2, ty, '#9fd8ff', 3);
     }
   }
 
@@ -334,7 +335,7 @@ export abstract class EngineHud extends EngineFx {
     ctx.textBaseline = 'middle';
     ctx.font = `${Math.round(14 * u)}px ${FONT}`;
     ctx.textAlign = 'left';
-    this.outlined(ctx, "SHIP'S STORES", x + 2, y - 5 * u, '#f3e2b3', 3);
+    this.outlined(ctx, i18n.t('hud:hud.stores'), x + 2, y - 5 * u, '#f3e2b3', 3);
     rr(ctx, x - 3, y + 4 * u, w + 6, h, 7 * u);
     ctx.fillStyle = 'rgba(24,12,4,0.82)';
     ctx.fill();
@@ -345,22 +346,22 @@ export abstract class EngineHud extends EngineFx {
     const rw = w - pad * 2;
     let ry = y + 4 * u + pad + rowH / 2;
     const crew = Math.max(0, Math.ceil(p.crew));
-    this.storeRow(ctx, lx, ry, rw, 'CREW', `${crew}`, '#f3e2b3');
+    this.storeRow(ctx, lx, ry, rw, i18n.t('hud:hud.crew'), `${crew}`, '#f3e2b3');
     ry += rowH;
     const wLow = this.water < this.maxWater * 0.25;
     const fLow = this.food < this.maxFood * 0.25;
     const blink = Math.sin(this.realTime * 8) > -0.2;
-    this.storeRow(ctx, lx, ry, rw, 'WATER', `${Math.floor(this.water)}`, wLow && blink ? '#ff6a5a' : '#9fd8ff');
+    this.storeRow(ctx, lx, ry, rw, i18n.t('hud:hud.water'), `${Math.floor(this.water)}`, wLow && blink ? '#ff6a5a' : '#9fd8ff');
     ry += rowH;
-    this.storeRow(ctx, lx, ry, rw, 'FOOD', `${Math.floor(this.food)}`, fLow && blink ? '#ff6a5a' : '#ffd88a');
+    this.storeRow(ctx, lx, ry, rw, i18n.t('hud:hud.food'), `${Math.floor(this.food)}`, fLow && blink ? '#ff6a5a' : '#ffd88a');
     ry += rowH;
-    this.storeRow(ctx, lx, ry, rw, 'PRISONERS', `${this.prisoners}`, '#d8c9a3');
+    this.storeRow(ctx, lx, ry, rw, i18n.t('hud:hud.prisoners'), `${this.prisoners}`, '#d8c9a3');
     ry += rowH;
     // colours struck — mini flags of the prizes, newest last
     const flagCy = ry + flagH / 2;
     ctx.font = `${Math.round(11 * u)}px ${FONT}`;
     ctx.textAlign = 'left';
-    this.outlined(ctx, 'FLAGS', lx, flagCy, '#cbb88f', 3);
+    this.outlined(ctx, i18n.t('hud:hud.flags'), lx, flagCy, '#cbb88f', 3);
     const fw = 13 * u;
     const fh = 8 * u;
     const gap = 2.5 * u;
@@ -392,7 +393,7 @@ export abstract class EngineHud extends EngineFx {
     const regCy = ry + flagH + regH / 2;
     ctx.font = `italic ${Math.round(12 * u)}px ${FELL}`;
     ctx.textAlign = 'center';
-    this.outlined(ctx, regionById(this.regionId).name, lx + rw / 2, regCy, '#e8c86a', 3);
+    this.outlined(ctx, i18n.t(`regions:arcade.${this.regionId}.name`), lx + rw / 2, regCy, '#e8c86a', 3);
   }
 
   protected storeRow(
@@ -444,11 +445,11 @@ export abstract class EngineHud extends EngineFx {
     const V = s.def.value * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder;
     const prize = Math.round(V * 1.25) + 100;
     const touch = this.isTouch || this.input.usedTouch;
-    const l1 = `Prize alongside: ${s.def.name} — ${Math.max(0, Math.ceil(s.crew))} men`;
+    const l1 = i18n.t('hud:hud.prizeAlong', { name: shipKindNameL(s.def.kind, s.def.name), crew: Math.max(0, Math.ceil(s.crew)) });
     const l2 = touch
-      ? `Tap BOARD for ~${prize.toLocaleString('en-US')} gold + her colours`
-      : `Press F to BOARD for ~${prize.toLocaleString('en-US')} gold + her colours`;
-    const l3 = 'Full cargo… if her crew plays fair. Beware treachery, scuttling & fever!';
+      ? i18n.t('hud:hud.tapBoard', { prize: fmt(prize) })
+      : i18n.t('hud:hud.pressBoard', { prize: fmt(prize) });
+    const l3 = i18n.t('hud:hud.fullCargo');
     ctx.font = `${Math.round(17 * u)}px ${FONT}`;
     const need =
       Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width, ctx.measureText(l3).width) + 44 * u;
@@ -517,10 +518,10 @@ export abstract class EngineHud extends EngineFx {
     ctx.font = `${Math.round(r * 0.36)}px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('N', 0, -r * 0.55);
-    ctx.fillText('S', 0, r * 0.57);
-    ctx.fillText('E', r * 0.56, 0);
-    ctx.fillText('W', -r * 0.55, 0);
+    ctx.fillText(i18n.t('hud:hud.compassN'), 0, -r * 0.55);
+    ctx.fillText(i18n.t('hud:hud.compassS'), 0, r * 0.57);
+    ctx.fillText(i18n.t('hud:hud.compassE'), r * 0.56, 0);
+    ctx.fillText(i18n.t('hud:hud.compassW'), -r * 0.55, 0);
     const good = (this.windFactor(p.angle, !!p.def.oared || isSteelHull(p.def.hullStyle)) - 0.46) / 0.54;
     ctx.save();
     ctx.rotate(p.angle);
@@ -550,7 +551,7 @@ export abstract class EngineHud extends EngineFx {
     ctx.restore();
     ctx.font = `${Math.round(11 * this.ui)}px ${FONT}`;
     ctx.textAlign = 'center';
-    this.outlined(ctx, 'WIND', cx, cy + r + 9 * this.ui, '#f3e2b3', 3);
+    this.outlined(ctx, i18n.t('hud:hud.wind'), cx, cy + r + 9 * this.ui, '#f3e2b3', 3);
   }
 
   protected drawBanner(ctx: CanvasRenderingContext2D) {
@@ -602,10 +603,10 @@ export abstract class EngineHud extends EngineFx {
     if (t > 15 || this.stats.sunk >= 2) return;
     const a = Math.min(1, t * 2) * Math.min(1, (15 - t) * 1.5);
     const touch = this.isTouch || this.input.usedTouch;
-    const l1 = touch ? 'Drag on the left side to steer' : 'A / D steer   ·   W / S trim sails';
+    const l1 = touch ? i18n.t('hud:hud.hintSteerTouch') : i18n.t('hud:hud.hintSteerKeys');
     const l2 = touch
-      ? `Tap FIRE — ${this.arm.weaponWord} fire from the SIDES!`
-      : 'Q / E fire port & starboard   ·   SPACE or CLICK smart broadside';
+      ? i18n.t('hud:hud.hintFireTouch', { weapon: armWeaponWordL(this.eraId) })
+      : i18n.t('hud:hud.hintFireKeys');
     const u = this.ui;
     const W = this.w;
     const H = this.h;

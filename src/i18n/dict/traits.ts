@@ -1249,4 +1249,716 @@ const ja: TraitsDict = {
   },
 };
 
-export const traits: Dict<TraitsDict> = { en, es, fr, de, nl, pt, ja };
+const zh: TraitsDict = {
+  golden: {
+    name: '假旗与悬赏',
+    pitch: '首发炮弹前挂假旗——你的悬赏让每单俘获更肥。',
+    hint: '按住不开火以隐身；击沉海军船只提高悬赏。',
+  },
+  exploration: {
+    name: '未测之水',
+    pitch: '雾掩海图——驶近每座岛测绘换金。',
+    hint: '测绘岛屿赚钱，舱里备水果防坏血病。',
+  },
+  napoleonic: {
+    name: '上风之利',
+    pitch: '上风船炮更狠——抢风，然后发信号。',
+    hint: '从上风打，炮击 +25%；信号增益每波。',
+  },
+  barbary: {
+    name: '纳贡或开战',
+    pitch: '鸣号（F）逼商船纳贡——不战得金。',
+    hint: '近商船按 F 索贡。你放过的纳贡者会再纳。',
+  },
+  viking: {
+    name: '斯特兰德霍格',
+    pitch: '抢滩野岸劫掠——战队赶来前撑船离岸。',
+    hint: '慢漂上岸劫掠；按帆（W）撑离。',
+  },
+  ironclad: {
+    name: '铁甲角度',
+    pitch: '倾斜装甲弹开正面炮弹；水雷漂在航道上。',
+    hint: '艏对敌冲锋：正面伤害减半。当心漂雷。',
+  },
+  ww1: {
+    name: 'U艇与水听器',
+    pitch: 'U艇潜航——水听器滴答定位；撞它们。',
+    hint: '听滴答声：暴露的潜艇上浮攻击。撞它们。',
+  },
+  ww2: {
+    name: '夜战',
+    pitch: '逢偶波次，照明弹下夜战——拿危险津贴。',
+    hint: '夜里敌人射程减半。贴近拿奖金。',
+  },
+  hormuz: {
+    name: '导弹锁定',
+    pitch: '来袭导弹尖啸锁定音——急转脱锁。',
+    hint: '听到锁定音？横切导弹急转。放过中立油轮。',
+  },
+  roman: {
+    name: '乌鸦吊桥',
+    pitch: '触敌，钉桥落下——立刻接舷。',
+    hint: '靠帮撞：被钩敌减速，俘获自动接舷。',
+  },
+  greek: {
+    name: '截横战术',
+    pitch: '从敌阵中穿插而过，震懵其船员。',
+    hint: '高速掠过敌船舷侧，震乱其装填。',
+  },
+  arab: {
+    name: '乘季风',
+    pitch: '季风按历反转——三角帆船顺风疾驰。',
+    hint: '顺季风（+航速）；伏击下风商路。',
+  },
+  chinese: {
+    name: '水上堡垒',
+    pitch: '抛锚（T 或空帆）成堡垒——或逼朝贡船纳贡。',
+    hint: 'T：抛锚 +伤害。近商船按 F：立纳贡约，不劫。',
+  },
+  japanese: {
+    name: '钩镰与铁炮',
+    pitch: '敌钩住你拖行——以艏铁炮齐射（T）还击。',
+    hint: 'T：向前铁炮齐射。速杀钩船，否则被拖沉。',
+  },
+  maori: {
+    name: '乌图复仇',
+    pitch: '每次击沉都会点名复仇者——杀被标记者叠法力。',
+    hint: '被标记的亲族猎杀你；杀之叠法力（伤害）——别断供。',
+  },
+  hawaii: {
+    name: '一统群岛',
+    pitch: '打服每岛战舟，使其每波纳贡。',
+    hint: '击沉某岛 3 艘船使其臣服。一统所有岛。',
+  },
+  macedon: {
+    name: '水上攻城塔',
+    pitch: '攻城弩炮射程无敌——但蚊蚋成群。',
+    hint: '你射程极远；小鱼小虾撞船自灭。不停转向。',
+  },
+  maya: {
+    name: '礁盘游击',
+    pitch: '西班牙龙骨在礁上见血；你的独木舟畅行无阻。',
+    hint: '在礁环内打。向第一个陌生人鸣号讨礼。',
+  },
+  inca: {
+    name: '洪堡洋流与棘贝',
+    pitch: '乘洋流航道；潜采贝床取金。',
+    hint: '洋流推所有船。在粉色贝床上慢漂潜采。',
+  },
+  lepanto: {
+    name: '大混战',
+    pitch: '混战中接舷无尽——连环夺船。',
+    hint: '接舷距离远；每单俘获都划来自由水手入伙。',
+  },
+  korea: {
+    name: '鸣梁潮汐',
+    pitch: '海峡潮流反转——你的龟船几乎无感。',
+    hint: '把轻敌引进潮里；潮流把它们卷上礁石和炮口。',
+  },
+  byzantium: {
+    name: '铁链与火海',
+    pitch: '铁链把敌人引进唯一缺口；希腊火漂流蔓延。',
+    hint: '守住缺口；你的火油随风漂，久久不散。',
+  },
+  egypt: {
+    name: '法老的岸弓手',
+    pitch: '友岸为你齐射；芦苇藏伏兵。',
+    hint: '近友岸作战得弓手支援。扫荡芦苇丛。',
+  },
+  chola: {
+    name: '横渡海湾',
+    pitch: '远离本土：给养双倍消耗，神庙黄金双倍，季风暴。',
+    hint: '给养烧得飞快——但大奖赔双倍。',
+  },
+  vietnam: {
+    name: '白藤江暗桩',
+    pitch: '退潮时，暗桩阵对深龙骨露出獠牙。',
+    hint: '看潮汐钟：退潮时把深船引进桩阵。',
+  },
+  aztec: {
+    name: '特斯科科堤道',
+    pitch: '堤道迷宫——独木舟穿缝而过，双桅船不行。',
+    hint: '从缝隙打；西班牙深船搁浅爬行。',
+  },
+  phoenicia: {
+    name: '紫色航线',
+    pitch: '在友好港间运货，利润随波次涨。',
+    hint: '触友好堡装货，到另一堡卖掉。善待伙伴。',
+  },
+  hanse: {
+    name: '磅金税',
+    pitch: '鸣号（F）向护航商船收同盟税——或跟他们全干。',
+    hint: '近商船按 F：收税。拒者招来整支护航队。',
+  },
+  portugal: {
+    name: '季风与商站',
+    pitch: '风每 3 波反转；商站堡为你疗伤补给。',
+    hint: '看季风历；在友好堡旁停留恢复。',
+  },
+  armada: {
+    name: '大风与火船',
+    pitch: '大风吹散一切阵型；新月阵护着宝藏。',
+    hint: '大风把所有船往下风推。撕开新月阵拿大奖。',
+  },
+  dutch: {
+    name: '流沙',
+    pitch: '沙洲漂过特塞尔，搁住英国深龙骨。',
+    hint: '你的浅船掠过沙洲——把深水猎手引进沙洲。',
+  },
+  ottoman: {
+    name: '桨冲刺',
+    pitch: '冲刺（T）撞——被接舷的桨船划来自由水手。',
+    hint: 'T：冲刺爆发，然后桨手力竭。接舷要人，不要金。',
+  },
+  predread: {
+    name: '抢T横头',
+    pitch: '纵射艏艉；咬住一靶夹叉测距。',
+    hint: '打艏艉 +50%。咬住一敌越打越准。',
+  },
+  falklands: {
+    name: '空袭警报',
+    pitch: '飞鱼导弹从屏外掠来——顺浪规避或中弹。',
+    hint: '看到空袭箭头？迎着转，保持机动。干扰箔配件有用。',
+  },
+  somali: {
+    name: '劫持与赎金',
+    pitch: '被接舷的商船成人质——扣着，赎金滴答涨。',
+    hint: '接舷商船，然后活下去：赎金每秒涨。',
+  },
+};
+
+const id: TraitsDict = {
+  golden: {
+    name: 'Panji Palsu & Hadiah',
+    pitch: 'Kibarkan panji palsu hingga tembakan pertama — hadiahmu menggemukkan tiap rampasan.',
+    hint: 'Tahan tembakan agar tak terlihat; tenggelamkan lambung AL untuk menaikkan hadiah.',
+  },
+  exploration: {
+    name: 'Perairan Tak Terpetakan',
+    pitch: 'Kabut menyembunyikan peta — layari tiap pulau untuk memetakannya demi emas.',
+    hint: 'Petakan pulau demi emas, dan simpan buah di palka melawan skorbut.',
+  },
+  napoleonic: {
+    name: 'Posisi Angin',
+    pitch: 'Kapal di atas angin menembak lebih keras — rebut posisi angin, lalu beri isyarat.',
+    hint: 'Bertarunglah dari atas angin untuk +25% tembakan; isyarat memperkuat tiap gelombang.',
+  },
+  barbary: {
+    name: 'Upeti atau Perang',
+    pitch: 'Seru pedagang (F) untuk menuntut upeti — emas tanpa tempur.',
+    hint: 'Tekan F dekat pedagang untuk menuntut upeti. Pembayar yang kausimpan membayar lagi.',
+  },
+  viking: {
+    name: 'Strandhögg',
+    pitch: 'Mendaratlah di pantai liar untuk merampok — dorong lepas sebelum pasukan perang.',
+    hint: 'Hanyut pelan ke pantai untuk merampok; tekan layar (W) untuk lepas.',
+  },
+  ironclad: {
+    name: 'Sudut Besi',
+    pitch: 'Baja miring memantulkan tembakan dari depan; ranjau hanyut di alur.',
+    hint: 'Menyerbu haluan duluan: separuh kerusakan dari depan. Awasi ranjau hanyut.',
+  },
+  ww1: {
+    name: 'U-boat & Hidrofon',
+    pitch: 'U-boat berjalan menyelam — ping hidrofon menemukan mereka; dobrak mereka.',
+    hint: 'Awasi ping: perahu yang ketahuan muncul untuk menyerang. Dobrak mereka.',
+  },
+  ww2: {
+    name: 'Aksi Malam',
+    pitch: 'Tiap gelombang genap bertempur malam dengan peluru suar — demi bayaran bahaya.',
+    hint: 'Di malam hari musuh menembak separuh jarak. Dekati dan raih bonus.',
+  },
+  hormuz: {
+    name: 'Kunci Rudal',
+    pitch: 'Rudal datang menjeritkan nada kunci — belok tajam untuk lepas.',
+    hint: 'Nada KUNCI? Belok tajam memotong rudal. Ampuni tanker netral.',
+  },
+  roman: {
+    name: 'Corvus',
+    pitch: 'Sentuh musuh dan jembatan berduri jatuh — serbu sekaligus.',
+    hint: 'Rapat ke samping: musuh terpaut melambat, dan rampasan menyerbu sendiri.',
+  },
+  greek: {
+    name: 'Diekplous',
+    pitch: 'Dayung bersih menembus garis musuh untuk mengejutkan awaknya.',
+    hint: 'Lewat cepat di sisi lambung musuh untuk mengejutkan isi ulangnya.',
+  },
+  arab: {
+    name: 'Tunggangi Muson',
+    pitch: 'Muson berbalik menurut kalender — lambung lateen melesat searah angin.',
+    hint: 'Berlayarlah searah muson (+laju); hadang jalur dagang bawah angin.',
+  },
+  chinese: {
+    name: 'Benteng Terapung',
+    pitch: 'Berlabuh (T atau layar kosong) jadi benteng — atau tuntut upeti kapal.',
+    hint: 'T: berlabuh untuk +kerusakan. F dekat pedagang: pakta upeti ganti jarahan.',
+  },
+  japanese: {
+    name: 'Kait & Teppo',
+    pitch: 'Musuh mengait dan menyeretmu — balas dengan rentetan teppo haluan (T).',
+    hint: 'T: rentetan teppo ke depan. Bunuh pengait cepat atau terseret tenggelam.',
+  },
+  maori: {
+    name: 'Utu',
+    pitch: 'Tiap penenggelaman menamai pembalas — bunuh yang bertanda untuk menumpuk Mana.',
+    hint: 'Kerabat bertanda memburumu; membunuh mereka menumpuk Mana (kerusakan) — terus beri makan.',
+  },
+  hawaii: {
+    name: 'Satukan Kepulauan',
+    pitch: 'Kalahkan kano tiap pulau untuk menjadikannya vasal demi upeti per gelombang.',
+    hint: 'Tenggelamkan 3 perahu satu pulau untuk memvasalkannya. Satukan semuanya.',
+  },
+  macedon: {
+    name: 'Menara Pengepungan Terapung',
+    pitch: 'Katapel pengepungan mengungguli semua jarak — tapi nyamuk berkerumun.',
+    hint: 'Jarakmu luas; ikan kecil mati di lambungmu. Terus berbelok.',
+  },
+  maya: {
+    name: 'Gerilya Karang',
+    pitch: 'Lunas Spanyol berdarah di karang; kanomu lewat bebas.',
+    hint: 'Bertarunglah di dalam lingkaran karang. Sapa orang asing pertama untuk hadiah.',
+  },
+  inca: {
+    name: 'Humboldt & Spondylus',
+    pitch: 'Tunggangi jalur arus; selami ladang kerang demi emas.',
+    hint: 'Arus mendorong semua lambung. Berlambat pelan di atas ladang merah muda untuk menyelam.',
+  },
+  lepanto: {
+    name: 'Keroyokan Akbar',
+    pitch: 'Tiada akhir menyerbu dalam keroyokan — rantai rampasan demi rampasan.',
+    hint: 'Jangkauan serbu jauh; tiap rampasan mendayung orang bebas ke awakmu.',
+  },
+  korea: {
+    name: 'Pasang Myeongnyang',
+    pitch: 'Arus selat berbalik — kapal kura-kuramu nyaris tak merasa.',
+    hint: 'Pancing musuh ringan ke pasang; ia menyapu mereka ke karang dan meriam.',
+  },
+  byzantium: {
+    name: 'Rantai & Laut Terbakar',
+    pitch: 'Rantai menggiring musuh ke satu celah; api Yunani hanyut dan menyebar.',
+    hint: 'Jaga celah rantai; licin minyakmu hanyut mengikuti angin dan bertahan.',
+  },
+  egypt: {
+    name: 'Pemanah Pantai Firaun',
+    pitch: 'Pantai sahabat menghujani tembakan untukmu; gelagah menyembunyikan penyergap.',
+    hint: 'Bertarunglah dekat pantai sahabat demi dukungan pemanah. Sapu gelagah.',
+  },
+  chola: {
+    name: 'Seberang Teluk',
+    pitch: 'Jauh dari rumah: tiris perbekalan ganda, emas kuil ganda, badai muson.',
+    hint: 'Perbekalan terbakar dua kali cepat — tapi jackpot membayar dua kali lipat.',
+  },
+  vietnam: {
+    name: 'Pancang Bạch Đằng',
+    pitch: 'Saat surut rintangan pancang menyeringai untuk lunas dalam.',
+    hint: 'Awasi jam pasang: pancing lambung dalam ke pancang saat SURUT.',
+  },
+  aztec: {
+    name: 'Jalan Lintas Texcoco',
+    pitch: 'Labirin jalan lintas — kano menyelinap lewat celah yang tak bisa dilewati brigantin.',
+    hint: 'Bertarunglah dari celah; lambung Spanyol yang dalam kandas dan merangkak.',
+  },
+  phoenicia: {
+    name: 'Pelayaran Ungu',
+    pitch: 'Bawa kargo antar pelabuhan sahabat demi untung berskala gelombang.',
+    hint: 'Sentuh benteng sahabat untuk muat, satu lagi untuk jual. Ampuni mitramu.',
+  },
+  hanse: {
+    name: 'Pfundgeld',
+    pitch: 'Seru pedagang konvoi (F) untuk tol Liga — atau lawan mereka semua.',
+    hint: 'F dekat pedagang: tuntut tol. Penolak memanggil seluruh konvoi.',
+  },
+  portugal: {
+    name: 'Muson & Feitoria',
+    pitch: 'Angin berbalik tiap 3 gelombang; benteng feitoria memperbaiki dan memberimu makan.',
+    hint: 'Perhatikan kalender muson; berdiamlah di dekat benteng sahabat untuk pulih.',
+  },
+  armada: {
+    name: 'Topan & Kapal Api',
+    pitch: 'Topan mencerai-beraikan tiap formasi; sabit menjaga hartanya.',
+    hint: 'Topan mendorong semua lambung ke bawah angin. Retak sabit demi jackpot.',
+  },
+  dutch: {
+    name: 'Pasir Berpindah',
+    pitch: 'Beting pasir hanyut melintasi Texel dan mengandaskan lunas Inggris yang dalam.',
+    hint: 'Lambung dangkalmu melintasi beting — pancing pemburu dalam ke atasnya.',
+  },
+  ottoman: {
+    name: 'Sprint Dayung',
+    pitch: 'Sprint (T) ke dobrakan — galai yang diserbu mendayung orang bebas kepadamu.',
+    hint: 'T: ledakan sprint, lalu dayung kelelahan. Serbu demi tangan, bukan emas.',
+  },
+  predread: {
+    name: 'Potong T',
+    pitch: 'Sapu haluan dan buritan; kunci satu sasaran untuk mengepung jarak.',
+    hint: 'Tembak ke haluan/buritan untuk +50%. Tetap pada satu korban agar makin tepat.',
+  },
+  falklands: {
+    name: 'Peringatan Serangan Udara',
+    pitch: 'Exocet melesat dari luar layar — belok mengikuti atau kena.',
+    hint: 'Panah serbuan? Belok menghadapinya dan terus bergerak. Fitting sekam membantu.',
+  },
+  somali: {
+    name: 'Bajak & Tebusan',
+    pitch: 'Pedagang yang diserbu jadi sandera — tebusan berdetak naik selagi kautahan.',
+    hint: 'Serbu pedagang, lalu selamat: tebusan tumbuh tiap detik.',
+  },
+};
+
+const th: TraitsDict = {
+  golden: {
+    name: 'ธงปลอม & ค่าหัว',
+    pitch: 'ชักธงปลอมจนกว่านัดแรก — ค่าหัวท่านทำให้ทุกรางวัลอ้วนขึ้น',
+    hint: 'กลั้นยิงเพื่อซ่อนตัว; จมเรือทัพเรือเพื่อขึ้นค่าหัว',
+  },
+  exploration: {
+    name: 'น่านน้ำไม่สำรวจ',
+    pitch: 'หมอกบังแผนที่ — แล่นทุกเกาะเพื่อสำรวจแลกทอง',
+    hint: 'สำรวจเกาะแลกทอง เก็บผลไม้ในระวางกันลักปิดลักเปิด',
+  },
+  napoleonic: {
+    name: 'เหนือลม',
+    pitch: 'เรือเหนือลมยิงแรงกว่า — ชิงเหนือลม แล้วส่งสัญญาณ',
+    hint: 'สู้จากเหนือลม +25% นัด; สัญญาณบัฟทุกคลื่น',
+  },
+  barbary: {
+    name: 'บรรณาการหรือสงคราม',
+    pitch: 'เรียกพ่อค้า (F) รีดบรรณาการ — ได้ทองไม่ต้องรบ',
+    hint: 'กด F ใกล้พ่อค้าเพื่อรีดบรรณาการ ผู้จ่ายที่ท่านไว้ชีวิตจะจ่ายอีก',
+  },
+  viking: {
+    name: 'สตรานด์เฮิกก์',
+    pitch: 'เกยหาดป่าเพื่อปล้น — ถ่ออกก่อนกองรบมา',
+    hint: 'ลอยช้าเข้าหาดเพื่อปล้น; กดใบ (W) เพื่อถ่ออก',
+  },
+  ironclad: {
+    name: 'มุมเหล็ก',
+    pitch: 'เกราะเอียงสะท้อนนัดจากหน้า; ทุ่นระเบิดลอยในร่องน้ำ',
+    hint: 'ชนหัวเข้า: ดาเมจหน้าครึ่งเดียว ระวังทุ่นลอย',
+  },
+  ww1: {
+    name: 'อูโบ๊ต & ไฮโดรโฟน',
+    pitch: 'อูโบ๊ตดำน้ำ — เสียงปิงไฮโดรโฟนหาเจอ; ชนมัน',
+    hint: 'ฟังเสียงปิง: เรือที่โผล่ขึ้นมาโจมตี ชนมัน',
+  },
+  ww2: {
+    name: 'รบกลางคืน',
+    pitch: 'ทุกคลื่นคู่รบกลางคืนด้วยพลุส่องสว่าง — แลกค่าอันตราย',
+    hint: 'กลางคืนศัตรูยิงครึ่งระยะ เข้าใกล้แล้วรับโบนัส',
+  },
+  hormuz: {
+    name: 'ล็อคขีปนาวุธ',
+    pitch: 'ขีปนาวุธมาร้องเสียงล็อค — หักเลี้ยวแรงเพื่อหลุด',
+    hint: 'เสียงล็อค? หักขวางขีปนาวุธ ไว้ชีวิตเรือน้ำมันกลาง',
+  },
+  roman: {
+    name: 'คอร์วุส',
+    pitch: 'แตะศัตรู สะพานหนามหล่น — ยึดทันที',
+    hint: 'เบียดข้าง: ศัตรูถูกเกี่ยวช้าลง รางวัลยึดตัวเอง',
+  },
+  greek: {
+    name: 'ดีเอ็กพลูส',
+    pitch: 'พายทะลุแนวศัตรูให้ลูกเรือมึน',
+    hint: 'แล่นเร็วข้างตัวเรือศัตรูเพื่อช็อกการบรรจุ',
+  },
+  arab: {
+    name: 'ขี่มรสุม',
+    pitch: 'มรสุมกลับตามปฏิทิน — ตัวเรือเลทีนบินตามลม',
+    hint: 'แล่นตามมรสุม (+ความเร็ว); ซุ่มเส้นทางค้าลมใต้',
+  },
+  chinese: {
+    name: 'ป้อมลอยน้ำ',
+    pitch: 'ทอดสมอ (T หรือใบเปล่า) เป็นป้อม — หรือรีดเรือบรรณาการ',
+    hint: 'T: ทอดสมอ +ดาเมจ F ใกล้พ่อค้า: สัญญาบรรณาการแทนปล้น',
+  },
+  japanese: {
+    name: 'ตะขอ & เท็ปโป',
+    pitch: 'ศัตรูเกี่ยวลากท่าน — ตอบด้วยระดมเท็ปโปหัวเรือ (T)',
+    hint: 'T: ระดมเท็ปโปข้างหน้า ฆ่าตัวเกี่ยวเร็วไม่งั้นโดนลากจม',
+  },
+  maori: {
+    name: 'อูตู',
+    pitch: 'ทุกการจมตั้งชื่อผู้แก้แค้น — ฆ่าตัวหมายเพื่อสะสมมานา',
+    hint: 'ญาติหมายหัวล่าท่าน; ฆ่าพวกมันสะสมมานา (ดาเมจ) — ป้อนต่ออย่าหยุด',
+  },
+  hawaii: {
+    name: 'รวมหมู่เกาะ',
+    pitch: 'ปราบแคนูทุกเกาะให้เป็นเมืองขึ้นส่งบรรณาการทุกคลื่น',
+    hint: 'จมเรือเกาะเดียว 3 ลำให้สวามิภักดิ์ รวมให้หมด',
+  },
+  macedon: {
+    name: 'หอรบประชิดลอยน้ำ',
+    pitch: 'เครื่องยิงประชิดไกลสุด — แต่ยุงรุม',
+    hint: 'ระยะท่านกว้าง; ปลาเล็กตายที่ตัวเรือ หมุนตลอด',
+  },
+  maya: {
+    name: 'กองโจรแนวปะการัง',
+    pitch: 'กระดูกงูสเปนเลือดออกบนปะการัง; แคนูท่านผ่านฟรี',
+    hint: 'สู้ในวงปะการัง ทักคนแปลกหน้าคนแรกเพื่อของขวัญ',
+  },
+  inca: {
+    name: 'ฮุมโบลดต์ & สปอนดิลัส',
+    pitch: 'ขี่ร่องกระแส; ดำแปลงหอยเอาทอง',
+    hint: 'กระแสผลักทุกตัวเรือ ลอยช้าเหนือแปลงชมพูเพื่อดำ',
+  },
+  lepanto: {
+    name: 'ตะลุมบอนใหญ่',
+    pitch: 'ยึดเรือไม่รู้จบในตะลุมบอน — โซ่รางวัลต่อรางวัล',
+    hint: 'ระยะยึดไกล; ทุกรางวัลพายคนอิสระเข้าลูกเรือท่าน',
+  },
+  korea: {
+    name: 'น้ำเมียงนยัง',
+    pitch: 'กระแสช่องแคบกลับ — เรือเต่าท่านแทบไม่รู้สึก',
+    hint: 'ล่อศัตรูเบาเข้ากระแส; มันกวาดพวกมันชนหินและปืน',
+  },
+  byzantium: {
+    name: 'โซ่ & ทะเลเพลิง',
+    pitch: 'โซ่ต้อนศัตรูเข้าช่องเดียว; กรีกไฟลอยกระจาย',
+    hint: 'เฝ้าช่องโซ่; คราบน้ำมันท่านลอยตามลมและอยู่นาน',
+  },
+  egypt: {
+    name: 'พลธนูชายฝั่งฟาโรห์',
+    pitch: 'ฝั่งมิตรระดมยิงให้ท่าน; กกซ่อนตัวซุ่ม',
+    hint: 'สู้ใกล้ฝั่งมิตรเพื่อพลธนูช่วย กวาดดงกก',
+  },
+  chola: {
+    name: 'ข้ามอ่าว',
+    pitch: 'ไกลบ้าน: เสบียงหมดสองเท่า ทองวัดสองเท่า พายุมรสุม',
+    hint: 'เสบียงเผาเร็วสองเท่า — แต่แจ็กพอตจ่ายสองเท่า',
+  },
+  vietnam: {
+    name: 'หลักไม้บักดั่ง',
+    pitch: 'น้ำลงแนวกั้นหลักแยกเขี้ยวใส่กระดูกงูลึก',
+    hint: 'ดูนาฬิกาน้ำ: ล่อตัวเรือลึกเข้าหลักตอนน้ำลง',
+  },
+  aztec: {
+    name: 'ทางยกระดับเตซโกโก',
+    pitch: 'เขาวงกตทางยกระดับ — แคนูรอดช่องที่บริกันทีนไม่ได้',
+    hint: 'สู้จากช่อง; ตัวเรือสเปนลึกเกยตื้นคลาน',
+  },
+  phoenicia: {
+    name: 'เส้นทางม่วง',
+    pitch: 'ขนสินค้าระหว่างท่ามิตรเพื่อกำไรตามคลื่น',
+    hint: 'แตะป้อมมิตรเพื่อบรรทุก อีกป้อมเพื่อขาย ไว้ชีวิตหุ้นส่วน',
+  },
+  hanse: {
+    name: 'ฟุนด์เกิลด์',
+    pitch: 'เรียกพ่อค้าขบวน (F) เก็บค่าผ่านลีก — หรือสู้ทั้งหมด',
+    hint: 'F ใกล้พ่อค้า: รีดค่าผ่าน ผู้ปฏิเสธเรียกทั้งขบวน',
+  },
+  portugal: {
+    name: 'มรสุม & เฟโตเรีย',
+    pitch: 'ลมกลับทุก 3 คลื่น; ป้อมเฟโตเรียซ่อมและเลี้ยงท่าน',
+    hint: 'ดูปฏิทินมรสุม; วนใกล้ป้อมมิตรเพื่อฟื้น',
+  },
+  armada: {
+    name: 'พายุ & เรือไฟ',
+    pitch: 'พายุสลายทุกขบวน; เสี้ยวจันทร์คุ้มสมบัติ',
+    hint: 'พายุดันทุกตัวเรือลงลม ฉีกเสี้ยวจันทร์เอาแจ็กพอต',
+  },
+  dutch: {
+    name: 'ทรายเลื่อน',
+    pitch: 'สันทรายลอยข้ามเท็กเซล เกยกระดูกงูอังกฤษลึก',
+    hint: 'ตัวเรือตื้นท่านข้ามสัน — ล่อนักล่าลึกขึ้นสัน',
+  },
+  ottoman: {
+    name: 'สปรินต์พาย',
+    pitch: 'สปรินต์ (T) เข้าชน — แกลลีย์ที่ยึดพายคนอิสระมาหาท่าน',
+    hint: 'T: ระเบิดสปรินต์ แล้วพายหมดแรง ยึดเอาคน ไม่เอาทอง',
+  },
+  predread: {
+    name: 'ตัดตัว T',
+    pitch: 'ยิงกราดหัวท้าย; เกาะเป้าเดียวเพื่อคร่อมระยะ',
+    hint: 'ยิงหัว/ท้าย +50% เกาะเหยื่อเดียวเพื่อแม่นขึ้น',
+  },
+  falklands: {
+    name: 'เตือนโจมตีอากาศ',
+    pitch: 'เอ็กโซเซต์พุ่งจากนอกจอ — เลี้ยวตามหรือโดน',
+    hint: 'ลูกศรโจมตี? เลี้ยวใส่และเคลื่อนต่อ อุปกรณ์แกลบช่วย',
+  },
+  somali: {
+    name: 'จี้ & ค่าไถ่',
+    pitch: 'พ่อค้าที่ยึดเป็นตัวประกัน — ค่าไถ่ขึ้นขณะท่านยึด',
+    hint: 'ยึดพ่อค้า แล้วรอด: ค่าไถ่โตทุกวินาที',
+  },
+};
+
+const vi: TraitsDict = {
+  golden: {
+    name: 'Cờ Giả & Tiền Thưởng',
+    pitch: 'Treo cờ giả tới phát đầu — tiền thưởng làm mọi tàu mồi béo lên.',
+    hint: 'Nén bắn để ẩn mình; đánh chìm tàu hải quân để tăng thưởng.',
+  },
+  exploration: {
+    name: 'Vùng Nước Chưa Vẽ',
+    pitch: 'Sương che hải đồ — dong tới từng đảo để vẽ lấy vàng.',
+    hint: 'Vẽ đảo lấy vàng, trữ trái cây trong hầm chống scorbut.',
+  },
+  napoleonic: {
+    name: 'Lợi Thế Đầu Gió',
+    pitch: 'Tàu đầu gió bắn mạnh hơn — giành đầu gió, rồi phát hiệu.',
+    hint: 'Đánh từ đầu gió +25% đạn; hiệu lệnh tăng sức mỗi đợt.',
+  },
+  barbary: {
+    name: 'Cống Nạp Hay Chiến Tranh',
+    pitch: 'Gọi hàng (F) đòi cống — vàng không cần đánh.',
+    hint: 'Nhấn F gần thương thuyền đòi cống. Kẻ nộp được tha sẽ nộp nữa.',
+  },
+  viking: {
+    name: 'Strandhögg',
+    pitch: 'Cắm bãi hoang để cướp — chống ra trước khi toán chiến tới.',
+    hint: 'Trôi chậm vào bãi để cướp; nhấn buồm (W) để chống ra.',
+  },
+  ironclad: {
+    name: 'Góc Sắt',
+    pitch: 'Giáp nghiêng đỡ đạn chính diện; thủy lôi trôi trên luồng.',
+    hint: 'Xông mũi vào: nửa sát thương chính diện. Coi chừng lôi trôi.',
+  },
+  ww1: {
+    name: 'U-boat & Thủy Âm',
+    pitch: 'U-boat chạy ngầm — tiếng ping thủy âm tìm ra; đâm chúng.',
+    hint: 'Nghe tiếng ping: tàu lộ diện trồi lên đánh. Đâm chúng.',
+  },
+  ww2: {
+    name: 'Đánh Đêm',
+    pitch: 'Mọi đợt chẵn đánh đêm bằng đạn chiếu sáng — lĩnh phụ cấp hiểm nguy.',
+    hint: 'Ban đêm địch bắn nửa tầm. Áp sát lĩnh thưởng.',
+  },
+  hormuz: {
+    name: 'Khóa Tên Lửa',
+    pitch: 'Tên lửa tới réo tiếng khóa — bẻ gấp để cắt khóa.',
+    hint: 'Nghe KHÓA? Bẻ gấp cắt ngang tên lửa. Tha tàu dầu trung lập.',
+  },
+  roman: {
+    name: 'Cầu Corvus',
+    pitch: 'Chạm địch, cầu đinh sập — xung kích ngay.',
+    hint: 'Cặp mạn: địch bị móc chậm lại, tàu mồi tự xung kích.',
+  },
+  greek: {
+    name: 'Xuyên Trận Diekplous',
+    pitch: 'Chèo xuyên tuyến địch làm thủy thủ hoảng loạn.',
+    hint: 'Lướt nhanh ngang mạn địch để phá nạp đạn.',
+  },
+  arab: {
+    name: 'Cưỡi Gió Mùa',
+    pitch: 'Gió mùa đảo theo lịch — thân buồm latin bay xuôi gió.',
+    hint: 'Dong xuôi gió mùa (+tốc độ); phục kích tuyến buôn dưới gió.',
+  },
+  chinese: {
+    name: 'Pháo Đài Nổi',
+    pitch: 'Thả neo (T hoặc buồm trần) thành pháo đài — hay đòi tàu cống nạp.',
+    hint: 'T: thả neo +sát thương. F gần thương thuyền: ước cống thay cướp.',
+  },
+  japanese: {
+    name: 'Móc & Súng Teppo',
+    pitch: 'Địch móc kéo bạn — đáp bằng loạt teppo mũi (T).',
+    hint: 'T: loạt teppo phía trước. Diệt tàu móc nhanh kẻo bị lôi chìm.',
+  },
+  maori: {
+    name: 'Utu',
+    pitch: 'Mỗi lần đánh chìm chỉ mặt kẻ báo thù — diệt kẻ bị đánh dấu để chồng Mana.',
+    hint: 'Họ hàng bị đánh dấu săn bạn; diệt chúng chồng Mana (sát thương) — nuôi liên tục.',
+  },
+  hawaii: {
+    name: 'Thống Nhất Quần Đảo',
+    pitch: 'Đánh bại xuồng từng đảo bắt chư hầu nộp cống mỗi đợt.',
+    hint: 'Chìm 3 thuyền một đảo để bắt thần phục. Thống nhất tất cả.',
+  },
+  macedon: {
+    name: 'Tháp Công Thành Nổi',
+    pitch: 'Máy bắn công thành tầm xa vô đối — nhưng muỗi bu đầy.',
+    hint: 'Tầm bạn bao la; tép riu chết ở mạn. Xoay liên tục.',
+  },
+  maya: {
+    name: 'Du Kích Rạn San Hô',
+    pitch: 'Sống tàu Tây Ban Nha rướm máu trên rạn; xuồng bạn qua tự do.',
+    hint: 'Đánh trong vòng rạn. Gọi người lạ đầu tiên xin quà.',
+  },
+  inca: {
+    name: 'Humboldt & Spondylus',
+    pitch: 'Cưỡi luồng hải lưu; lặn bãi sò lấy vàng.',
+    hint: 'Hải lưu đẩy mọi thân. Lững thững trên bãi hồng để lặn.',
+  },
+  lepanto: {
+    name: 'Hỗn Chiến Lớn',
+    pitch: 'Xung kích bất tận trong hỗn chiến — xâu tàu mồi nối nhau.',
+    hint: 'Tầm xung kích xa; mỗi tàu mồi chèo người tự do về đội bạn.',
+  },
+  korea: {
+    name: 'Thủy Triều Myeongnyang',
+    pitch: 'Dòng eo đảo chiều — thuyền rùa của bạn hầu như không cảm.',
+    hint: 'Dụ địch nhẹ vào triều; triều quét chúng lên đá và họng pháo.',
+  },
+  byzantium: {
+    name: 'Xích & Biển Lửa',
+    pitch: 'Xích dồn địch vào một cửa; lửa Hy Lạp trôi lan.',
+    hint: 'Giữ cửa xích; váng dầu của bạn trôi theo gió và đọng lâu.',
+  },
+  egypt: {
+    name: 'Cung Thủ Bờ Của Pharaoh',
+    pitch: 'Bờ bạn trút mưa tên giúp bạn; lau sậy giấu quân phục.',
+    hint: 'Đánh gần bờ bạn để có cung yểm trợ. Quét bãi sậy.',
+  },
+  chola: {
+    name: 'Vượt Vịnh',
+    pitch: 'Xa nhà: hao lương gấp đôi, vàng đền gấp đôi, bão gió mùa.',
+    hint: 'Lương cháy nhanh gấp đôi — nhưng jackpot trả gấp đôi.',
+  },
+  vietnam: {
+    name: 'Cọc Bạch Đằng',
+    pitch: 'Nước ròng, bãi cọc nhe nanh với sống sâu.',
+    hint: 'Coi đồng hồ thủy triều: dụ thân sâu lên cọc lúc NƯỚC RÒNG.',
+  },
+  aztec: {
+    name: 'Đường Đắp Texcoco',
+    pitch: 'Mê cung đường đắp — xuồng luồn khe mà brigantine chịu.',
+    hint: 'Đánh từ khe; thân sâu Tây Ban Nha mắc cạn bò lết.',
+  },
+  phoenicia: {
+    name: 'Tuyến Tím',
+    pitch: 'Chở hàng giữa cảng bạn để lãi theo đợt.',
+    hint: 'Chạm đồn bạn để chất hàng, đồn khác để bán. Tha đối tác.',
+  },
+  hanse: {
+    name: 'Thuế Pfundgeld',
+    pitch: 'Gọi thương thuyền đoàn (F) thu thuế Liên minh — hoặc đánh tất.',
+    hint: 'F gần thương thuyền: đòi thuế. Kẻ từ chối gọi cả đoàn.',
+  },
+  portugal: {
+    name: 'Gió Mùa & Feitoria',
+    pitch: 'Gió đảo mỗi 3 đợt; đồn feitoria sửa và nuôi bạn.',
+    hint: 'Coi lịch gió mùa; lảng vảng gần đồn bạn để hồi.',
+  },
+  armada: {
+    name: 'Bão & Tàu Lửa',
+    pitch: 'Bão phá mọi đội hình; vành trăng khuyết giữ kho báu.',
+    hint: 'Bão đẩy mọi thân xuống gió. Xé vành trăng lấy jackpot.',
+  },
+  dutch: {
+    name: 'Cát Trôi',
+    pitch: 'Bãi cát trôi qua Texel, mắc cạn sống sâu Anh.',
+    hint: 'Thân cạn của bạn lướt bãi — dụ thợ săn sâu lên bãi.',
+  },
+  ottoman: {
+    name: 'Bứt Tốc Chèo',
+    pitch: 'Bứt tốc (T) vào cú đâm — thuyền chèo bị xung kích chèo người tự do về bạn.',
+    hint: 'T: bứt tốc bùng nổ, rồi tay chèo kiệt sức. Xung kích lấy người, không lấy vàng.',
+  },
+  predread: {
+    name: 'Cắt Chữ T',
+    pitch: 'Quét dọc mũi lái; bám một mục tiêu để kẹp tầm.',
+    hint: 'Bắn mũi/lái +50%. Bám một con mồi để ngắm chuẩn dần.',
+  },
+  falklands: {
+    name: 'Báo Động Không Kích',
+    pitch: 'Exocet xé từ ngoài màn hình — ngoặt theo hoặc trúng đạn.',
+    hint: 'Thấy mũi tên đột kích? Ngoặt đón và di chuyển liên tục. Đồ chaff đỡ được.',
+  },
+  somali: {
+    name: 'Cướp & Tiền Chuộc',
+    pitch: 'Thương thuyền bị xung kích thành con tin — tiền chuộc nhích lên trong lúc bạn giữ.',
+    hint: 'Xung kích thương thuyền, rồi sống sót: tiền chuộc tăng mỗi giây.',
+  },
+};
+
+export const traits: Dict<TraitsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };

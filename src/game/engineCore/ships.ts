@@ -1,6 +1,6 @@
 import { type Fortress, type Island, type Ship, type ShipKind, isSteelHull } from '../types';
 import { islandRadiusAt, drawFortRuin } from '../render';
-import { HARBOUR_FLEETS, HARBOUR_SQUADRON_CAP, harbourMouth, harbourSortie } from '../harbour';
+import { HARBOUR_SQUADRON_CAP, harbourMouth, harbourSortie } from '../harbour';
 import { PROVOKE, coolOff, provokeNetwork } from '../settlements';
 import { blastKindFor, projectileFor, usesGunpowder } from '../weapons';
 import { angDiff, TAU } from '../math';
@@ -10,6 +10,7 @@ import {
 } from '../hullFittings';
 import { HALF_PI, WORLD, NATIVE_HUNT, NATIVE_LEASH, NATIVE_GUARD, NATIVE_BEACH, P_SMOKE, P_FIRE, P_FOAM, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, rand, clamp, pick, type Ball } from './constants';
 import { EngineCombat } from './combat';
+import i18n from '../../i18n';
 
 /** Ship physics, collisions, enemy AI, island natives, settlements and forts. */
 export abstract class EngineShips extends EngineCombat {
@@ -294,7 +295,7 @@ export abstract class EngineShips extends EngineCombat {
         this.hitStop = Math.max(this.hitStop, 0.05);
         foe.vx += nx * 90;
         foe.vy += ny * 90;
-        this.addText(cx, cy - 18, kit.ram.effect === 'breach' ? 'HOLED!' : 'RAMMED!', '#ffd84d', 20);
+        this.addText(cx, cy - 18, kit.ram.effect === 'breach' ? i18n.t('hud:combat.holed') : i18n.t('hud:combat.rammed'), '#ffd84d', 20);
         this.fittingEffect(foe, kit.ram.effect, ps.ram);
         this.damageShip(foe, dmg, true);
       }
@@ -556,7 +557,7 @@ export abstract class EngineShips extends EngineCombat {
       s.nativeState = 'home';
       if (this.nativeCallTimer <= 0) {
         this.nativeCallTimer = 4;
-        this.addText(s.x, s.y - 30, s.def.native ? 'The war party turns for home!' : 'The harbour squadron puts back!', '#ffd8a8', 15);
+        this.addText(s.x, s.y - 30, s.def.native ? i18n.t('hud:isles.warPartyHome') : i18n.t('hud:isles.squadronBack'), '#ffd8a8', 15);
       }
     }
 
@@ -775,8 +776,7 @@ export abstract class EngineShips extends EngineCombat {
       launched++;
     });
     if (launched > 0) {
-      const fleet = HARBOUR_FLEETS[this.eraId] ?? HARBOUR_FLEETS.golden;
-      this.addText(is.x + mouth.x, is.y + mouth.y - 30, f.ruined ? 'Guard boats put out from the harbour!' : fleet.sortie, '#ffd8a8', 16);
+      this.addText(is.x + mouth.x, is.y + mouth.y - 30, f.ruined ? i18n.t('hud:isles.guardBoats') : i18n.t(`hud:sortie.${this.eraId}`, { defaultValue: i18n.t('hud:sortie.golden') }), '#ffd8a8', 16);
       this.sfx.horn();
     }
   }
@@ -838,7 +838,7 @@ export abstract class EngineShips extends EngineCombat {
     for (const is of this.islands) {
       const st = is.settlement;
       if (!st.inhabited) continue;
-      if (coolOff(st, dt)) this.addText(is.x, is.y - is.maxR - 20, `${st.name} stands down`, '#cfe8d0', 18);
+      if (coolOff(st, dt)) this.addText(is.x, is.y - is.maxR - 20, i18n.t('hud:isles.standsDown', { name: st.name }), '#cfe8d0', 18);
     }
   }
 
@@ -859,7 +859,7 @@ export abstract class EngineShips extends EngineCombat {
     const st = is.settlement;
     const allies = roused.filter((member) => member !== st).length;
     if (allies > 0) this.addText(this.player.x, this.player.y - 100,
-      `${st.peopleName}${st.allianceName ? ` / ${st.allianceName}` : ''}: ${allies} other islands join the fight!`,
+      `${st.peopleName}${st.allianceName ? ` / ${st.allianceName}` : ''}: ${i18n.t(allies === 1 ? 'hud:isles.joinOne' : 'hud:isles.joinOther', { n: allies })}`,
       '#ff9a5a', 18);
   }
 
@@ -870,15 +870,15 @@ export abstract class EngineShips extends EngineCombat {
   protected onIslandRoused(is: Island, kind: 'boats' | 'shell') {
     const st = is.settlement;
     const f = st.fortress;
-    this.addText(is.x, is.y - is.maxR - 26, `${st.name} is roused!`, '#ff9a5a', 24);
+    this.addText(is.x, is.y - is.maxR - 26, i18n.t('hud:isles.roused', { name: st.name }), '#ff9a5a', 24);
     this.addText(
       is.x,
       is.y - is.maxR,
       f && !f.ruined
-        ? (usesGunpowder(this.eraId) ? 'The fort runs out its guns!' : 'Archers and pulley launchers man the walls!')
+        ? (usesGunpowder(this.eraId) ? i18n.t('hud:isles.fortGuns') : i18n.t('hud:isles.archersWalls'))
         : kind === 'shell'
-          ? 'War canoes put out!'
-          : 'They will not forget that!',
+          ? i18n.t('hud:isles.warCanoes')
+          : i18n.t('hud:isles.notForget'),
       '#ffd8a8',
       16,
     );
@@ -937,7 +937,7 @@ export abstract class EngineShips extends EngineCombat {
     this.sfx.fanfare();
     this.addTrauma(0.45);
     const st = is.settlement;
-    this.addText(is.x, is.y - is.maxR - 24, `${st.name}: the fort is silenced!`, '#ffd863', 24);
+    this.addText(is.x, is.y - is.maxR - 24, i18n.t('hud:isles.fortSilenced', { name: st.name }), '#ffd863', 24);
     for (let i = 0; i < 7; i++) {
       const a = rand(0, TAU);
       this.addPickup(

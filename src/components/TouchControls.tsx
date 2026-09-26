@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bomb, ShipWheel } from 'lucide-react';
 import type { Input } from '../game/input';
 import { cn } from '../utils/cn';
@@ -7,6 +8,7 @@ const R = 60; // joystick radius (px)
 const DEAD = 7; // dead-zone before steering engages (px)
 
 export function TouchControls({ input }: { input: Input }) {
+  const { t } = useTranslation('screens');
   const baseRef = useRef<HTMLDivElement>(null);
   const knobRef = useRef<HTMLDivElement>(null);
   const joyId = useRef<number | null>(null);
@@ -139,7 +141,7 @@ export function TouchControls({ input }: { input: Input }) {
       >
         <div className="flex flex-col items-center text-parch/70">
           <ShipWheel className="h-9 w-9" />
-          <span className="font-pirate text-sm tracking-wider">STEER</span>
+          <span className="font-pirate text-sm tracking-wider">{t('touch.steer')}</span>
         </div>
       </div>
 
@@ -180,7 +182,7 @@ export function TouchControls({ input }: { input: Input }) {
           }}
         >
           <Bomb className="h-9 w-9" />
-          <span className="mt-0.5 text-2xl">FIRE</span>
+          <span className="mt-0.5 text-2xl">{t('touch.fire')}</span>
         </div>
       </div>
     </>

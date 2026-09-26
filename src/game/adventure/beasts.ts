@@ -9,6 +9,7 @@
 // Nothing here touches the DOM, so the whole gallery can be reasoned about (and
 // tested) without a canvas.
 
+import i18n from '../../i18n';
 import { project, nudgeToSea, isLand, WORLD_W, WORLD_H } from '../chart/world';
 import { PORTS_PROJ } from '../chart/ports';
 
@@ -316,6 +317,26 @@ export function rankFor(renown: number): string {
   let rank = RENOWN_RANKS[0].rank;
   for (const r of RENOWN_RANKS) if (renown >= r.at) rank = r.rank;
   return rank;
+}
+
+/** Index into the localized `adventure:ranks` list for a renown total. */
+export function rankIndexFor(renown: number): number {
+  let idx = 0;
+  RENOWN_RANKS.forEach((r, i) => {
+    if (renown >= r.at) idx = i;
+  });
+  return idx;
+}
+
+/** Localized lair-holder strings (engine toasts, HUD, port panel). */
+export function foeNameL(id: string): string {
+  return i18n.t(`adventure:foes.${id}.name`);
+}
+export function foeTitleL(id: string): string {
+  return i18n.t(`adventure:foes.${id}.title`);
+}
+export function foeTaleL(id: string): string {
+  return i18n.t(`adventure:foes.${id}.tale`);
 }
 
 /**

@@ -20,7 +20,7 @@ import { hud } from './dict/hud';
 import { hero } from './dict/hero';
 
 export type { LocaleId };
-export const LOCALES: LocaleId[] = ['en', 'es', 'fr', 'de', 'nl', 'pt', 'ja'];
+export const LOCALES: LocaleId[] = ['en', 'es', 'fr', 'de', 'nl', 'pt', 'ja', 'zh', 'id', 'th', 'vi'];
 
 /** Each language's own name, for the picker. */
 export const LOCALE_NAMES: Record<LocaleId, string> = {
@@ -31,6 +31,10 @@ export const LOCALE_NAMES: Record<LocaleId, string> = {
   nl: 'Nederlands',
   pt: 'Português',
   ja: '日本語',
+  zh: '简体中文',
+  id: 'Bahasa Indonesia',
+  th: 'ไทย',
+  vi: 'Tiếng Việt',
 };
 
 /** BCP-47 tags for locale-aware number formatting. */

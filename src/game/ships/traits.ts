@@ -5,11 +5,21 @@
 
 import { isSteelHull, type EraId, type ShipDef } from '../types';
 import { ERA_SHIPS } from './era';
-import { armamentFor, usesGunpowder } from '../weapons';
+import { usesGunpowder } from '../weapons';
+
+/**
+ * One line of the report, as a dictionary key: `hero:scout.<key>` with
+ * `params`, except `armHeavy`, which the picker renders as the era's real
+ * armament name. Keys keep game logic free of language.
+ */
+export interface TraitChip {
+  key: string;
+  params?: Record<string, string | number>;
+}
 
 export interface ShipTraits {
-  strengths: string[];
-  weaknesses: string[];
+  strengths: TraitChip[];
+  weaknesses: TraitChip[];
 }
 
 export interface ShipScores {
@@ -43,63 +53,75 @@ export function shipScores(def: ShipDef): ShipScores {
   };
 }
 
+type Chip = [number, TraitChip];
+
 /** Strengths and weaknesses, strongest line first. 1-3 of each, never empty.
  * Pass the era to name the armament a pre-gunpowder hull really carries. */
 export function shipTraits(def: ShipDef, era?: EraId): ShipTraits {
-  const strengths: [number, string][] = [];
-  const weaknesses: [number, string][] = [];
+  const strengths: Chip[] = [];
+  const weaknesses: Chip[] = [];
   const hpR = def.hp / MAX.hp;
   const spdR = def.speed / MAX.speed;
   const gunR = def.cannons / MAX.cannons;
   const turnR = def.turn / MAX.turn;
   const big = def.length > MAX.length * 0.75;
 
-  if (hpR >= 0.6) strengths.push([hpR, `Tough hull (${def.hp})`]);
-  if (spdR >= 0.8) strengths.push([spdR, `Fast — ${def.speed} knots`]);
-  if (gunR >= 0.8) strengths.push([gunR, `Heavy broadside — ${def.cannons} a side`]);
-  if (turnR >= 0.85) strengths.push([turnR, 'Nimble helm']);
-  if (def.reload <= 2.6) strengths.push([0.7, `Quick reload (${def.reload.toFixed(1)}s)`]);
-  if (def.oared || isSteelHull(def.hullStyle)) strengths.push([0.75, isSteelHull(def.hullStyle) ? 'Burns fuel — wind means nothing' : 'Paddles — wind means nothing']);
-  if (def.mortar) strengths.push([0.72, 'Lobs exploding shells']);
-  if ((def.crew ?? 0) >= 120) strengths.push([0.68, `Big boarding crew (${def.crew})`]);
+  if (hpR >= 0.6) strengths.push([hpR, { key: 'toughHull', params: { hp: def.hp } }]);
+  if (spdR >= 0.8) strengths.push([spdR, { key: 'fast', params: { speed: def.speed } }]);
+  if (gunR >= 0.8) strengths.push([gunR, { key: 'heavyBroadside', params: { guns: def.cannons } }]);
+  if (turnR >= 0.85) strengths.push([turnR, { key: 'nimble' }]);
+  if (def.reload <= 2.6) strengths.push([0.7, { key: 'quickReload', params: { s: def.reload.toFixed(1) } }]);
+  if (def.oared || isSteelHull(def.hullStyle))
+    strengths.push([0.75, { key: isSteelHull(def.hullStyle) ? 'burnsFuel' : 'paddles' }]);
+  if (def.mortar) strengths.push([0.72, { key: 'lobsShells' }]);
+  if ((def.crew ?? 0) >= 120) strengths.push([0.68, { key: 'bigCrew', params: { crew: def.crew ?? 0 } }]);
   if (big && def.cannons >= 3) {
-    const mechanical = def.weapon === 'mechanical'
-      ? (era && !usesGunpowder(era) ? armamentFor(era).heavyName : 'Ranks of archers and pulley-drawn launchers')
-      : null;
-    strengths.push([0.66, mechanical ?? 'Carries a whole fort’s worth of guns']);
+    const key =
+      def.weapon === 'mechanical'
+        ? era && !usesGunpowder(era)
+          ? 'armHeavy'
+          : 'archersFallback'
+        : 'fortGuns';
+    strengths.push([0.66, { key }]);
   }
 
-  if (hpR <= 0.4) weaknesses.push([1 - hpR, `Thin hull (${def.hp})`]);
-  if (spdR <= 0.65) weaknesses.push([1 - spdR, `Slow — ${def.speed} knots`]);
-  if (def.cannons <= 2) weaknesses.push([0.6, `Light broadside (${def.cannons} a side)`]);
-  if (turnR <= 0.7) weaknesses.push([1 - turnR, 'Sluggish helm']);
-  if (def.reload >= 4) weaknesses.push([0.55, `Slow reload (${def.reload.toFixed(1)}s)`]);
-  if ((def.crew ?? 99) <= 26) weaknesses.push([0.5, `Few hands for boarding (${def.crew})`]);
-  if (big) weaknesses.push([0.5, 'A big target — broadsides find her']);
+  if (hpR <= 0.4) weaknesses.push([1 - hpR, { key: 'thinHull', params: { hp: def.hp } }]);
+  if (spdR <= 0.65) weaknesses.push([1 - spdR, { key: 'slow', params: { speed: def.speed } }]);
+  if (def.cannons <= 2) weaknesses.push([0.6, { key: 'lightBroadside', params: { guns: def.cannons } }]);
+  if (turnR <= 0.7) weaknesses.push([1 - turnR, { key: 'sluggish' }]);
+  if (def.reload >= 4) weaknesses.push([0.55, { key: 'slowReload', params: { s: def.reload.toFixed(1) } }]);
+  if ((def.crew ?? 99) <= 26) weaknesses.push([0.5, { key: 'fewHands', params: { crew: def.crew ?? 0 } }]);
+  if (big) weaknesses.push([0.5, { key: 'bigTarget' }]);
 
   // a hull can be good at everything (or bad at nothing): fall back to her very
   // best and very worst traits so every card still reads as a scouting report
   if (strengths.length === 0) {
     const best = [
-      [hpR, `Tough hull (${def.hp})`],
-      [spdR, `Fast — ${def.speed} knots`],
-      [gunR, `Heavy broadside — ${def.cannons} a side`],
-      [turnR, 'Nimble helm'],
-    ].sort((a, b) => (b[0] as number) - (a[0] as number))[0] as [number, string];
+      [hpR, { key: 'toughHull', params: { hp: def.hp } }],
+      [spdR, { key: 'fast', params: { speed: def.speed } }],
+      [gunR, { key: 'heavyBroadside', params: { guns: def.cannons } }],
+      [turnR, { key: 'nimble' }],
+    ].sort((a, b) => (b[0] as number) - (a[0] as number))[0] as Chip;
     strengths.push(best);
   }
   if (weaknesses.length === 0) {
     const worst = [
-      [hpR, `Thin hull (${def.hp})`],
-      [spdR, `Slow — ${def.speed} knots`],
-      [gunR, `Light broadside (${def.cannons} a side)`],
-      [turnR, 'Sluggish helm'],
-    ].sort((a, b) => (a[0] as number) - (b[0] as number))[0] as [number, string];
+      [hpR, { key: 'thinHull', params: { hp: def.hp } }],
+      [spdR, { key: 'slow', params: { speed: def.speed } }],
+      [gunR, { key: 'lightBroadside', params: { guns: def.cannons } }],
+      [turnR, { key: 'sluggish' }],
+    ].sort((a, b) => (a[0] as number) - (b[0] as number))[0] as Chip;
     weaknesses.push(worst);
   }
 
   return {
-    strengths: strengths.sort((a, b) => b[0] - a[0]).slice(0, 3).map(([, s]) => s),
-    weaknesses: weaknesses.sort((a, b) => b[0] - a[0]).slice(0, 2).map(([, s]) => s),
+    strengths: strengths
+      .sort((a, b) => b[0] - a[0])
+      .slice(0, 3)
+      .map(([, s]) => s),
+    weaknesses: weaknesses
+      .sort((a, b) => b[0] - a[0])
+      .slice(0, 2)
+      .map(([, s]) => s),
   };
 }

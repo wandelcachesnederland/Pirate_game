@@ -1,5 +1,6 @@
 import { usesGunpowder } from './game/weapons';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flag, Grape, Crosshair, Pause } from 'lucide-react';
 import { Engine } from './game/engine';
 import { isTypingTarget } from './game/input';
@@ -40,6 +41,10 @@ function detectTouch(): boolean {
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation(['hud', 'screens', 'menu']);
+  useEffect(() => {
+    document.title = `${t('menu:brand')} — ${t('menu:tagline')}`;
+  }, [t, i18n.language]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const [engine, setEngine] = useState<Engine | null>(null);
@@ -135,7 +140,7 @@ export default function App() {
       },
       onGameOver: (st) => {
         gameOverAt.current = performance.now();
-        const entryName = nameRef.current.trim() || 'Captain';
+        const entryName = nameRef.current.trim() || t('screens:gameover.captainFallback');
         if (st.score > 0) {
           const res = addScore({
             name: entryName,
@@ -377,10 +382,10 @@ export default function App() {
           style={{
             bottom: `calc(max(14px, env(safe-area-inset-bottom)) + ${isTouch ? 150 : 18}px)`,
           }}
-          aria-label={`Board ${boardPrompt.name}`}
+          aria-label={t('hud:overlay.boardAria', { name: boardPrompt.name })}
         >
           <Flag className="h-6 w-6" />
-          BOARD! {boardPrompt.crew} men
+          {t('hud:overlay.boardBtn', { crew: boardPrompt.crew })}
         </button>
       )}
 
@@ -394,7 +399,7 @@ export default function App() {
             engineRef.current?.fireGrapeshotFromUI();
             setGrape(engineRef.current?.getGrapeshot() ?? null);
           }}
-          aria-label={usesGunpowder(era) ? 'Grapeshot — sweep the deck' : 'Arrow storm — sweep the deck'}
+          aria-label={usesGunpowder(era) ? t('hud:overlay.grapeAria') : t('hud:overlay.arrowsAria')}
           className={cn(
             'absolute z-10 flex items-center gap-2 px-4 py-2 leading-none',
             grape.cd > 0 ? 'btn-wood opacity-70' : 'btn-seal cursor-pointer',
@@ -409,13 +414,13 @@ export default function App() {
         >
           {usesGunpowder(era) ? <Grape className="h-6 w-6" /> : <Crosshair className="h-6 w-6" />}
           <span className="flex flex-col items-start">
-            <span className="text-2xl">{usesGunpowder(era) ? 'GRAPE' : 'ARROWS'}</span>
+            <span className="text-2xl">{usesGunpowder(era) ? t('hud:overlay.grape') : t('hud:overlay.arrows')}</span>
             <span className="text-xs italic tracking-wide opacity-90">
               {grape.cd > 0
-                ? `loading… ${Math.ceil(grape.cd)}s`
+                ? t('hud:overlay.loading', { cd: Math.ceil(grape.cd) })
                 : isTouch
-                  ? `ready · ${grape.targets} in reach`
-                  : `R · ${grape.targets} in reach`}
+                  ? t('hud:overlay.readyTouch', { n: grape.targets })
+                  : t('hud:overlay.readyKeys', { n: grape.targets })}
             </span>
           </span>
           <span className="flex flex-col gap-0.5">
@@ -430,7 +435,7 @@ export default function App() {
         <button
           type="button"
           tabIndex={-1}
-          aria-label="Pause"
+          aria-label={t('hud:overlay.pauseAria')}
           onClick={(e) => {
             e.currentTarget.blur();
             pause();
@@ -493,7 +498,7 @@ export default function App() {
       )}
 
       {screen === 'upgrade' && offers.length > 0 && (
-        <UpgradeScreen offers={offers} wave={offerWave} onChoose={choose} isTouch={isTouch} />
+        <UpgradeScreen offers={offers} wave={offerWave} era={era} onChoose={choose} isTouch={isTouch} />
       )}
 
       {screen === 'gameover' && stats && (

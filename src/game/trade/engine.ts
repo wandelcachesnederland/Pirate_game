@@ -5,6 +5,7 @@
 // requestAnimationFrame loop, canvas rendering hook, and input — it is entirely
 // independent of the arcade combat engine so the rest of the game is untouched.
 
+import i18n from '../../i18n';
 import { Input } from '../input';
 import { angDiff, TAU, clamp } from '../math';
 import {
@@ -182,7 +183,7 @@ export class TradeEngine {
     this.activePortId = null;
     this.phase = 'sailing';
     this.over = false;
-    this.pushMessage('A fresh venture begins at Port Royal. Fair winds, Captain.', 'good');
+    this.pushMessage(i18n.t('trade:log.start'), 'good');
   }
 
   destroy() {
@@ -415,7 +416,7 @@ export class TradeEngine {
         const loot = Math.round(rand(140, 380));
         this.gold += loot;
         this.stats.sunk += 1;
-        this.pushMessage(`Prize taken! The pirate goes down — ${loot} gold in plunder.`, 'good');
+        this.pushMessage(i18n.t('trade:log.prize', { loot }), 'good');
         this.audio.coin();
       }
     }
@@ -502,7 +503,7 @@ export class TradeEngine {
     this.player.vy = 0;
     this.player.sail = 0;
     this.stats.ports.add(portId);
-    this.pushMessage(`Dropped anchor at ${port.name}.`, 'info');
+    this.pushMessage(i18n.t('trade:log.docked', { port: port.name }), 'info');
     this.audio.dock();
     this.cb.onPhase?.(this.phase);
     this.save();
@@ -537,7 +538,7 @@ export class TradeEngine {
     this.gold -= cost;
     this.cargo[good] += take;
     this.audio.coin();
-    this.pushMessage(`Bought ${take} ${GOOD_BY_ID[good].name} for ${cost} gold.`, 'trade');
+    this.pushMessage(i18n.t('trade:log.bought', { n: take, good: i18n.t(`trade:goods.${good}`), cost }), 'trade');
     this.save();
     return true;
   }
@@ -552,7 +553,7 @@ export class TradeEngine {
     this.gold += gain;
     this.cargo[good] -= give;
     this.audio.coin();
-    this.pushMessage(`Sold ${give} ${GOOD_BY_ID[good].name} for ${gain} gold.`, 'trade');
+    this.pushMessage(i18n.t('trade:log.sold', { n: give, good: i18n.t(`trade:goods.${good}`), gain }), 'trade');
     this.save();
     return true;
   }
@@ -567,7 +568,7 @@ export class TradeEngine {
     this.gold -= cost;
     this.player.hp = this.player.maxHp;
     this.audio.coin();
-    this.pushMessage(`Hull caulked and repaired for ${cost} gold.`, 'good');
+    this.pushMessage(i18n.t('trade:log.repaired', { cost }), 'good');
     this.save();
   }
   holdUpgradeCost(): number {
@@ -580,7 +581,7 @@ export class TradeEngine {
     this.gold -= cost;
     this.holdCap += 40;
     this.audio.coin();
-    this.pushMessage(`Hold expanded to ${this.holdCap} — costs ${cost} gold.`, 'good');
+    this.pushMessage(i18n.t('trade:log.hold', { cap: this.holdCap, cost }), 'good');
     this.save();
   }
   hullUpgradeCost(): number {
@@ -594,7 +595,7 @@ export class TradeEngine {
     this.player.maxHp += 30;
     this.player.hp += 30;
     this.audio.coin();
-    this.pushMessage(`Hull reinforced (+30) for ${cost} gold.`, 'good');
+    this.pushMessage(i18n.t('trade:log.hull', { cost }), 'good');
     this.save();
   }
 
@@ -603,7 +604,7 @@ export class TradeEngine {
     if (this.player.hp <= 0 && !this.over) {
       this.over = true;
       this.phase = 'over';
-      this.pushMessage('Your ship is sunk. The venture ends here.', 'fight');
+      this.pushMessage(i18n.t('trade:log.sunk'), 'fight');
       this.cb.onPhase?.(this.phase);
       this.clearSave();
       return;
@@ -611,7 +612,7 @@ export class TradeEngine {
     if (this.gold >= GOAL_GOLD && !this.over) {
       this.over = true;
       this.phase = 'victory';
-      this.pushMessage('A trading empire! You have cornered the markets of the world.', 'good');
+      this.pushMessage(i18n.t('trade:log.empire'), 'good');
       this.audio.fanfare();
       this.cb.onPhase?.(this.phase);
       this.clearSave();
@@ -738,7 +739,7 @@ export class TradeEngine {
         hp: d.hp ?? 100, maxHp: d.maxHp ?? 100, cannons: 3, damage: 7, range: 80, reload: 1.0,
         reloadL: 0, reloadR: 0, speed: 46, turn: 2.6, aiState: 'wander', wander: 0, hitFlash: 0,
       };
-      this.pushMessage('Welcome back, Captain — your voyage continues.', 'info');
+      this.pushMessage(i18n.t('trade:log.welcome'), 'info');
       return true;
     } catch {
       return false;

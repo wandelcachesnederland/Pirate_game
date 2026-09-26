@@ -1,4 +1,5 @@
 import { Gamepad2, Map, Coins, Lock, Swords, Skull, Anchor } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../utils/cn';
 
 export type GameModeId = 'arcade' | 'adventure' | 'trade';
@@ -10,63 +11,41 @@ interface Props {
 
 interface ModeDef {
   id: GameModeId;
-  name: string;
-  subtitle: string;
-  desc: string;
-  longDesc: string;
   icon: React.ElementType;
   accent: string;
   gradient: string;
   ring: string;
   glow: string;
   enabled: boolean;
-  badge?: string;
 }
 
 const MODES: ModeDef[] = [
   {
     id: 'arcade',
-    name: 'Arcade',
-    subtitle: 'Broadside Mayhem',
-    desc: 'Fast waves, quick plunder',
-    longDesc: 'The classic cabinet brawl — sink, board, upgrade, survive. 26 eras, 5 perils, endless waves.',
     icon: Gamepad2,
     accent: '#ffd863',
     gradient: 'radial-gradient(circle at 35% 30%, #ff8a6a, #c22e1f 55%, #560d07)',
     ring: '#ffd863',
     glow: 'rgba(255, 150, 60, 0.55)',
     enabled: true,
-    badge: 'Play Now',
   },
   {
     id: 'adventure',
-    name: 'Adventure',
-    subtitle: 'Chart the Unknown',
-    desc: 'Story & exploration',
-    longDesc:
-      'Hunt the same world map as Trade: ten lairs of sea beasts and named rivals wake as you sail close. Take contracts, refit on salvage, cross every name off the chart.',
     icon: Map,
     accent: '#7de8c3',
     gradient: 'radial-gradient(circle at 35% 30%, #a8e6cf, #3aa88f 55%, #0e4a40)',
     ring: '#7de8c3',
     glow: 'rgba(80, 230, 190, 0.35)',
     enabled: true,
-    badge: 'Play Now',
   },
   {
     id: 'trade',
-    name: 'Trade',
-    subtitle: 'Fortune & Rum',
-    desc: 'Buy low, sell high',
-    longDesc:
-      'Sail a living world map, run cargo between real ports, dodge pirates and corner the markets of the globe.',
     icon: Coins,
     accent: '#c98aff',
     gradient: 'radial-gradient(circle at 35% 30%, #dfaaff, #7a2fc0 55%, #280b4e)',
     ring: '#c98aff',
     glow: 'rgba(180, 110, 255, 0.35)',
     enabled: true,
-    badge: 'Play Now',
   },
 ];
 
@@ -99,21 +78,24 @@ function ModeEmblem({ mode, size = 'lg', disabled = false }: { mode: ModeDef; si
 }
 
 export function ModeSelectScreen({ onSelect, isTouch }: Props) {
+  const { t } = useTranslation(['menu', 'common']);
   return (
     <div className="flex h-full flex-col gap-2 overflow-y-auto no-scrollbar p-2 sm:gap-3 sm:p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <div>
-          <div className="arcade-tag text-[0.6rem] sm:text-xs">Step 1 of 7 · Game Mode</div>
-          <h2 className="arcade-marquee text-2xl sm:text-4xl">Choose Your Mode</h2>
+          <div className="arcade-tag text-[0.6rem] sm:text-xs">{t('menu:mode.stepTag')}</div>
+          <h2 className="arcade-marquee text-2xl sm:text-4xl">{t('menu:mode.heading')}</h2>
         </div>
         <span className="text-[0.7rem] italic opacity-75 sm:text-[0.8rem]">
-          {isTouch ? 'Tap a mode to weigh anchor' : 'Enter — sail Arcade · arrow keys to choose a mode'}
+          {isTouch ? t('menu:mode.hintTouch') : t('menu:mode.hintKeys')}
         </span>
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 sm:content-center">
         {MODES.map((m) => {
           const enabled = m.enabled;
+          const name = t(`menu:mode.${m.id}Name`);
+          const sub = t(`menu:mode.${m.id}Sub`);
           return (
             <button
               key={m.id}
@@ -121,7 +103,7 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
               disabled={!enabled}
               onClick={() => enabled && onSelect(m.id)}
               aria-disabled={!enabled}
-              aria-label={enabled ? `${m.name} — ${m.subtitle}` : `${m.name} — Coming Soon`}
+              aria-label={enabled ? `${name} — ${sub}` : `${name} — ${t('menu:mode.comingSoon')}`}
               className={cn(
                 'group relative flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all sm:px-4 sm:py-6',
                 enabled
@@ -134,32 +116,30 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
                   : undefined
               }
             >
-              {m.badge && (
-                <span
-                  className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-0.5 font-pirate text-[0.65rem] uppercase tracking-widest sm:text-[0.7rem]"
-                  style={{
-                    background: enabled ? m.ring : '#3a3a3a',
-                    color: enabled ? '#4a1a05' : '#a8a29a',
-                    boxShadow: enabled ? `0 0 10px ${m.glow}` : undefined,
-                  }}
-                >
-                  {enabled ? (
-                    <span className="flex items-center gap-1">
-                      <Swords className="h-3 w-3" /> {m.badge}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1">
-                      <Lock className="h-3 w-3" /> {m.badge}
-                    </span>
-                  )}
-                </span>
-              )}
+              <span
+                className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-0.5 font-pirate text-[0.65rem] uppercase tracking-widest sm:text-[0.7rem]"
+                style={{
+                  background: enabled ? m.ring : '#3a3a3a',
+                  color: enabled ? '#4a1a05' : '#a8a29a',
+                  boxShadow: enabled ? `0 0 10px ${m.glow}` : undefined,
+                }}
+              >
+                {enabled ? (
+                  <span className="flex items-center gap-1">
+                    <Swords className="h-3 w-3" /> {t('menu:mode.badge')}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <Lock className="h-3 w-3" /> {t('menu:mode.comingSoon')}
+                  </span>
+                )}
+              </span>
 
               <ModeEmblem mode={m} disabled={!enabled} />
 
               <div className="mt-1">
                 <div className={cn('font-pirate text-2xl leading-none sm:text-3xl', enabled ? 'text-parch' : 'text-parch/40')}>
-                  {m.name}
+                  {name}
                 </div>
                 <div
                   className={cn(
@@ -167,22 +147,22 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
                     enabled ? 'text-gold' : 'text-parch/30',
                   )}
                 >
-                  {m.subtitle}
+                  {sub}
                 </div>
               </div>
 
               <div className={cn('mt-1 text-[0.78rem] italic leading-snug sm:text-[0.85rem]', enabled ? 'opacity-90' : 'opacity-50')}>
-                {m.longDesc}
+                {t(`menu:mode.${m.id}Desc`)}
               </div>
 
               <div className="mt-auto pt-3">
                 {enabled ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/60 bg-black/30 px-3 py-1 font-pirate text-sm text-gold">
-                    <Anchor className="h-4 w-4" /> Set Sail
+                    <Anchor className="h-4 w-4" /> {t('common:setSail')}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-parch/15 bg-black/20 px-3 py-1 font-pirate text-sm text-parch/30">
-                    <Lock className="h-3.5 w-3.5" /> Locked
+                    <Lock className="h-3.5 w-3.5" /> {t('menu:mode.locked')}
                   </span>
                 )}
               </div>
@@ -190,7 +170,7 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
               {!enabled && (
                 <div className="pointer-events-none absolute inset-0 grid place-items-center rounded-[10px] bg-black/40 backdrop-blur-[0.5px]">
                   <span className="rotate-[-12deg] rounded-md border-2 border-parch/20 bg-black/70 px-3 py-1 font-pirate text-lg tracking-widest text-parch/40">
-                    COMING SOON
+                    {t('menu:mode.comingSoonBanner')}
                   </span>
                 </div>
               )}
@@ -205,15 +185,13 @@ export function ModeSelectScreen({ onSelect, isTouch }: Props) {
             <Gamepad2 className="h-5 w-5 text-gold" />
           </span>
           <div className="text-left">
-            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">Three ways to sail</div>
-            <div className="text-[0.7rem] italic opacity-75">
-              Adventure and Trade share one chart — the same coasts, the same ports.
-            </div>
+            <div className="font-pirate text-lg leading-none text-parch sm:text-xl">{t('menu:mode.footerTitle')}</div>
+            <div className="text-[0.7rem] italic opacity-75">{t('menu:mode.footerNote')}</div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[0.7rem] italic opacity-60">
           <Skull className="h-4 w-4" />
-          <span>Choose Arcade to continue to Sign On · Adventure and Trade set sail at once</span>
+          <span>{t('menu:mode.footerHint')}</span>
         </div>
       </div>
     </div>

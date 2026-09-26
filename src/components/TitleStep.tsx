@@ -1,4 +1,6 @@
 import { Anchor, Play, Sailboat, Skull, Trophy, Waves } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { fmt } from '../i18n';
 import type { ScoreEntry } from '../game/storage';
 
 interface Props {
@@ -13,6 +15,7 @@ interface Props {
  * single coin slot. One decision only — to play.
  */
 export function TitleStep({ hiScore, scores, isTouch, onStart }: Props) {
+  const { t } = useTranslation(['menu', 'common']);
   const legends = scores.slice(0, 3);
   return (
     <div className="relative grid h-full place-items-center overflow-y-auto no-scrollbar p-3 sm:p-6">
@@ -29,26 +32,26 @@ export function TitleStep({ hiScore, scores, isTouch, onStart }: Props) {
 
       <div className="anim-pop relative w-full max-w-3xl text-center">
         <div className="marquee-bulbs mx-auto max-w-md opacity-90" aria-hidden />
-        <div className="arcade-tag mt-2 text-[0.6rem] sm:text-xs">★ An arcade voyage in 26 eras ★</div>
+        <div className="arcade-tag mt-2 text-[0.6rem] sm:text-xs">{t('menu:title.tag')}</div>
 
-        <h1 className="title-gold anim-shimmer title-arcade mt-1">Broadside!</h1>
+        <h1 className="title-gold anim-shimmer title-arcade mt-1">{t('menu:brand')}</h1>
         <div className="mt-1 flex items-center justify-center gap-2 text-parch/90 sm:gap-3">
           <Skull className="h-4 w-4 sm:h-5 sm:w-5" />
           <span className="font-fell text-[0.65rem] uppercase italic tracking-[0.28em] sm:text-sm">
-            Scourge of the Spanish Main
+            {t('menu:tagline')}
           </span>
           <Skull className="h-4 w-4 sm:h-5 sm:w-5" />
         </div>
 
         <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5 text-[0.62rem] sm:text-xs">
           <span className="arcade-tag rounded-full border border-gold/40 bg-black/40 px-2.5 py-0.5">
-            26 eras
+            {t('menu:title.chipEras')}
           </span>
           <span className="arcade-tag rounded-full border border-gold/40 bg-black/40 px-2.5 py-0.5">
-            5 perils
+            {t('menu:title.chipPerils')}
           </span>
           <span className="arcade-tag rounded-full border border-gold/40 bg-black/40 px-2.5 py-0.5">
-            1 ship — yours
+            {t('menu:title.chipShip')}
           </span>
         </div>
 
@@ -57,7 +60,7 @@ export function TitleStep({ hiScore, scores, isTouch, onStart }: Props) {
           <div className="mt-2 flex items-center justify-center gap-2">
             <Trophy className="h-4 w-4 text-gold sm:h-5 sm:w-5" />
             <span className="arcade-tag text-sm sm:text-base">
-              Hi-Score {hiScore.toLocaleString('en-US')}
+              {t('common:hiScore', { score: fmt(hiScore) })}
             </span>
             <Trophy className="h-4 w-4 text-gold sm:h-5 sm:w-5" />
           </div>
@@ -72,37 +75,31 @@ export function TitleStep({ hiScore, scores, isTouch, onStart }: Props) {
                   <span className="font-pirate text-lg text-gold">{i + 1}</span>
                   <span className="truncate text-left font-pirate text-xl leading-tight">{s.name}</span>
                   <span className="font-pirate text-xl tabular-nums leading-tight text-gold">
-                    {s.score.toLocaleString('en-US')}
+                    {fmt(s.score)}
                   </span>
                 </li>
               ))}
             </ol>
           ) : (
-            <p className="mt-2 text-sm italic opacity-70">
-              No legends yet — the sea is waiting for its first.
-            </p>
+            <p className="mt-2 text-sm italic opacity-70">{t('menu:title.noLegends')}</p>
           )}
 
-          <div className="press-start arcade-tag mt-3 text-base sm:text-lg">★ Insert coin ★</div>
+          <div className="press-start arcade-tag mt-3 text-base sm:text-lg">{t('menu:title.insertCoin')}</div>
           <button
             type="button"
             onClick={onStart}
             className="btn-seal anim-pulse mt-2 inline-flex items-center gap-2 px-8 py-2.5 text-3xl sm:gap-3 sm:px-12 sm:text-4xl"
           >
             <Play className="h-7 w-7 sm:h-8 sm:w-8" />
-            Start Game
+            {t('menu:title.start')}
           </button>
           <p className="mt-2 text-[0.74rem] italic leading-snug opacity-80">
-            {isTouch
-              ? 'Tap START, pick Arcade mode, sign the book, your peril, era and hero ship — then sail.'
-              : 'Press Enter (or START) — then pick Arcade mode, sign on, peril, era and hero ship.'}
+            {isTouch ? t('menu:title.hintTouch') : t('menu:title.hintKeys')}
           </p>
           <div className="marquee-bulbs mt-2 opacity-70" aria-hidden />
         </div>
 
-        <p className="mt-2 text-[0.68rem] italic opacity-60">
-          New hand aboard? <b>Orders &amp; Legends</b> below has the controls.
-        </p>
+        <p className="mt-2 text-[0.68rem] italic opacity-60">{t('menu:newHandBelow')}</p>
       </div>
     </div>
   );

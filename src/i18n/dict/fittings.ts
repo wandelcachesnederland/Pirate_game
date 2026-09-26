@@ -1277,4 +1277,732 @@ const ja: FittingsDict = {
   },
 };
 
-export const fittings: Dict<FittingsDict> = { en, es, fr, de, nl, pt, ja };
+const zh: FittingsDict = {
+  lead: { ram: '艏', spikes: '舷', fenders: '卫' },
+  tag: { breach: ' · 击穿她', tangle: ' · 缠住她', fire: ' · 点燃她', shock: ' · 震慑其船员' },
+  eras: {
+    golden: {
+      ram: { name: '铁包艏柱', desc: '高速把铁包艏柱撞进敌船体' },
+      spikes: { name: '舷墙钩镰', desc: '凡擦舷而过者，钩住、耙伤、减速' },
+      fenders: { name: '旧缆碰垫与撑杆', desc: '旧缆碰垫和长撑杆挡开撞角与火船' },
+    },
+    exploration: {
+      ram: { name: '加固艏楼', desc: '以加固艏楼高速撞击船体' },
+      spikes: { name: '桁端镰钩', desc: '桁上镰刀割断擦舷者的帆缆' },
+      fenders: { name: '牛皮垫', desc: '填羊毛的牛皮垫挂舷吸冲击' },
+    },
+    napoleonic: {
+      ram: { name: '包铜艏柱与铁曲材', desc: '双层艏柱高速撞碎船板' },
+      spikes: { name: '防接舷网与长矛', desc: '舷墙网与矛林刺伤接舷者' },
+      fenders: { name: '缆绳碰垫与撑杆', desc: '碰垫与撑杆挡开他船' },
+    },
+    barbary: {
+      ram: { name: '包铜艏', desc: '纵帆船利艏，加固以撞炮艇' },
+      spikes: { name: '防接舷网与长矛', desc: '舷墙矛林对付海盗' },
+      fenders: { name: '吊床网', desc: '卷起吊床塞舷网，挡弹片' },
+    },
+    viking: {
+      ram: { name: '铁箍艏柱', desc: '高艏铁箍——骑上敌船压裂船板' },
+      spikes: { name: '盾墙矛林', desc: '盾间平端长矛，戳穿擦舷者' },
+      fenders: { name: '橡木护舷', desc: '厚橡木护舷替船板挨撞' },
+    },
+    ironclad: {
+      ram: { name: '铸铁撞角', desc: '弗吉尼亚号的招：水线下击穿' },
+      spikes: { name: '锅炉蒸汽管', desc: '通往舷墙的蒸汽烫接舷者——船员四散' },
+      fenders: { name: '铁轨裙甲', desc: '水线倾斜铁甲弹开撞角炮弹' },
+    },
+    hanse: {
+      ram: { name: '铁包柯克艏', desc: '柯克船重艏，包铁以撞' },
+      spikes: { name: '桁端镰刀', desc: '桁上刀片削断擦舷者帆缆' },
+      fenders: { name: '羊毛袋碰垫', desc: '英国羊毛袋挂舷——同盟自家货' },
+    },
+    portugal: {
+      ram: { name: '大克拉克艏', desc: '巨艏加固以撞独桅船' },
+      spikes: { name: '镰钩', desc: '钩刃撕裂擦舷者帆缆' },
+      fenders: { name: '棉包舷墙', desc: '印度棉包绑舷腰' },
+    },
+    armada: {
+      ram: { name: '大桨帆船铁喙', desc: '铁喙在护舷下击穿船板' },
+      spikes: { name: '带矛防接舷网', desc: '舷腰网矛刺伤接舷者' },
+      fenders: { name: '火船钩撑杆', desc: '撑杆挡开格拉沃利纳的火船' },
+    },
+    dutch: {
+      ram: { name: '橡木艏肘', desc: '双层橡木艏以撞俘获船' },
+      spikes: { name: '舷墙矛架', desc: '舷墙矛架戳接舷者' },
+      fenders: { name: '麻垫', desc: '厚编麻垫挂舷' },
+    },
+    predread: {
+      ram: { name: '撞角艏', desc: '1905 年每艘战列舰都有撞角——用它' },
+      spikes: { name: '防雷网撑杆', desc: '张开撑杆钢网缠住擦舷者' },
+      fenders: { name: '哈维钢装甲带', desc: '水线表面硬化装甲' },
+    },
+    ww1: {
+      ram: { name: '加强撞角艏', desc: '驱逐舰撞过 U 艇——艏为此而造' },
+      spikes: { name: '爆炸防雷具', desc: '艏拖曳炸弹触船爆炸——船员踉跄' },
+      fenders: { name: '防雷凸出部', desc: '外凸船体吸冲击爆炸' },
+    },
+    ww2: {
+      ram: { name: '加强撞击艏', desc: '学鲍里号战 U-405：骑上去压碎她' },
+      spikes: { name: '深弹导轨', desc: '抵近滚深弹——冲击震散其船员' },
+      fenders: { name: '破片垫', desc: '舰桥炮位覆破片垫' },
+    },
+    hormuz: {
+      ram: { name: '加强艏板', desc: '包板艏以撞快艇' },
+      spikes: { name: '触发水雷架', desc: '舷墙雷架触船爆炸' },
+      fenders: { name: '凯夫拉装甲板', desc: '舰桥水线覆复合板' },
+    },
+    falklands: {
+      ram: { name: '破冰加强艏', desc: '南大西洋艏，够硬能撞' },
+      spikes: { name: '干扰箔发射器', desc: '抵近箔条曳光晃瞎其船员' },
+      fenders: { name: '凯夫拉破片板', desc: '谢菲尔德号之后加装：要害覆破片甲' },
+    },
+    somali: {
+      ram: { name: '焊接钢艏板', desc: '母船艏焊废钢板——蹭上去接舷' },
+      spikes: { name: '钩梯', desc: '铝梯钩住其舷墙，缠住减速' },
+      fenders: { name: '卡车胎碰垫', desc: '旧胎链挂两舷挨蹭' },
+    },
+    roman: {
+      ram: { name: '青铜撞角', desc: '三鳍青铜撞角——水线下击穿' },
+      spikes: { name: '乌鸦吊桥', desc: '钉桥落其甲板钉住她' },
+      fenders: { name: '橡木护舷', desc: '水线重护舷挨撞' },
+    },
+    greek: {
+      ram: { name: '青铜撞角', desc: '萨拉米斯撞角：全桨速撞碎船体' },
+      spikes: { name: '艏斜撑梁', desc: '艏梁削断擦舷者船桨' },
+      fenders: { name: '环船束缆', desc: '束缆中弹时箍住船体' },
+    },
+    macedon: {
+      ram: { name: '大撞角与副喙', desc: '主撞角上再加一喙，对付重型多列桨船' },
+      spikes: { name: '铁手钩', desc: '链上铁手抓住擦舷者' },
+      fenders: { name: '双护舷与皮帘', desc: '双护舷，桨室覆皮' },
+    },
+    phoenicia: {
+      ram: { name: '青铜猪鼻撞角', desc: '推罗雪松战船的尖撞角' },
+      spikes: { name: '挂盾舷墙', desc: '盾与矛尖挂舷墙' },
+      fenders: { name: '雪松护舷', desc: '水线黎巴嫩雪松护舷' },
+    },
+    egypt: {
+      ram: { name: '狮头艏梁', desc: '麦迪内特哈布狮头艏，加固迎撞' },
+      spikes: { name: '长杆钩', desc: '长杆钩把袭击者拖住' },
+      fenders: { name: '纸莎草束舷墙', desc: '舷墙纸莎草束帘' },
+    },
+    byzantium: {
+      ram: { name: '撞角喙', desc: '战船撞角骑上敌船折断其桨' },
+      spikes: { name: '手喷火舷墙', desc: '舷墙手喷管向擦舷者喷火' },
+      fenders: { name: '醋泡毡', desc: '醋泡毡——防希腊火的老法' },
+    },
+    lepanto: {
+      ram: { name: '战船撞角', desc: '铁撞角骑其艏砸断船桨' },
+      spikes: { name: '盾墙长矛', desc: '大盾后长矛戳接舷者' },
+      fenders: { name: '网与垫', desc: '舷台覆防接舷网垫' },
+    },
+    ottoman: {
+      ram: { name: '卡迪尔加撞角', desc: '奥斯曼撞角折断基督徒桨船船桨' },
+      spikes: { name: '钩链', desc: '链钩锁住擦舷者' },
+      fenders: { name: '羊毛包盾墙', desc: '羊毛包绑舷墙后' },
+    },
+    arab: {
+      ram: { name: '柚木艏帽', desc: '柚木艏帽以撞海盗' },
+      spikes: { name: '火油罐架', desc: '舷墙陶火罐触船爆裂' },
+      fenders: { name: '椰绳碰垫', desc: '椰纤碰垫，如缝船之绳' },
+    },
+    chola: {
+      ram: { name: '铁包艏', desc: '科罗曼德大艏铁包' },
+      spikes: { name: '铁刺舷墙', desc: '舷墙铁刺对付小船' },
+      fenders: { name: '椰纤碰垫', desc: '两舷椰纤碰垫' },
+    },
+    chinese: {
+      ram: { name: '蒙冲撞角艏', desc: '水师蒙冲生皮覆艏' },
+      spikes: { name: '火枪架', desc: '舷墙火枪抵近喷火' },
+      fenders: { name: '生皮船帘', desc: '上层覆湿生皮' },
+    },
+    vietnam: {
+      ram: { name: '铁头桩艏', desc: '白藤桩装自家艏上' },
+      spikes: { name: '竹桩裙', desc: '水线削尖竹' },
+      fenders: { name: '竹束碰垫', desc: '捆扎青竹束' },
+    },
+    japanese: {
+      ram: { name: '铁甲艏', desc: '信长铁甲船：装甲艏以撞' },
+      spikes: { name: '熊手耙钩', desc: '熊爪耙拖擦舷者' },
+      fenders: { name: '竹束', desc: '竹束挡箭挡撞' },
+    },
+    korea: {
+      ram: { name: '龙头撞角', desc: '龙头——撞，并以硫磺烟呛其船员' },
+      spikes: { name: '龟甲铁刺', desc: '甲上铁刺撕擦舷者' },
+      fenders: { name: '六角铁甲', desc: '船体甲上覆铁板' },
+    },
+    maori: {
+      ram: { name: '雕刻船艏', desc: '雕像艏加固以撞战舟' },
+      spikes: { name: '泰阿哈矛墙', desc: '舷墙平端长矛' },
+      fenders: { name: '亚麻缆', desc: '哈拉凯克亚麻缆挨蹭' },
+    },
+    hawaii: {
+      ram: { name: '寇阿木艏', desc: '寇阿木艏楔入双体间' },
+      spikes: { name: '鲨牙舷墙', desc: '舷墙鲨牙刃' },
+      fenders: { name: '露兜垫', desc: '两舷覆编露兜垫' },
+    },
+    maya: {
+      ram: { name: '硬木艏', desc: '人心果木艏以撞独木舟' },
+      spikes: { name: '黑曜石刃舷', desc: '舷墙嵌黑曜石刃' },
+      fenders: { name: '绗缝棉帘', desc: '两舷挂绗缝棉甲' },
+    },
+    aztec: {
+      ram: { name: '柏木艏', desc: '落羽杉木艏加固以撞' },
+      spikes: { name: '黑曜石刃墙', desc: '舷墙嵌马夸维特刃' },
+      fenders: { name: '棉甲披帘', desc: '两舷披绗缝棉甲' },
+    },
+    inca: {
+      ram: { name: '硬木艏横木', desc: '重硬木横绑艏上' },
+      spikes: { name: '骨尖杆墙', desc: '筏缘立骨尖长杆' },
+      fenders: { name: '托托拉芦苇束', desc: '筏周绑托托拉芦苇束' },
+    },
+  },
+};
+
+const id: FittingsDict = {
+  lead: { ram: 'Haluan', spikes: 'Sisi', fenders: 'Jaga' },
+  tag: { breach: ' · melubanginya', tangle: ' · memperlambatnya', fire: ' · membakarnya', shock: ' · mengejutkan awaknya' },
+  eras: {
+    golden: {
+      ram: { name: 'Linggi Berlapis Besi', desc: 'Tancapkan linggi berlapis besi ke lambung dengan kecepatan' },
+      spikes: { name: 'Ganco di Rel', desc: 'Apa pun yang menyerempet sisi dikait, disayat, dan diperlambat' },
+      fenders: { name: 'Fender Junk & Galah Penahan', desc: 'Fender tali junk dan galah panjang menahan ram dan kapal api' },
+    },
+    exploration: {
+      ram: { name: 'Anjungan Depan Diperkuat', desc: 'Anjungan depan diperkuat yang menghantam lambung dengan kecepatan' },
+      spikes: { name: 'Kait Sabit di Layar', desc: 'Bilah sabit di layar memotong tali-temali siapa pun di samping' },
+      fenders: { name: 'Bantal Kulit Sapi', desc: 'Kulit berisi wol digantung di sisi menyerap pukulan' },
+    },
+    napoleonic: {
+      ram: { name: 'Linggi Tembaga & Lutut Besi', desc: 'Linggi ganda yang membobol papan dengan kecepatan' },
+      spikes: { name: 'Jaring Serbu & Tombak', desc: 'Jaring dan pagar tombak di rel melukai penyerbu' },
+      fenders: { name: 'Fender Tali & Boom', desc: 'Fender dan boom penahan menjauhkan lambung lain' },
+    },
+    barbary: {
+      ram: { name: 'Linggi Berlapis Tembaga', desc: 'Linggi tajam sekunar, diperkuat untuk mendobrak kapal meriam' },
+      spikes: { name: 'Jaring Serbu & Tombak', desc: 'Pagar tombak di rel untuk para korsair' },
+      fenders: { name: 'Jaring Hammock', desc: 'Hammock digulung di jaring rel menahan peluru dan serpihan' },
+    },
+    viking: {
+      ram: { name: 'Linggi Berikat Besi', desc: 'Sabuk besi di linggi tinggi — naik dan retakkan papan mereka' },
+      spikes: { name: 'Pagar Tombak di Rel Perisai', desc: 'Tombak diratakan di antara perisai menanduk siapa pun di samping' },
+      fenders: { name: 'Papan Gosok Oak', desc: 'Papan oak tebal menahan pukulan ganti papan lambung' },
+    },
+    ironclad: {
+      ram: { name: 'Haluan Ram Besi Cor', desc: 'Trik Virginia: lubangi dia di bawah garis air' },
+      spikes: { name: 'Selang Uap Ketel', desc: 'Uap hidup disalurkan ke rel menyiram penyerbu — awaknya berhamburan' },
+      fenders: { name: 'Rok Besi Rel', desc: 'Besi miring di atas garis air membelokkan ram dan peluru' },
+    },
+    hanse: {
+      ram: { name: 'Linggi Kog Berlapis Besi', desc: 'Linggi berat kog, dilapis untuk mendobrak' },
+      spikes: { name: 'Pedang Sabit Layar', desc: 'Bilah di layar memangkas tali-temali siapa pun di samping' },
+      fenders: { name: 'Fender Karung Wol', desc: 'Karung wol Inggris digantung di sisi — kargo Liga sendiri' },
+    },
+    portugal: {
+      ram: { name: 'Anjungan Karak', desc: 'Paruh besar diperkuat untuk menghantam dhow' },
+      spikes: { name: 'Kait Sabit', desc: 'Bilah berkait merobek tali-temali siapa pun di samping' },
+      fenders: { name: 'Benteng Bal Wol', desc: 'Bal kapas India diikat di sepanjang lambung' },
+    },
+    armada: {
+      ram: { name: 'Paruh Besi Galeas', desc: 'Taji besi galeas melubangi papan di bawah papan gosok' },
+      spikes: { name: 'Jaring Serbu Bertombak', desc: 'Jaring dan tombak di sepanjang lambung melukai penyerbu' },
+      fenders: { name: 'Boom Ganco Kapal Api', desc: 'Boom untuk menahan kapal api Gravelines' },
+    },
+    dutch: {
+      ram: { name: 'Lutut Linggi Oak', desc: 'Linggi oak ganda untuk menenggelamkan rampasan' },
+      spikes: { name: 'Rel Tombak Serbu', desc: 'Tombak dirak di sepanjang rel menanduk penyerbu' },
+      fenders: { name: 'Keset Fender Hemp', desc: 'Keset hemp tebal anyaman digantung di sisi' },
+    },
+    predread: {
+      ram: { name: 'Haluan Ram', desc: 'Tiap kapal tempur 1905 masih membawa ram — gunakan' },
+      spikes: { name: 'Boom Jaring Torpedo', desc: 'Boom terayun dan jaring baja menjerat siapa pun di samping' },
+      fenders: { name: 'Sabuk Baja Harvey', desc: 'Baja keras muka di sepanjang garis air' },
+    },
+    ww1: {
+      ram: { name: 'Haluan Ram Diperkuat', desc: 'Destroyer mendobrak U-boat — haluan dibangun untuk itu' },
+      spikes: { name: 'Paravane Peledak', desc: 'Muatan derek dari haluan meledak pada lambung — awak terhuyung' },
+      fenders: { name: 'Tonjolan Anti-Torpedo', desc: 'Lambung luar menonjol menyerap pukulan dan ledakan' },
+    },
+    ww2: {
+      ram: { name: 'Linggi Ram Diperkuat', desc: 'Seperti USS Borie lawan U-405: naik dan remukkan dia' },
+      spikes: { name: 'Rel Depth-Charge', desc: 'Muatan digulirkan jarak rapat — kejutannya mencerai-beraikan awaknya' },
+      fenders: { name: 'Kasur Serpihan', desc: 'Anyaman serpihan di atas anjungan dan dudukan' },
+    },
+    hormuz: {
+      ram: { name: 'Pelat Haluan Diperkuat', desc: 'Haluan berpelat untuk menenggelamkan perahu cepat' },
+      spikes: { name: 'Rak Ranjau Kontak', desc: 'Ranjau dirak di rel meledak pada lambung' },
+      fenders: { name: 'Panel Baja Kevlar', desc: 'Panel komposit di atas anjungan dan garis air' },
+    },
+    falklands: {
+      ram: { name: 'Haluan Diperkuat Es', desc: 'Haluan Atlantik Selatan, cukup kuat untuk mendobrak' },
+      spikes: { name: 'Peluncur Chaff Corvus', desc: 'Chaff dan suar jarak rapat membutakan awaknya' },
+      fenders: { name: 'Panel Serpihan Kevlar', desc: 'Ditambah setelah Sheffield: baja serpihan di atas bagian vital' },
+    },
+    somali: {
+      ram: { name: 'Pelat Haluan Baja Las', desc: 'Pelat bekas dilas ke haluan kapal induk — senggol dan serbu' },
+      spikes: { name: 'Tangga Kait', desc: 'Tangga aluminium dikaitkan ke relnya menjerat dan memperlambatnya' },
+      fenders: { name: 'Fender Ban Truk', desc: 'Ban bekas dirantai di sepanjang sisi menahan benturan' },
+    },
+    roman: {
+      ram: { name: 'Rostrum Perunggu', desc: 'Ram perunggu tiga sirip — lubangi dia di bawah garis air' },
+      spikes: { name: 'Jembatan Serbu Corvus', desc: 'Jembatan berduri jatuh ke deknya dan menjepitnya' },
+      fenders: { name: 'Papan Oak', desc: 'Papan berat di garis air menahan dobrakan' },
+    },
+    greek: {
+      ram: { name: 'Embolon Perunggu', desc: 'Ram Salamis: dengan dayungan penuh ia membobol lambung' },
+      spikes: { name: 'Balok Epotides', desc: 'Balok dari haluan menyabit dayung siapa pun di samping' },
+      fenders: { name: 'Kabel Hypozomata', desc: 'Kabel pengikat lambung menahannya saat kena' },
+    },
+    macedon: {
+      ram: { name: 'Ram Besar & Proembolion', desc: 'Ram utama dengan satu lagi di atasnya untuk polyreme berat' },
+      spikes: { name: 'Ganco Tangan Besi', desc: 'Tangan besi pada rantai mencengkeram siapa pun di samping' },
+      fenders: { name: 'Papan Ganda & Layar Kulit', desc: 'Papan ganda dan kulit di atas kotak dayung' },
+    },
+    phoenicia: {
+      ram: { name: 'Ram Moncong Babi Perunggu', desc: 'Ram runcing galai cedar Tirus' },
+      spikes: { name: 'Rel Gantungan Perisai', desc: 'Perisai dan mata tombak digantung di rel' },
+      fenders: { name: 'Papan Cedar', desc: 'Papan cedar Lebanon di garis air' },
+    },
+    egypt: {
+      ram: { name: 'Balok Haluan Kepala Singa', desc: 'Haluan berkepala singa Medinet Habu, diperkuat untuk benturan' },
+      spikes: { name: 'Kait Galah', desc: 'Kait pada galah menyeret perampok ke samping dan menahannya' },
+      fenders: { name: 'Benteng Bundel Papirus', desc: 'Layar papirus terbundel di sepanjang rel' },
+    },
+    byzantium: {
+      ram: { name: 'Paruh Taji', desc: 'Taji dromon menunggang dan mematahkan dayungnya' },
+      spikes: { name: 'Rel Api Sifon Tangan', desc: 'Sifon tangan di rel menyemprotkan api ke siapa pun di samping' },
+      fenders: { name: 'Felt Rendaman Cuka', desc: 'Felt direndam cuka — pertahanan lama melawan api Yunani' },
+    },
+    lepanto: {
+      ram: { name: 'Taji Galai (Sperone)', desc: 'Taji besi menunggangi haluannya dan menghancurkan dayungnya' },
+      spikes: { name: 'Pavesade & Tombak Serbu', desc: 'Tombak di balik pavise menanduk penyerbu' },
+      fenders: { name: 'Jaring & Kasur', desc: 'Jaring serbu dan kasur di atas rambade' },
+    },
+    ottoman: {
+      ram: { name: 'Taji Kadırga', desc: 'Taji Ottoman mematahkan dayung galai Kristen' },
+      spikes: { name: 'Rantai Ganco', desc: 'Ganco pada rantai mengunci siapa pun di samping' },
+      fenders: { name: 'Pavisade Bal Wol', desc: 'Bal wol diikat di balik rel' },
+    },
+    arab: {
+      ram: { name: 'Tudung Linggi Jati', desc: 'Linggi jati bertudung untuk menenggelamkan bajak laut' },
+      spikes: { name: 'Rak Panci Nafta', desc: 'Panci api tanah liat dirak di rel pecah pada lambung' },
+      fenders: { name: 'Fender Tali Sabut', desc: 'Fender sabut kelapa, seperti tali yang menjahit lambung' },
+    },
+    chola: {
+      ram: { name: 'Linggi Bertudung Besi', desc: 'Tudung besi pada linggi besar Coromandel' },
+      spikes: { name: 'Rel Duri Besi', desc: 'Duri besi di sepanjang rel untuk prahu' },
+      fenders: { name: 'Fender Sabut', desc: 'Fender sabut kelapa di sepanjang sisi' },
+    },
+    chinese: {
+      ram: { name: 'Haluan Ram Mengchong', desc: 'Haluan kapal pendobrak berlapis kulit mentah armada sungai' },
+      spikes: { name: 'Rak Tombak Api', desc: 'Tombak api dirak di rel menyemburkan api jarak rapat' },
+      fenders: { name: 'Layar Kulit Mentah', desc: 'Kulit mentah basah di atas bangunan atas' },
+    },
+    vietnam: {
+      ram: { name: 'Haluan Pancang Berujung Besi', desc: 'Pancang Bạch Đằng, dipasang ke haluanmu sendiri' },
+      spikes: { name: 'Rok Pancang Bambu', desc: 'Bambu runcing di sepanjang garis air' },
+      fenders: { name: 'Fender Bundel Bambu', desc: 'Bundelan bambu hijau yang diikat' },
+    },
+    japanese: {
+      ram: { name: 'Haluan Berlapis Besi', desc: 'Kapal besi Nobunaga: haluan berzirah untuk mendobrak' },
+      spikes: { name: 'Kait Garu Kumade', desc: 'Garu cakar beruang menyeret siapa pun di samping' },
+      fenders: { name: 'Bundel Bambu Takeba', desc: 'Bundel bambu yang menahan panah dan pukulan' },
+    },
+    korea: {
+      ram: { name: 'Ram Kepala Naga', desc: 'Kepala naga — dobrak, dan cekik awaknya dengan asap belerang' },
+      spikes: { name: 'Atap Duri Besi Kura-kura', desc: 'Duri besi di atas atap merobek siapa pun yang datang' },
+      fenders: { name: 'Baja Lapis Segi Enam', desc: 'Pelat besi di atas lambung dan atap' },
+    },
+    maori: {
+      ram: { name: 'Haluan Ukir Tauihu', desc: 'Patung haluan ukiran, diperkuat untuk menghantam waka' },
+      spikes: { name: 'Rel Tombak Taiaha', desc: 'Tombak diratakan di sepanjang rel' },
+      fenders: { name: 'Ikatan Tali Rami', desc: 'Ikatan rami harakeke menahan benturan' },
+    },
+    hawaii: {
+      ram: { name: 'Haluan Koa', desc: 'Haluan kayu koa untuk menghantam antara lambung' },
+      spikes: { name: 'Rel Gigi Hiu', desc: 'Bilah gigi hiu leiomano di sepanjang rel' },
+      fenders: { name: 'Fender Keset Hala', desc: 'Keset pandan anyaman di atas sisi' },
+    },
+    maya: {
+      ram: { name: 'Haluan Kayu Keras', desc: 'Haluan chicozapote untuk mendobrak kano' },
+      spikes: { name: 'Rel Tepi Obsidian', desc: 'Bilah obsidian dipasang di rel' },
+      fenders: { name: 'Layar Kapas Quilt', desc: 'Baja kapas quilt digantung di sisi' },
+    },
+    aztec: {
+      ram: { name: 'Haluan Cemara', desc: 'Haluan kayu ahuehuete diperkuat untuk mendobrak' },
+      spikes: { name: 'Rel Bilah Obsidian', desc: 'Bilah macuahuitl dipasang di rel' },
+      fenders: { name: 'Mantel Ichcahuipilli', desc: 'Baja kapas quilt disampirkan di sisi' },
+    },
+    inca: {
+      ram: { name: 'Gelondong Haluan Kayu Keras', desc: 'Gelondong kayu keras berat diikat melintang di haluan' },
+      spikes: { name: 'Pagar Galah Ujung Tulang', desc: 'Galah berujung tulang di sepanjang tepi rakit' },
+      fenders: { name: 'Bundel Gelagah Totora', desc: 'Bundelan gelagah totora diikat mengelilingi rakit' },
+    },
+  },
+};
+
+const th: FittingsDict = {
+  lead: { ram: 'หัว', spikes: 'ข้าง', fenders: 'กัน' },
+  tag: { breach: ' · เจาะเธอ', tangle: ' · ทำให้เธอช้า', fire: ' · จุดไฟเธอ', shock: ' · ช็อกลูกเรือเธอ' },
+  eras: {
+    golden: {
+      ram: { name: 'หัวเรือหุ้มเหล็ก', desc: 'ขับหัวหุ้มเหล็กเข้าตัวเรือด้วยความเร็ว' },
+      spikes: { name: 'ตะขอที่ราว', desc: 'อะไรขูดข้างโดนเกี่ยว คราด และช้า' },
+      fenders: { name: 'ยางเชือกเก่า & ไม้ถ่อ', desc: 'ยางเชือกเก่าและไม้ถ่อยาวกันหัวชนและเรือไฟ' },
+    },
+    exploration: {
+      ram: { name: 'หัวเรือเสริม', desc: 'หัวเรือเสริมพุ่งชนตัวเรือด้วยความเร็ว' },
+      spikes: { name: 'เคียวที่คันใบ', desc: 'ใบเคียวบนคันตัดใบเรือคนข้างๆ' },
+      fenders: { name: 'หมอนหนังวัว', desc: 'หนังยัดขนแกะแขวนข้างซับแรง' },
+    },
+    napoleonic: {
+      ram: { name: 'หัวเรือทองแดง & เข่าเหล็ก', desc: 'หัวเรือสองชั้นพุ่งทะลุแผ่นด้วยความเร็ว' },
+      spikes: { name: 'ตาข่ายกันยึด & หอก', desc: 'ตาข่ายและแนหอกที่ราวทำร้ายผู้ยึด' },
+      fenders: { name: 'ยางเชือก & บูม', desc: 'ยางและบูมกันตัวเรืออื่น' },
+    },
+    barbary: {
+      ram: { name: 'หัวเรือหุ้มทองแดง', desc: 'หัวแหลมสกูนเนอร์ เสริมเพื่อชนเรือปืน' },
+      spikes: { name: 'ตาข่ายกันยึด & หอก', desc: 'แนวหอกที่ราวสำหรับโจร' },
+      fenders: { name: 'ตาข่ายเปล', desc: 'เปลม้วนในตาข่ายราวกันกระสุนและสะเก็ด' },
+    },
+    viking: {
+      ram: { name: 'หัวเรือรัดเหล็ก', desc: 'แถบเหล็กบนหัวสูง — ขี่ขึ้นแล้วร้าวแผ่นเขา' },
+      spikes: { name: 'แนวหอกที่ราวโล่', desc: 'หอกระดับระหว่างโล่แทงคนข้างๆ' },
+      fenders: { name: 'แผ่นกันโอ๊ค', desc: 'แผ่นโอ๊คหนารับแรงแทนแผ่นเรือ' },
+    },
+    ironclad: {
+      ram: { name: 'หัวชนเหล็กหล่อ', desc: 'ทีเด็ดเวอร์จิเนีย: เจาะเธอใต้แนวน้ำ' },
+      spikes: { name: 'ท่อไอน้ำหม้อต้ม', desc: 'ไอน้ำสดท่อสู่ราวลวกผู้ยึด — ลูกเรือแตกกระเจิง' },
+      fenders: { name: 'กระโปรงเหล็กราง', desc: 'เหล็กเอียงเหนือแนวน้ำเบี่ยงหัวชนและกระสุน' },
+    },
+    hanse: {
+      ram: { name: 'หัวค็อกก์หุ้มเหล็ก', desc: 'หัวหนักค็อกก์ หุ้มเพื่อชน' },
+      spikes: { name: 'ใบเคียวคันใบ', desc: 'ใบมีดบนคันเฉือนใบเรือคนข้างๆ' },
+      fenders: { name: 'ยางกระสอบขนแกะ', desc: 'กระสอบขนแกะอังกฤษแขวนข้าง — สินค้าลีกเอง' },
+    },
+    portugal: {
+      ram: { name: 'หัวคาร์แร็ก', desc: 'จงอยใหญ่เสริมเพื่อชนโดว์' },
+      spikes: { name: 'ตะขอเคียว', desc: 'ใบเกี่ยวฉีกใบเรือคนข้างๆ' },
+      fenders: { name: 'กำแพงก้อนฝ้าย', desc: 'ก้อนฝ้ายอินเดียมัดเอวเรือ' },
+    },
+    armada: {
+      ram: { name: 'จงอยเหล็กแกลลีอัส', desc: 'เดือยเหล็กแกลลีอัสเจาะแผ่นใต้แผ่นกัน' },
+      spikes: { name: 'ตาข่ายยึดติดหอก', desc: 'ตาข่ายและหอกเอวเรือทำร้ายผู้ยึด' },
+      fenders: { name: 'บูมตะขอเรือไฟ', desc: 'บูมกันเรือไฟกราฟลีน' },
+    },
+    dutch: {
+      ram: { name: 'เข่าหัวโอ๊ค', desc: 'หัวโอ๊คสองชั้นเพื่อชนรางวัล' },
+      spikes: { name: 'ราวหอกยึด', desc: 'หอกวางราวแทงผู้ยึด' },
+      fenders: { name: 'เสื่อยางป่าน', desc: 'เสื่อป่านหนาทอแขวนข้าง' },
+    },
+    predread: {
+      ram: { name: 'หัวชน', desc: 'เรือประจัญบาน 1905 ทุกลำยังมีหัวชน — ใช้มัน' },
+      spikes: { name: 'บูมตาข่ายตอร์ปิโด', desc: 'บูมกางและตาข่ายเหล็กพันคนข้างๆ' },
+      fenders: { name: 'แถบเหล็กฮาร์วีย์', desc: 'เหล็กแข็งผิวแนวน้ำ' },
+    },
+    ww1: {
+      ram: { name: 'หัวชนเสริม', desc: 'เรือพิฆาตชนอูโบ๊ต — หัวสร้างมาเพื่อสิ่งนี้' },
+      spikes: { name: 'พาราเวนระเบิด', desc: 'ระเบิดลากจากหัวระเบิดใส่ตัวเรือ — ลูกเรือเซ' },
+      fenders: { name: 'ตุ่มกันตอร์ปิโด', desc: 'ตัวเรือนอกป่องซับแรงและระเบิด' },
+    },
+    ww2: {
+      ram: { name: 'หัวชนเสริม', desc: 'อย่าง USS Borie กับ U-405: ขี่ขึ้นแล้วบดเธอ' },
+      spikes: { name: 'รางระเบิดลึก', desc: 'ระเบิดกลิ้งระยะประชิด — แรงช็อกกระจายลูกเรือเธอ' },
+      fenders: { name: 'ที่นอนสะเก็ด', desc: 'เสื่อสะเก็ดคลุมสะพานและป้อม' },
+    },
+    hormuz: {
+      ram: { name: 'แผ่นหัวเสริม', desc: 'หัวหุ้มแผ่นเพื่อชนเรือเร็ว' },
+      spikes: { name: 'ชั้นทุ่นสัมผัส', desc: 'ทุ่นวางราวระเบิดใส่ตัวเรือ' },
+      fenders: { name: 'แผ่นเกราะเคฟลาร์', desc: 'แผ่นคอมโพสิตคลุมสะพานและแนวน้ำ' },
+    },
+    falklands: {
+      ram: { name: 'หัวเสริมน้ำแข็ง', desc: 'หัวแอตแลนติกใต้ แข็งพอชน' },
+      spikes: { name: 'เครื่องยิงแกลบคอร์วัส', desc: 'แกลบและพลุประชิดบังตาลูกเรือเธอ' },
+      fenders: { name: 'แผ่นสะเก็ดเคฟลาร์', desc: 'เพิ่มหลังเชฟฟิลด์: เกราะสะเก็ดคลุมจุดสำคัญ' },
+    },
+    somali: {
+      ram: { name: 'แผ่นหัวเหล็กเชื่อม', desc: 'แผ่นเศษเชื่อมที่หัวเรือแม่ — เบียดแล้วยึด' },
+      spikes: { name: 'บันไดตะขอ', desc: 'บันไดอลูมิเนียมเกี่ยวราวเธอพันและช้า' },
+      fenders: { name: 'ยางยางรถบรรทุก', desc: 'ยางเก่าโซ่ข้างรับแรง' },
+    },
+    roman: {
+      ram: { name: 'หัวชนทองสัมฤทธิ์', desc: 'หัวชนทองสัมฤทธิ์สามครีบ — เจาะเธอใต้แนวน้ำ' },
+      spikes: { name: 'สะพานยึดคอร์วุส', desc: 'สะพานหนามหล่นดาดฟ้าเธอและตรึง' },
+      fenders: { name: 'แผ่นโอ๊ค', desc: 'แผ่นหนักแนวน้ำรับการชน' },
+    },
+    greek: {
+      ram: { name: 'หัวชนทองสัมฤทธิ์', desc: 'หัวชนซาลามิส: เต็มฝีพายทะลุตัวเรือ' },
+      spikes: { name: 'คานเอโพไทดีส', desc: 'คานจากหัวเกี่ยวพายคนข้างๆ' },
+      fenders: { name: 'เคเบิลไฮโพโซมาตา', desc: 'เคเบิลรัดตัวเรือยึดเธอเมื่อโดน' },
+    },
+    macedon: {
+      ram: { name: 'หัวชนใหญ่ & โปรเอมโบเลียน', desc: 'หัวชนหลักกับอีกอันบนสำหรับโพลีรีมหนัก' },
+      spikes: { name: 'ตะขอมือเหล็ก', desc: 'มือเหล็กบนโซ่คว้าคนข้างๆ' },
+      fenders: { name: 'แผ่นคู่ & ม่านหนัง', desc: 'แผ่นคู่และหนังคลุมห้องพาย' },
+    },
+    phoenicia: {
+      ram: { name: 'หัวชนจมูกหมูทองสัมฤทธิ์', desc: 'หัวชนแหลมแกลลีย์ซีดาร์ไทร์' },
+      spikes: { name: 'ราวแขวนโล่', desc: 'โล่และปลายหอกแขวนที่ราว' },
+      fenders: { name: 'แผ่นซีดาร์', desc: 'แผ่นซีดาร์เลบานอนแนวน้ำ' },
+    },
+    egypt: {
+      ram: { name: 'คานหัวสิงห์', desc: 'หัวสิงห์เมดิเนตฮาบู เสริมรับแรง' },
+      spikes: { name: 'ตะขอเสา', desc: 'ตะขอบนเสาลากโจรเข้าข้างและยึด' },
+      fenders: { name: 'กำแพงมัดปาปิรุส', desc: 'ม่านปาปิรุสมัดที่ราว' },
+    },
+    byzantium: {
+      ram: { name: 'จงอยเดือย', desc: 'เดือยโดรโมนขี่ขึ้นหักพายเธอ' },
+      spikes: { name: 'ราวไฟไซฟอนมือ', desc: 'ไซฟอนมือที่ราวพ่นไฟใส่คนข้างๆ' },
+      fenders: { name: 'สักหลาดแช่น้ำส้ม', desc: 'สักหลาดแช่น้ำส้ม — กันกรีกไฟแบบเก่า' },
+    },
+    lepanto: {
+      ram: { name: 'เดือยแกลลีย์ (สเปโรเน)', desc: 'เดือยเหล็กขี่หัวเธอทุบพาย' },
+      spikes: { name: 'ปาเวซาด & หอกยึด', desc: 'หอกหลังโล่แทงผู้ยึด' },
+      fenders: { name: 'ตาข่าย & ที่นอน', desc: 'ตาข่ายยึดและที่นอนคลุมแรมเบด' },
+    },
+    ottoman: {
+      ram: { name: 'เดือยกาดีร์กา', desc: 'เดือยออตโตมันหักพายแกลลีย์คริสเตียน' },
+      spikes: { name: 'โซ่ตะขอ', desc: 'ตะขอบนโซ่ล็อกคนข้างๆ' },
+      fenders: { name: 'กำแพงก้อนขนแกะ', desc: 'ก้อนขนแกะมัดหลังราว' },
+    },
+    arab: {
+      ram: { name: 'ฝาหัวไม้สัก', desc: 'หัวไม้สักมีฝาเพื่อชนโจร' },
+      spikes: { name: 'ชั้นหม้อแนฟทา', desc: 'หม้อไฟดินวางราวแตกใส่ตัวเรือ' },
+      fenders: { name: 'ยางเชือกมะพร้าว', desc: 'ยางใยมะพร้าว เหมือนเชือกเย็บเรือ' },
+    },
+    chola: {
+      ram: { name: 'หัวหุ้มเหล็ก', desc: 'ฝาเหล็กบนหัวใหญ่โคโรมันเดล' },
+      spikes: { name: 'ราวหนามเหล็ก', desc: 'หนามเหล็กที่ราวสำหรับปราว' },
+      fenders: { name: 'ยางใยมะพร้าว', desc: 'ยางใยมะพร้าวข้างเรือ' },
+    },
+    chinese: {
+      ram: { name: 'หัวชนเหมิงชง', desc: 'หัวเรือชนหุ้มหนังดิบของกองเรือแม่น้ำ' },
+      spikes: { name: 'ชั้นหอกไฟ', desc: 'หอกไฟวางราวพ่นไฟประชิด' },
+      fenders: { name: 'ม่านหนังดิบ', desc: 'หนังดิบเปียกคลุมส่วนบน' },
+    },
+    vietnam: {
+      ram: { name: 'หัวหลักปลายเหล็ก', desc: 'หลักบักดั่ง ติดที่หัวตัวเอง' },
+      spikes: { name: 'กระโปรงหลักไม้ไผ่', desc: 'ไม้ไผ่เหลาแนวน้ำ' },
+      fenders: { name: 'ยางมัดไม้ไผ่', desc: 'มัดไม้ไผ่เขียวมัด' },
+    },
+    japanese: {
+      ram: { name: 'หัวหุ้มเหล็ก', desc: 'เรือเหล็กโนบุนากะ: หัวเกราะเพื่อชน' },
+      spikes: { name: 'ตะขอคราดคุมาเดะ', desc: 'คราดกรงเล็บหมีลากคนข้างๆ' },
+      fenders: { name: 'มัดไม้ไผ่ทาเกบะ', desc: 'มัดไม้ไผ่กันธนูและแรง' },
+    },
+    korea: {
+      ram: { name: 'หัวชนหัวมังกร', desc: 'หัวมังกร — ชน และสำลักลูกเรือเธอด้วยควันกำมะถัน' },
+      spikes: { name: 'หลังคาหนามเหล็กเต่า', desc: 'หนามเหล็กบนหลังคาฉีกคนเข้าใกล้' },
+      fenders: { name: 'เกราะแผ่นหกเหลี่ยม', desc: 'แผ่นเหล็กคลุมตัวเรือและหลังคา' },
+    },
+    maori: {
+      ram: { name: 'หัวแกะเตาอิฮู', desc: 'หัวแกะสลัก เสริมเพื่อชนวากา' },
+      spikes: { name: 'ราวหอกไทอาฮา', desc: 'หอกระดับที่ราว' },
+      fenders: { name: 'เชือกป่าน', desc: 'เชือกป่านฮาราเกเกรับแรง' },
+    },
+    hawaii: {
+      ram: { name: 'หัวโคอา', desc: 'หัวไม้โคอาเพื่อชนระหว่างตัวเรือ' },
+      spikes: { name: 'ราวฟันฉลาม', desc: 'ใบฟันฉลามเลโอมาโนที่ราว' },
+      fenders: { name: 'ยางเสื่อฮาลา', desc: 'เสื่อเตยถักคลุมข้าง' },
+    },
+    maya: {
+      ram: { name: 'หัวไม้เนื้อแข็ง', desc: 'หัวชิโกซาโพเตเพื่อชนแคนู' },
+      spikes: { name: 'ราวคมออบซิเดียน', desc: 'ใบออบซิเดียนติดที่ราว' },
+      fenders: { name: 'ม่านฝ้ายควิลต์', desc: 'เกราะฝ้ายควิลต์แขวนข้าง' },
+    },
+    aztec: {
+      ram: { name: 'หัวไซเปรส', desc: 'หัวไม้อาฮูอาฮูเอเตเสริมเพื่อชน' },
+      spikes: { name: 'ราวใบออบซิเดียน', desc: 'ใบมากัวฮูอิตล์ติดที่ราว' },
+      fenders: { name: 'ผ้าคลุมอิชกาวีปิลลี', desc: 'เกราะฝ้ายควิลต์พาดข้าง' },
+    },
+    inca: {
+      ram: { name: 'ท่อนหัวไม้เนื้อแข็ง', desc: 'ท่อนไม้เนื้อแข็งหนักมัดขวางที่หัว' },
+      spikes: { name: 'รั้วเสาปลายกระดูก', desc: 'เสาปลายกระดูกขอบแพ' },
+      fenders: { name: 'มัดกกโตโตรา', desc: 'มัดกกโตโตรามัดรอบแพ' },
+    },
+  },
+};
+
+const vi: FittingsDict = {
+  lead: { ram: 'Mũi', spikes: 'Mạn', fenders: 'Chắn' },
+  tag: { breach: ' · chọc thủng nàng', tangle: ' · làm chậm nàng', fire: ' · đốt cháy nàng', shock: ' · choáng thủy thủ nàng' },
+  eras: {
+    golden: {
+      ram: { name: 'Trụ Mũi Bọc Sắt', desc: 'Lao trụ mũi bọc sắt vào thân địch tốc độ cao' },
+      spikes: { name: 'Móc Neo Ở Lan Can', desc: 'Thứ gì cạ mạn đều bị móc, cào, chậm lại' },
+      fenders: { name: 'Đệm Thừng Cũ & Sào Chống', desc: 'Đệm thừng cũ và sào dài chặn mũi đâm và tàu lửa' },
+    },
+    exploration: {
+      ram: { name: 'Mỏ Tàu Gia Cố', desc: 'Mỏ tàu gia cố đâm thân tàu tốc độ cao' },
+      spikes: { name: 'Lưỡi Hái Ở Sào Buồm', desc: 'Lưỡi hái trên sào cắt dây buồm kẻ cặp mạn' },
+      fenders: { name: 'Đệm Da Bò', desc: 'Da nhồi len treo mạn hút xung kích' },
+    },
+    napoleonic: {
+      ram: { name: 'Trụ Mũi Đồng & Gối Sắt', desc: 'Trụ mũi kép đâm vỡ ván tốc độ cao' },
+      spikes: { name: 'Lưới Chống Xung Kích & Giáo', desc: 'Lưới và hàng giáo ở lan can đả thương quân xung kích' },
+      fenders: { name: 'Đệm Thừng & Sào', desc: 'Đệm và sào chống đẩy thân khác ra' },
+    },
+    barbary: {
+      ram: { name: 'Mũi Bọc Đồng', desc: 'Mũi nhọn schooner, gia cố để đâm tàu pháo' },
+      spikes: { name: 'Lưới Chống Xung Kích & Giáo', desc: 'Hàng giáo ở lan can dành cho cướp biển' },
+      fenders: { name: 'Lưới Võng', desc: 'Võng cuộn trong lưới lan can chặn đạn và mảnh' },
+    },
+    viking: {
+      ram: { name: 'Trụ Mũi Đai Sắt', desc: 'Đai sắt trên trụ cao — cưỡi lên nứt ván địch' },
+      spikes: { name: 'Hàng Giáo Ở Lan Can Khiên', desc: 'Giáo ngang giữa các khiên đâm kẻ cặp mạn' },
+      fenders: { name: 'Nẹp Gỗ Sồi', desc: 'Nẹp sồi dày chịu đòn thay ván thân' },
+    },
+    ironclad: {
+      ram: { name: 'Mũi Đâm Gang Đúc', desc: 'Chiêu của Virginia: chọc thủng dưới mớn nước' },
+      spikes: { name: 'Ống Hơi Nồi Hơi', desc: 'Hơi sống dẫn ra lan can luộc quân xung kích — thủy thủ tán loạn' },
+      fenders: { name: 'Váy Sắt Ray', desc: 'Sắt nghiêng trên mớn nước đỡ mũi đâm và đạn' },
+    },
+    hanse: {
+      ram: { name: 'Mũi Cog Bọc Sắt', desc: 'Mũi nặng của cog, bọc để đâm' },
+      spikes: { name: 'Lưỡi Hái Sào Buồm', desc: 'Lưỡi trên sào phạt dây buồm kẻ cặp mạn' },
+      fenders: { name: 'Đệm Bao Len', desc: 'Bao len Anh treo mạn — hàng của Liên minh' },
+    },
+    portugal: {
+      ram: { name: 'Mỏ Carrack', desc: 'Mỏ lớn gia cố để đâm dhow' },
+      spikes: { name: 'Móc Hái', desc: 'Lưỡi móc xé dây buồm kẻ cặp mạn' },
+      fenders: { name: 'Tường Kiện Bông', desc: 'Kiện bông Ấn Độ buộc dọc mạn' },
+    },
+    armada: {
+      ram: { name: 'Mỏ Sắt Galeas', desc: 'Cựa sắt galeas chọc ván dưới nẹp' },
+      spikes: { name: 'Lưới Xung Kích Gắn Giáo', desc: 'Lưới và giáo dọc mạn đả thương quân xung kích' },
+      fenders: { name: 'Sào Móc Chống Tàu Lửa', desc: 'Sào chống tàu lửa Gravelines' },
+    },
+    dutch: {
+      ram: { name: 'Gối Mũi Sồi', desc: 'Trụ sồi kép để đâm tàu mồi' },
+      spikes: { name: 'Giá Giáo Lan Can', desc: 'Giáo xếp dọc lan can đâm quân xung kích' },
+      fenders: { name: 'Chiếu Đệm Gai', desc: 'Chiếu gai dày đan treo mạn' },
+    },
+    predread: {
+      ram: { name: 'Mũi Đâm', desc: 'Mọi thiết giáp hạm 1905 đều còn mũi đâm — dùng đi' },
+      spikes: { name: 'Sào Lưới Chống Ngư Lôi', desc: 'Sào giương và lưới thép vướng kẻ cặp mạn' },
+      fenders: { name: 'Đai Thép Harvey', desc: 'Thép cứng mặt dọc mớn nước' },
+    },
+    ww1: {
+      ram: { name: 'Mũi Đâm Gia Cố', desc: 'Khu trục hạm từng đâm U-boat — mũi đóng để làm việc ấy' },
+      spikes: { name: 'Phao Phá Lôi Nổ', desc: 'Thuốc nổ kéo từ mũi nổ vào thân — thủy thủ choáng váng' },
+      fenders: { name: 'Bướu Chống Ngư Lôi', desc: 'Thân ngoài phồng hút xung kích và nổ' },
+    },
+    ww2: {
+      ram: { name: 'Trụ Đâm Gia Cố', desc: 'Như USS Borie đấu U-405: cưỡi lên nghiền nát nàng' },
+      spikes: { name: 'Ray Bom Chìm', desc: 'Bom lăn cự ly gần — chấn động tán thủy thủ nàng' },
+      fenders: { name: 'Đệm Chống Mảnh', desc: 'Chiếu chống mảnh phủ buồng lái và bệ pháo' },
+    },
+    hormuz: {
+      ram: { name: 'Tôn Mũi Gia Cố', desc: 'Mũi bọc tôn để đâm xuồng nhanh' },
+      spikes: { name: 'Giá Lôi Chạm Nổ', desc: 'Lôi xếp lan can nổ vào thân' },
+      fenders: { name: 'Tấm Giáp Kevlar', desc: 'Tấm composite phủ buồng lái và mớn nước' },
+    },
+    falklands: {
+      ram: { name: 'Mũi Gia Cố Băng', desc: 'Mũi Nam Đại Tây Dương, đủ cứng để đâm' },
+      spikes: { name: 'Máy Phóng Chaff Corvus', desc: 'Chaff và pháo sáng cự ly gần làm mù thủy thủ nàng' },
+      fenders: { name: 'Tấm Chống Mảnh Kevlar', desc: 'Thêm sau Sheffield: giáp chống mảnh phủ chỗ hiểm' },
+    },
+    somali: {
+      ram: { name: 'Tôn Mũi Thép Hàn', desc: 'Tôn phế hàn vào mũi tàu mẹ — cạ rồi xung kích' },
+      spikes: { name: 'Thang Móc', desc: 'Thang nhôm móc lan can nàng vướng và chậm' },
+      fenders: { name: 'Đệm Lốp Xe Tải', desc: 'Lốp cũ xích dọc mạn chịu va' },
+    },
+    roman: {
+      ram: { name: 'Mũi Đâm Đồng', desc: 'Mũi đồng ba vây — chọc thủng dưới mớn nước' },
+      spikes: { name: 'Cầu Xung Kích Corvus', desc: 'Cầu đinh sập boong nàng ghim chặt' },
+      fenders: { name: 'Nẹp Sồi', desc: 'Nẹp nặng mớn nước chịu đâm' },
+    },
+    greek: {
+      ram: { name: 'Mũi Đâm Đồng', desc: 'Mũi Salamis: hết tay chèo đâm vỡ thân' },
+      spikes: { name: 'Dầm Epotides', desc: 'Dầm từ mũi phạt chèo kẻ cặp mạn' },
+      fenders: { name: 'Cáp Đai Hypozomata', desc: 'Cáp đai thân giữ nàng khi trúng đạn' },
+    },
+    macedon: {
+      ram: { name: 'Mũi Đâm Lớn & Proembolion', desc: 'Mũi chính thêm một trên cho tàu nhiều tầng nặng' },
+      spikes: { name: 'Móc Tay Sắt', desc: 'Tay sắt trên xích chộp kẻ cặp mạn' },
+      fenders: { name: 'Nẹp Kép & Màn Da', desc: 'Nẹp kép và da phủ buồng chèo' },
+    },
+    phoenicia: {
+      ram: { name: 'Mũi Đâm Mõm Lợn Đồng', desc: 'Mũi nhọn của thuyền tuyết tùng Tyre' },
+      spikes: { name: 'Lan Can Treo Khiên', desc: 'Khiên và mũi giáo treo lan can' },
+      fenders: { name: 'Nẹp Tuyết Tùng', desc: 'Nẹp tuyết tùng Lebanon mớn nước' },
+    },
+    egypt: {
+      ram: { name: 'Dầm Mũi Đầu Sư Tử', desc: 'Mũi đầu sư tử Medinet Habu, gia cố chịu va' },
+      spikes: { name: 'Móc Sào', desc: 'Móc trên sào lôi kẻ cướp cặp mạn giữ chặt' },
+      fenders: { name: 'Tường Bó Cói Giấy', desc: 'Màn cói giấy bó dọc lan can' },
+    },
+    byzantium: {
+      ram: { name: 'Mỏ Cựa', desc: 'Cựa dromon cưỡi lên bẻ chèo nàng' },
+      spikes: { name: 'Lan Can Phun Tay', desc: 'Ống phun tay ở lan can phun lửa kẻ cặp mạn' },
+      fenders: { name: 'Nỉ Ngâm Giấm', desc: 'Nỉ ngâm giấm — cách cổ chống lửa Hy Lạp' },
+    },
+    lepanto: {
+      ram: { name: 'Cựa Thuyền Chèo (Sperone)', desc: 'Cựa sắt cưỡi mũi nàng đập gãy chèo' },
+      spikes: { name: 'Khiên Pavesade & Giáo Xung Kích', desc: 'Giáo sau khiên đâm quân xung kích' },
+      fenders: { name: 'Lưới & Đệm', desc: 'Lưới xung kích và đệm phủ rambade' },
+    },
+    ottoman: {
+      ram: { name: 'Cựa Kadırga', desc: 'Cựa Ottoman bẻ chèo thuyền chèo Thiên Chúa' },
+      spikes: { name: 'Xích Móc', desc: 'Móc trên xích khóa kẻ cặp mạn' },
+      fenders: { name: 'Tường Kiện Len', desc: 'Kiện len buộc sau lan can' },
+    },
+    arab: {
+      ram: { name: 'Mũ Mũi Gỗ Tếch', desc: 'Mũi tếch đội mũ để đâm cướp biển' },
+      spikes: { name: 'Giá Bình Naphtha', desc: 'Bình lửa đất nung xếp lan can vỡ vào thân' },
+      fenders: { name: 'Đệm Thừng Xơ Dừa', desc: 'Đệm xơ dừa, như thừng khâu thân' },
+    },
+    chola: {
+      ram: { name: 'Mũi Đội Sắt', desc: 'Mũ sắt trên mũi lớn Coromandel' },
+      spikes: { name: 'Lan Can Gai Sắt', desc: 'Gai sắt dọc lan can trị prahu' },
+      fenders: { name: 'Đệm Xơ Dừa', desc: 'Đệm xơ dừa dọc mạn' },
+    },
+    chinese: {
+      ram: { name: 'Mũi Đâm Mông Xung', desc: 'Mũi tàu đâm bọc da sống của thủy quân sông' },
+      spikes: { name: 'Giá Hỏa Thương', desc: 'Hỏa thương xếp lan can phun lửa cự ly gần' },
+      fenders: { name: 'Màn Da Sống', desc: 'Da sống ướt phủ thượng tầng' },
+    },
+    vietnam: {
+      ram: { name: 'Mũi Cọc Đầu Sắt', desc: 'Cọc Bạch Đằng, gắn vào mũi nhà' },
+      spikes: { name: 'Váy Cọc Tre', desc: 'Tre vót dọc mớn nước' },
+      fenders: { name: 'Đệm Bó Tre', desc: 'Bó tre xanh buộc chặt' },
+    },
+    japanese: {
+      ram: { name: 'Mũi Bọc Sắt', desc: 'Tàu sắt của Nobunaga: mũi giáp để đâm' },
+      spikes: { name: 'Móc Cào Kumade', desc: 'Cào vuốt gấu lôi kẻ cặp mạn' },
+      fenders: { name: 'Bó Tre Takeba', desc: 'Bó tre đỡ tên và đòn' },
+    },
+    korea: {
+      ram: { name: 'Mũi Đâm Đầu Rồng', desc: 'Đầu rồng — đâm, và sặc thủy thủ nàng bằng khói lưu huỳnh' },
+      spikes: { name: 'Mái Gai Sắt Rùa', desc: 'Gai sắt trên mái xé kẻ áp sát' },
+      fenders: { name: 'Giáp Tấm Lục Giác', desc: 'Tấm sắt phủ thân và mái' },
+    },
+    maori: {
+      ram: { name: 'Mũi Chạm Tauihu', desc: 'Tượng mũi chạm, gia cố để đâm waka' },
+      spikes: { name: 'Lan Can Giáo Taiaha', desc: 'Giáo ngang dọc lan can' },
+      fenders: { name: 'Dây Buộc Lanh', desc: 'Dây lanh harakeke chịu va' },
+    },
+    hawaii: {
+      ram: { name: 'Mũi Gỗ Koa', desc: 'Mũi gỗ koa để đâm giữa các thân' },
+      spikes: { name: 'Lan Can Răng Cá Mập', desc: 'Lưỡi răng cá mập leiomano dọc lan can' },
+      fenders: { name: 'Đệm Chiếu Hala', desc: 'Chiếu dứa dệt phủ mạn' },
+    },
+    maya: {
+      ram: { name: 'Mũi Gỗ Cứng', desc: 'Mũi gỗ chicozapote để đâm xuồng' },
+      spikes: { name: 'Lan Can Lưỡi Obsidian', desc: 'Lưỡi obsidian gắn lan can' },
+      fenders: { name: 'Màn Bông Chần', desc: 'Giáp bông chần treo mạn' },
+    },
+    aztec: {
+      ram: { name: 'Mũi Bách', desc: 'Mũi gỗ ahuehuete gia cố để đâm' },
+      spikes: { name: 'Lan Can Lưỡi Obsidian', desc: 'Lưỡi macuahuitl gắn lan can' },
+      fenders: { name: 'Áo Ichcahuipilli', desc: 'Giáp bông chần choàng mạn' },
+    },
+    inca: {
+      ram: { name: 'Cây Ngang Mũi Gỗ Cứng', desc: 'Khúc gỗ cứng nặng buộc ngang mũi' },
+      spikes: { name: 'Hàng Sào Đầu Xương', desc: 'Sào đầu xương quanh mép bè' },
+      fenders: { name: 'Bó Sậy Totora', desc: 'Bó sậy totora buộc quanh bè' },
+    },
+  },
+};
+
+export const fittings: Dict<FittingsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };

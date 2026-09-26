@@ -1,5 +1,5 @@
 import type { EraId, GameStats, RegionId, Ship, ShipInventory, ShipKind, UpgradeId, UpgradeOffer, DifficultyId } from './types';
-import { SHIP_DEFS, UPGRADES, waveCompositionFor, waveTitleFor } from './data';
+import { SHIP_DEFS, UPGRADES, waveCompositionFor, waveTitleL } from './data';
 import { difficultyById } from './difficulty';
 import { DEFAULT_ERA, ERA_FLAGSHIPS, eraRegion } from './ships/era';
 import { regionById } from './worlds';
@@ -7,11 +7,12 @@ import { BOARD_MIN_CREW } from './boarding';
 import { TITLE_CASSETTE, type MusicMode } from './music';
 import { buildIsland, makeGlow, makeVignette, makeWaterTile, makeWaveTile } from './render';
 import { assignIslandPolitics, flagOf, rollSettlement } from './settlements';
-import { armShipForEra, upgradeForEra, usesGunpowder } from './weapons';
+import { armShipForEra, upgradeForEra, upgradeNameL, usesGunpowder } from './weapons';
 import { angDiff, TAU } from './math';
 import { WORLD, MAX_PARTICLES, GRAPE, rand, clamp, defaultStats, type EngineCallbacks } from './engineCore/constants';
 import { EngineWeapons } from './engineCore/weapons';
 import { CAMPAIGN_WAVES_PER_ERA, chronologicalEraIds, eraById } from './campaign';
+import i18n, { fmt } from '../i18n';
 
 // Re-exported so callers can keep importing these from the engine.
 export { angDiff };
@@ -470,8 +471,8 @@ export class Engine extends EngineWeapons {
     this.last = performance.now();
     this.sfx.duck(false);
     this.cb.onScreen('playing');
-    this.addText(p.x, p.y - 44, `${def.name}!`, '#9fe7ff', 24);
-    if (id === 'grapeshot') this.addText(p.x, p.y - 20, 'Press R to sweep the deck!', '#ffd84d', 17);
+    this.addText(p.x, p.y - 44, `${upgradeNameL(id, this.eraId)}!`, '#9fe7ff', 24);
+    if (id === 'grapeshot') this.addText(p.x, p.y - 20, i18n.t('hud:engine.pressR'), '#ffd84d', 17);
     this.fxSparkle(p.x, p.y, 14, '#9fe7ff');
 
     // campaign: after each cleared wave we track per-era progress. If the era's quota is met, advance.
@@ -482,8 +483,8 @@ export class Engine extends EngineWeapons {
         if (this.campaignIndex + 1 >= this.campaignEras.length) {
           // campaign complete — victory!
           this.banner = {
-            title: 'Campaign Complete!',
-            sub: `All ${this.campaignEras.length} eras conquered — ${this.score.toLocaleString('en-US')} gold`,
+            title: i18n.t('hud:banner.campaignDone'),
+            sub: i18n.t('hud:banner.conqueredAll', { len: this.campaignEras.length, gold: fmt(this.score) }),
             t: 0,
             dur: 4,
             gold: true,
@@ -550,8 +551,8 @@ export class Engine extends EngineWeapons {
     this.screen = 'playing';
     this.cb.onScreen('playing');
     this.banner = {
-      title: `Era ${this.campaignIndex + 1} / ${this.campaignEras.length}`,
-      sub: nextEraDef ? `${nextEraDef.era} — ${nextEraDef.year}` : nextId,
+      title: i18n.t('eras:ui.eraCount', { n: this.campaignIndex + 1, total: this.campaignEras.length }),
+      sub: nextEraDef ? `${i18n.t(`eras:${nextId}.name`, { defaultValue: nextEraDef.era })} — ${nextEraDef.year}` : nextId,
       t: 0,
       dur: 3.5,
       gold: true,
@@ -791,7 +792,7 @@ export class Engine extends EngineWeapons {
     this.waveClearing = false;
     this.magnetAll = false;
     this.waveDamage = 0;
-    this.banner = { title: `Wave ${n}`, sub: waveTitleFor(this.eraId, n), t: 0, dur: 3.2, gold: false };
+    this.banner = { title: i18n.t('hud:hud.wave', { n }), sub: waveTitleL(this.eraId, n), t: 0, dur: 3.2, gold: false };
     this.sfx.horn();
     this.sfx.setTempo(n);
     if (this.waveQueue.some((k) => SHIP_DEFS[k].boss)) {
@@ -893,8 +894,8 @@ export class Engine extends EngineWeapons {
       this.score += bonus;
       this.scorePulse = 1;
       this.banner = {
-        title: 'Wave Cleared!',
-        sub: flawless ? `Flawless victory! +${bonus.toLocaleString('en-US')}` : `Bounty collected +${bonus.toLocaleString('en-US')}`,
+        title: i18n.t('hud:banner.cleared'),
+        sub: flawless ? i18n.t('hud:banner.flawless', { bonus: fmt(bonus) }) : i18n.t('hud:banner.bounty', { bonus: fmt(bonus) }),
         t: 0,
         dur: 2.8,
         gold: true,
@@ -941,15 +942,15 @@ export class Engine extends EngineWeapons {
       this.last = performance.now();
       this.sfx.duck(false);
       this.cb.onScreen('playing');
-      this.addText(p.x, p.y - 44, 'Ship fully upgraded — onward!', '#9fe7ff', 22);
+      this.addText(p.x, p.y - 44, i18n.t('hud:engine.upgraded'), '#9fe7ff', 22);
 
       if (this.campaignActive) {
         this.campaignWavesClearedInEra++;
         if (this.campaignWavesClearedInEra >= this.campaignWavesPerEra) {
           if (this.campaignIndex + 1 >= this.campaignEras.length) {
             this.banner = {
-              title: 'Campaign Complete!',
-              sub: `All ${this.campaignEras.length} eras conquered — ${this.score.toLocaleString('en-US')} gold`,
+              title: i18n.t('hud:banner.campaignDone'),
+              sub: i18n.t('hud:banner.conqueredAll', { len: this.campaignEras.length, gold: fmt(this.score) }),
               t: 0,
               dur: 4,
               gold: true,
@@ -1074,7 +1075,7 @@ export class Engine extends EngineWeapons {
       if (this.streakTimer <= 0) {
         this.streakTimer = 0;
         if (this.mult > 1 && playing && this.playerDeadTimer < 0) {
-          this.addText(this.player.x, this.player.y - 50, 'Streak ended', '#d8c9a3', 16);
+          this.addText(this.player.x, this.player.y - 50, i18n.t('hud:engine.streakEnded'), '#d8c9a3', 16);
         }
         this.mult = 1;
       }
