@@ -49,7 +49,9 @@ export type TerrainTree =
   | 'cactus'
   | 'willow'
   | 'reeds'
-  | 'papyrus';
+  | 'papyrus'
+  /** Socotra's dragon's blood tree: a dense umbrella on bare branches. */
+  | 'dragonsBlood';
 
 export type TerrainPeak = 'none' | 'limestone' | 'granite' | 'snowcap' | 'volcano' | 'jebel';
 

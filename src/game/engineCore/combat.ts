@@ -3,6 +3,7 @@ import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURREND
 import { PROVOKE } from '../settlements';
 import { blastKindFor, isBlunt, SHOT_PROFILE, type ProjectileKind } from '../weapons';
 import { TAU } from '../math';
+import { fenderFireGuard, fenderGuard } from '../hullFittings';
 import { MAX_PICKUPS, STREAK_TIME, MAX_MULT, CHASER_BIG, BURN_TICK, FIRE_SPREAD, SLICK_LIFE, MAX_SLICKS, P_SMOKE, P_FIRE, P_SPLINTER, P_RING, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, WOOD, rand, clamp, pick, type Ball, type Pickup } from './constants';
 import { EngineWorldRender } from './worldRender';
 
@@ -210,7 +211,7 @@ export abstract class EngineCombat extends EngineWorldRender {
   protected igniteShip(s: Ship, time: number, rate: number, byPlayer: boolean) {
     if (s.sinking >= 0 || s.captured || s.dead || time <= 0) return;
     const player = s === this.player;
-    const t = player ? time * 0.7 : time;
+    const t = player ? time * 0.7 * fenderFireGuard(this.pstats.fenders) : time;
     const r = player ? rate * 0.7 : rate;
     const fresh = !(s.burn > 0);
     s.burn = Math.max(s.burn, t);
@@ -506,7 +507,7 @@ export abstract class EngineCombat extends EngineWorldRender {
       s.vy += ny * 90 * k;
       // the flames take hold of whatever she was grappled to
       this.igniteShip(s, 3 * k, 0.007, fs.hitByPlayer);
-      if (s === this.player) this.hurtPlayer(dmgBase * k, nx, ny, false);
+      if (s === this.player) this.hurtPlayer(dmgBase * k * fenderGuard(this.pstats.fenders), nx, ny, false);
       else this.damageShip(s, dmgBase * 1.4 * k, fs.hitByPlayer);
     }
   }
@@ -639,6 +640,8 @@ export abstract class EngineCombat extends EngineWorldRender {
         return 'Vietnamese';
       case 'aztec':
         return 'Aztec';
+      case 'somalia':
+        return 'Somali';
       case 'native':
         return 'native';
       case 'fire':

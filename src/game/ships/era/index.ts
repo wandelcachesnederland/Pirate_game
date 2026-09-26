@@ -25,6 +25,7 @@ import { REVENGE } from './revenge';
 import { ZEVEN_PROVINCIEN } from './zevenProvincien';
 import { MIKASA } from './mikasa';
 import { HMS_ARROW } from './hmsArrow';
+import { SAHAN_STAR } from './sahanStar';
 import {
   ARAB_BOOM,
   AZTEC_CANOE,
@@ -403,6 +404,16 @@ export const ERA_SHIPS: EraShip[] = [
     group: 'Steel Navies',
     homeWaters: 'the Falkland Sound',
   },
+  {
+    id: 'somali',
+    region: 'gulfOfAden',
+    era: 'Somali Pirates',
+    year: '2009',
+    blurb: 'Hijacked-trawler mothership: RPGs, skiffs and ladders — take the Suez traffic.',
+    def: SAHAN_STAR,
+    group: 'Steel Navies',
+    homeWaters: 'the Gulf of Aden',
+  },
 ];
 
 // Keep picker portraits and reports consistent with the era's actual weapons.
@@ -432,5 +443,5 @@ export function eraRegion(id: EraId): RegionId {
   return ERA_REGION[id] ?? ERA_REGION[DEFAULT_ERA];
 }
 
-export { BLACK_GULL, HANSE_COG, HMS_ARROW, HMS_HAVOC, HMS_VENGEANCE, IRIS_TIR, MIKASA, REVENGE, SANTA_BRISA, SAO_GABRIEL, SEA_WOLF, USS_ENTERPRISE, USS_KESTREL, USS_REVENANT, ZEVEN_PROVINCIEN };
+export { BLACK_GULL, HANSE_COG, HMS_ARROW, SAHAN_STAR, HMS_HAVOC, HMS_VENGEANCE, IRIS_TIR, MIKASA, REVENGE, SANTA_BRISA, SAO_GABRIEL, SEA_WOLF, USS_ENTERPRISE, USS_KESTREL, USS_REVENANT, ZEVEN_PROVINCIEN };
 export { ARAB_BOOM, CHINESE_JUNK, GREEK_TRIREME, HAWAII_WAA, INCA_BALSA, JAPANESE_ATAKEBUNE, MACEDON_SIXTEEN, MAORI_WAKA, MAYA_TULUM, OTTOMAN_KADIRGA, PHOENICIA_BIREME, ROMAN_QUINQUEREME, AZTEC_CANOE, BYZANTIUM_DROMON, CHOLA_TIGER, EGYPT_GALLEY, KOREA_TURTLE, LEPANTO_SULTANA, VIETNAM_JUNK };

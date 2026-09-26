@@ -364,6 +364,15 @@ export class Engine extends EngineWeapons {
       case 'chaser':
         ps.chase += 1;
         break;
+      case 'ram':
+        ps.ram += 1;
+        break;
+      case 'spikes':
+        ps.spikes += 1;
+        break;
+      case 'fenders':
+        ps.fenders += 1;
+        break;
     }
     this.applyPlayerStats();
     if (id === 'hull') p.hp = p.maxHp;

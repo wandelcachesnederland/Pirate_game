@@ -4,6 +4,10 @@ import { HARBOUR_FLEETS, HARBOUR_SQUADRON_CAP, harbourMouth, harbourSortie } fro
 import { PROVOKE, coolOff, provokeNetwork } from '../settlements';
 import { blastKindFor, projectileFor, usesGunpowder } from '../weapons';
 import { angDiff, TAU } from '../math';
+import {
+  RAM_ARC, RAM_COOLDOWN, SPIKE_COOLDOWN, fenderGuard, fenderRepel, fittingsFor, ramDamage, ramSelfGuard, spikeDamage,
+  type FittingEffect,
+} from '../hullFittings';
 import { HALF_PI, WORLD, NATIVE_HUNT, NATIVE_LEASH, NATIVE_GUARD, NATIVE_BEACH, P_SMOKE, P_FIRE, P_FOAM, FIRE_COLORS, SMOKE_LIGHT, SMOKE_DARK, rand, clamp, pick, type Ball } from './constants';
 import { EngineCombat } from './combat';
 
@@ -12,6 +16,11 @@ export abstract class EngineShips extends EngineCombat {
   /** Implemented by `EngineWeapons` / `Engine`. */
   protected abstract fireBroadside(s: Ship, side: number, rel: number): void;
   protected abstract makeShip(kind: ShipKind, x: number, y: number, angle: number): Ship;
+
+  /** When each hull last felt the player's ram / spikes (engine time). */
+  private fittingHits = new WeakMap<Ship, { ram: number; spike: number }>();
+  /** Set while resolving a pair the player's ram just struck: her bow is spared. */
+  private ramGuard = 1;
 
   // ================================================================ ships
   protected updateShips(dt: number) {
@@ -211,7 +220,7 @@ export abstract class EngineShips extends EngineCombat {
             const bite = 8 * (1 + 0.05 * (this.wave - 1)) * this.diff.enemyDamage;
             const nx = dx / dd;
             const ny = dy / dd;
-            if (victim === this.player) this.hurtPlayer(bite, -nx, -ny, false);
+            if (victim === this.player) this.hurtPlayer(bite * fenderGuard(this.pstats.fenders), -nx, -ny, false);
             else this.damageShip(victim, bite, victim.hitByPlayer || canoe === this.player);
             canoe.vx -= nx * 18;
             canoe.vy -= ny * 18;
@@ -229,8 +238,96 @@ export abstract class EngineShips extends EngineCombat {
             continue;
           }
         }
+        this.ramGuard = 1;
+        if (playing && a.team !== b.team && (a === this.player || b === this.player)) {
+          this.hullFittingContact(a === this.player ? b : a, Math.hypot(dx, dy), lim);
+        }
         this.resolvePair(a, b, playing);
+        this.ramGuard = 1;
       }
+    }
+  }
+
+  /**
+   * The player's hull fittings at work: a ram on the stem, spikes (hooks,
+   * blades, fire pots…) along the sides, and fenders that shove a hull off.
+   * Runs whenever an enemy hull is touching the player's.
+   */
+  protected hullFittingContact(foe: Ship, dist: number, lim: number) {
+    const p = this.player;
+    const ps = this.pstats;
+    if (ps.ram + ps.spikes + ps.fenders <= 0) return;
+    if (foe.surrendered || foe.captured || foe.peaceful || foe.sinking >= 0) return;
+    if (dist > lim * 0.95) return;
+    const kit = fittingsFor(this.eraId);
+    const d = dist || 1;
+    const nx = (foe.x - p.x) / d;
+    const ny = (foe.y - p.y) / d;
+    const hits = this.fittingHits.get(foe) ?? { ram: -99, spike: -99 };
+    this.fittingHits.set(foe, hits);
+
+    // ---- the ram: bow on, moving ahead with way on
+    const ahead = Math.cos(p.angle) * nx + Math.sin(p.angle) * ny;
+    const speedFrac = p.fwd / Math.max(1, p.maxSpeed);
+    let rammed = false;
+    if (ps.ram > 0 && ahead > RAM_ARC && speedFrac > 0.25) {
+      rammed = true;
+      this.ramGuard = ramSelfGuard(ps.ram);
+      if (this.time - hits.ram >= RAM_COOLDOWN) {
+        hits.ram = this.time;
+        hits.spike = this.time; // one blow at a time
+        const dmg = ramDamage(ps.ram, foe.maxHp, speedFrac, kit.ram.effect);
+        const cx = p.x + nx * d * 0.5;
+        const cy = p.y + ny * d * 0.5;
+        this.fxHit(cx, cy, Math.atan2(ny, nx), 1.3);
+        this.sfx.hit(this.volAt(cx, cy), this.panAt(cx));
+        this.addTrauma(0.22);
+        this.hitStop = Math.max(this.hitStop, 0.05);
+        foe.vx += nx * 90;
+        foe.vy += ny * 90;
+        this.addText(cx, cy - 18, kit.ram.effect === 'breach' ? 'HOLED!' : 'RAMMED!', '#ffd84d', 20);
+        this.fittingEffect(foe, kit.ram.effect, ps.ram);
+        this.damageShip(foe, dmg, true);
+      }
+    }
+
+    // ---- the sides: spikes, hooks, blades, fire pots
+    if (!rammed && ps.spikes > 0 && this.time - hits.spike >= SPIKE_COOLDOWN && foe.sinking < 0) {
+      hits.spike = this.time;
+      const dmg = spikeDamage(ps.spikes, foe.maxHp);
+      this.fxHit(foe.x - nx * foe.def.width * 0.4, foe.y - ny * foe.def.width * 0.4, Math.atan2(ny, nx), 0.6);
+      this.fittingEffect(foe, kit.spikes.effect, ps.spikes);
+      this.damageShip(foe, dmg, true);
+    }
+
+    // ---- fenders: shove her off
+    if (ps.fenders > 0 && foe.sinking < 0) {
+      const push = fenderRepel(ps.fenders) * 0.2;
+      foe.vx += nx * push;
+      foe.vy += ny * push;
+    }
+  }
+
+  /** What a fitting does besides damage. */
+  private fittingEffect(foe: Ship, effect: FittingEffect, level: number) {
+    switch (effect) {
+      case 'breach':
+        foe.slowTimer = Math.max(foe.slowTimer, 1.2 + 0.4 * level);
+        break;
+      case 'tangle':
+        foe.slowTimer = Math.max(foe.slowTimer, 1.5 + level);
+        break;
+      case 'fire':
+        this.igniteShip(foe, 2.5 + level, 0.008, true);
+        break;
+      case 'shock':
+        foe.reloadL += 1.2 + 0.4 * level;
+        foe.reloadR += 1.2 + 0.4 * level;
+        foe.vx += Math.cos(foe.angle + HALF_PI) * 30;
+        foe.vy += Math.sin(foe.angle + HALF_PI) * 30;
+        break;
+      case 'none':
+        break;
     }
   }
 
@@ -280,9 +377,10 @@ export abstract class EngineShips extends EngineCombat {
             const cy = (ay + by) / 2;
             this.fxHit(cx, cy, Math.atan2(ny, nx), 0.8);
             this.sfx.hit(this.volAt(cx, cy), this.panAt(cx));
-            if (a === this.player) this.hurtPlayer(dmg * 0.5, -nx, -ny, true);
+            const guard = this.ramGuard * fenderGuard(this.pstats.fenders);
+            if (a === this.player) this.hurtPlayer(dmg * 0.5 * guard, -nx, -ny, true);
             else this.damageShip(a, dmg, b === this.player);
-            if (b === this.player) this.hurtPlayer(dmg * 0.5, nx, ny, true);
+            if (b === this.player) this.hurtPlayer(dmg * 0.5 * guard, nx, ny, true);
             else this.damageShip(b, dmg, a === this.player);
           }
         }

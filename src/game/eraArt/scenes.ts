@@ -749,6 +749,26 @@ export const ERA_SCENES: Record<EraId, EraSceneSpec> = {
     ],
     fx: [['shells', 0, 1, 2.4], ['shells', 1, 0, 3.1]],
   },
+  somali: {
+    ribbon: 'Pirate Alley · Gulf of Aden',
+    sky: ['#3f7fae', '#9cc4d8', '#f0dcae'],
+    glow: [0.72, 0.05, 0.6, '#fff0c0', 0.45],
+    coast: [['mountains', 0.14, 0.9], ['dunes', 0.4, 0.8], ['village', 0.62, 0.7], ['mosque', 0.7, 0.6], ['dunes', 0.9, 0.9]],
+    weather: 'haze',
+    swell: 0.45,
+    glitter: 0.5,
+    tint: 'rgba(180,150,90,0.1)',
+    emblem: 'star',
+    accent: ['#4189dd', '#f4f4ee'],
+    props: ['wreck'],
+    cast: [
+      ['hero', 0.28, 0.72, 0.34, -0.2],
+      ['containerShip', 0.68, 0.5, 0.46, 0.08, { hp: 0.7, burn: 0.2 }],
+      ['rivalSkiff', 0.52, 0.62, 0.12, 0.3],
+      ['navFrigate', 0.92, 0.3, 0.22, -0.14],
+    ],
+    fx: [['missiles', 0, 1, 3.2], ['shells', 3, 0, 3.6]],
+  },
 };
 
 /** An era's own scene — unknown ids fall back to the Caribbean. */

@@ -68,3 +68,19 @@ test('the attract theme keeps its march tempo, and belongs to no sea', () => {
   }
   assert.ok(allCassettes().includes(broadsideMarch), 'the attract theme is a tape the game knows');
 });
+
+test('the Somali tapes are whole bars and belong to the Gulf of Aden', () => {
+  const tapes = cassettesForEra('somali');
+  assert.equal(tapes.length, 3);
+  for (const tape of tapes) {
+    const spec = (tape as unknown as { spec: { barSteps?: number } }).spec;
+    assert.equal(tape.loopSteps % (spec.barSteps ?? 16), 0, `${tape.title}: whole bars`);
+    const notes = new Set<number>();
+    const sd = tape.stepDuration(1);
+    const { deck } = countingDeck();
+    const collect = { ...deck, fiddle: (m: number) => notes.add(m % 12), reed: (m: number) => notes.add(m % 12), note: (_w: string, m: number) => notes.add(m % 12) } as unknown as Deck;
+    for (let step = 0; step < tape.loopSteps; step++) tape.playStep(collect, step, step * sd, sd, 0);
+    assert.ok(allCassettes().includes(tape));
+    assert.ok(notes.size > 0, `${tape.title} plays notes`);
+  }
+});

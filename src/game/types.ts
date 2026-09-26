@@ -99,6 +99,14 @@ export type ShipKind =
   | 'argDestroyer'
   | 'argSub'
   | 'belgrano'
+  // Somali piracy — the Gulf of Aden and the Somali Basin
+  | 'bulkCarrier'
+  | 'containerShip'
+  | 'rivalSkiff'
+  | 'navRhib'
+  | 'navFrigate'
+  | 'pmpfBoat'
+  | 'bainbridge'
   // Punic Wars — Carthage and the Cilician pirates
   | 'carthGalley'
   | 'carthTrader'
@@ -243,7 +251,8 @@ export type Faction =
   | 'germany'
   | 'ijn'
   | 'iran'
-  | 'tripoli';
+  | 'tripoli'
+  | 'somalia';
 
 export type HullStyle =
   | 'default'
@@ -312,7 +321,8 @@ export type EraId =
   | 'dutch'
   | 'ottoman'
   | 'predread'
-  | 'falklands';
+  | 'falklands'
+  | 'somali';
 
 /**
  * The voyage's peril, chosen on the start screen. Buccaneer is the voyage as
@@ -523,7 +533,8 @@ export type RegionId =
   | 'doggerBank'
   | 'coralSea'
   | 'hormuz'
-  | 'barbary';
+  | 'barbary'
+  | 'gulfOfAden';
 
 /** An enemy's colours, struck and carried home after a boarding. */
 export interface CapturedFlag {
@@ -557,7 +568,11 @@ export type UpgradeId =
   | 'swivel'
   | 'chain'
   | 'grapeshot'
-  | 'chaser';
+  | 'chaser'
+  // hull fittings — fixed to the hull, era-named (see hullFittings.ts)
+  | 'ram'
+  | 'spikes'
+  | 'fenders';
 
 export interface UpgradeDef {
   id: UpgradeId;

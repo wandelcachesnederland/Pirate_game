@@ -189,6 +189,10 @@ export interface PlayerStats {
   grapeshot: number;
   /** Levels of bow/stern chase guns fitted (0 = none shipped). */
   chase: number;
+  /** Hull fittings: ram on the stem, spikes along the sides, fenders. */
+  ram: number;
+  spikes: number;
+  fenders: number;
 }
 
 export function defaultStats(def: ShipDef): PlayerStats {
@@ -206,6 +210,9 @@ export function defaultStats(def: ShipDef): PlayerStats {
     chain: false,
     grapeshot: 0,
     chase: 0,
+    ram: 0,
+    spikes: 0,
+    fenders: 0,
   };
 }
 

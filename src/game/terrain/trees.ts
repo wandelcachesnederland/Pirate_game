@@ -263,6 +263,38 @@ export function drawTree(j: Job, kind: TerrainTree, x: number, y: number) {
       }
       break;
     }
+    case 'dragonsBlood': {
+      // from above: a flat, dense umbrella crown, bare forked branches just
+      // showing through at the rim, and a long hard desert shadow
+      const s = 4 + rnd() * 3;
+      ctx.fillStyle = 'rgba(40,20,0,0.32)';
+      ctx.beginPath();
+      ctx.ellipse(x + s * 1.3, y + s * 1.5, s * 1.2, s * 0.8, Math.PI / 4, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = tone(dark, -0.25);
+      ctx.beginPath();
+      ctx.arc(x, y, s, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = dark;
+      ctx.beginPath();
+      ctx.arc(x - s * 0.15, y - s * 0.15, s * 0.82, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#8a6a4a';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      const n = 7;
+      for (let k = 0; k < n; k++) {
+        const a = (k / n) * TAU + rnd() * 0.3;
+        ctx.moveTo(x + Math.cos(a) * s * 0.55, y + Math.sin(a) * s * 0.55);
+        ctx.lineTo(x + Math.cos(a) * s * 0.98, y + Math.sin(a) * s * 0.98);
+      }
+      ctx.stroke();
+      ctx.fillStyle = alpha(light, 0.45);
+      ctx.beginPath();
+      ctx.arc(x - s * 0.35, y - s * 0.35, s * 0.35, 0, TAU);
+      ctx.fill();
+      break;
+    }
     case 'willow': {
       const s = 2.5 + rnd() * 1.5;
       ctx.fillStyle = 'rgba(0,25,10,0.28)';

@@ -1,3 +1,4 @@
+import { isFittingSlot } from '../src/game/hullFittings';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ERA_SHIPS } from '../src/game/ships/era';
@@ -83,7 +84,10 @@ for (const era of ERA_SHIPS) {
       const adapted = upgradeForEra(upgrade, era.id);
       assert.equal(adapted.id, upgrade.id);
       assert.equal(adapted.max, upgrade.max);
-      if (gunpowder) assert.equal(adapted, upgrade);
+      // hull fittings are renamed in every era; Somali pirates rename the lot
+      if (isFittingSlot(upgrade.id)) assert.notEqual(adapted.name, upgrade.name, `${era.id}: ${upgrade.id} gets an era name`);
+      else if (era.id === 'somali') assert.notEqual(adapted.name, upgrade.name);
+      else if (gunpowder) assert.equal(adapted, upgrade);
       else assert.doesNotMatch(`${adapted.name} ${adapted.desc}`, /cannon|gun|powder|grape|canister|shell|torpedo|missile/i);
     }
   });

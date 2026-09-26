@@ -40,6 +40,9 @@ import { tipperary } from './cassettes/tipperary';
 import { tulumCanoes } from './cassettes/tulumCanoes';
 import { colonelBogey } from './cassettes/colonelBogey';
 import { broadsideMarch } from './cassettes/broadsideMarch';
+import { dhaantoBadweyn } from './cassettes/dhaantoBadweyn';
+import { heesBadmaax } from './cassettes/heesBadmaax';
+import { xamarNights } from './cassettes/xamarNights';
 
 export type { Cassette, Deck, MusicMode } from './cassette';
 export { VOICE_NAMES, FEEL_NAMES } from './arrange';
@@ -123,6 +126,7 @@ const ERA_SONGS: Record<EraId, Cassette[]> = {
   ottoman: [kadirga],
   predread: [ironcladMarch, navyHymn],
   falklands: [navyHymn, colonelBogey, tangehHormoz],
+  somali: [dhaantoBadweyn, heesBadmaax, xamarNights],
 };
 
 /** The songs sailing this era's waters. */

@@ -1273,6 +1273,45 @@ export const FALKLANDS_ROSTER: EraRoster = {
   ],
 };
 
+/** Somali piracy, 2009: the Suez traffic is the prey, the navies the hunters. */
+export const SOMALI_ROSTER: EraRoster = {
+  early: [
+    ['bulkCarrier', 'rivalSkiff', 'rivalSkiff'],
+    ['rivalSkiff', 'rivalSkiff', 'rivalSkiff', 'bulkCarrier'],
+    ['navRhib', 'navRhib', 'bulkCarrier'],
+    ['navFrigate', 'navRhib', 'containerShip'],
+    ['bainbridge'],
+  ],
+  boss: 'bainbridge',
+  jackpot: 'supertanker',
+  trader: 'bulkCarrier',
+  pool: [
+    { kind: 'rivalSkiff', cost: 0.8, weight: 3 },
+    { kind: 'navRhib', cost: 1.1, weight: 3 },
+    { kind: 'pmpfBoat', cost: 1.5, weight: 2, minWave: 4 },
+    { kind: 'navFrigate', cost: 3.0, weight: 2, minWave: 6 },
+    { kind: 'bulkCarrier', cost: 1.2, weight: 1 },
+    { kind: 'tanker', cost: 1.8, weight: 1, minWave: 5 },
+    { kind: 'containerShip', cost: 2.4, weight: 1, minWave: 7, noBossWave: true },
+  ],
+  titles: [
+    'A bulk carrier off Eyl — get the ladders up!',
+    'Rival skiffs out of Harardhere want her too!',
+    'The navy puts its boarding RHIBs in the water!',
+    'An EU NAVFOR frigate is on station!',
+    'USS Bainbridge closes in!',
+  ],
+  bossTitle: 'Task Force 151 sails — past a laden VLCC!',
+  lines: [
+    'More wakes on the radar!',
+    'The ransom money is waiting in Hobyo!',
+    'Another convoy through the transit corridor!',
+    'The monsoon is over — hunting season!',
+    'Atalanta has doubled the patrols!',
+    'Keep the skiffs close, Captain!',
+  ],
+};
+
 export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   golden: SAIL_ROSTER,
   exploration: EXPLORATION_ROSTER,
@@ -1308,4 +1347,5 @@ export const ERA_ROSTERS: Record<EraId, EraRoster> = {
   ottoman: LEPANTO_ROSTER,
   predread: PREDREAD_ROSTER,
   falklands: FALKLANDS_ROSTER,
+  somali: SOMALI_ROSTER,
 };

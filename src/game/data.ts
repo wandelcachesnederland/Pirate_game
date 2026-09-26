@@ -10,6 +10,7 @@ import { PACIFIC_DEFS } from './shipDefs/pacific';
 import { AMERICAS_DEFS } from './shipDefs/americas';
 import { MODERN_DEFS } from './shipDefs/modern';
 import { EXTRA_ERA_DEFS } from './shipDefs/extraEras';
+import { SOMALI_DEFS } from './shipDefs/somali';
 
 /**
  * Every ship in the game, keyed by kind. The definitions live per sea/era in
@@ -26,6 +27,7 @@ export const SHIP_DEFS: Record<ShipKind, ShipDef> = {
   ...AMERICAS_DEFS,
   ...MODERN_DEFS,
   ...EXTRA_ERA_DEFS,
+  ...SOMALI_DEFS,
 };
 
 export const UPGRADES: UpgradeDef[] = [
@@ -47,6 +49,10 @@ export const UPGRADES: UpgradeDef[] = [
     max: 3,
   },
   { id: 'chaser', name: 'Chase Guns', desc: 'Bow & stern guns fire on their own — rake your pursuers', max: 3 },
+  // hull fittings: renamed for every era by `fittingUpgradeForEra`
+  { id: 'ram', name: 'Ram', desc: 'Ram enemies bow-first for heavy damage', max: 3 },
+  { id: 'spikes', name: 'Hull Spikes', desc: 'Enemies touching your hull take damage', max: 3 },
+  { id: 'fenders', name: 'Fenders', desc: 'Less damage from collisions, bites, blasts and fire', max: 3 },
 ];
 
 export function waveTitle(n: number): string {

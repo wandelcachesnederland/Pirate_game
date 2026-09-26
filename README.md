@@ -1,7 +1,7 @@
 # Broadside!
 
 **Scourge of the Spanish Main** — a swashbuckling naval-combat arcade game that runs in the browser.
-Sail a hero ship through **26 eras and 23 stretches of water**, from Egyptian galleys fighting the Sea
+Sail a hero ship through **27 eras and 23 stretches of water**, from Egyptian galleys fighting the Sea
 Peoples (1178 BC) to a guided-missile boat in the Strait of Hormuz (1988). Turn broadside to the enemy,
 maul them until they strike their colours, then lay them aboard for the full prize.
 
@@ -93,6 +93,30 @@ drip of the stores, and your own flagship's hull at sailing. Deeper peril pays r
 and loot pay out by the same hand, so a King of the Seas run is worth half again a Landlubber's. The
 choice is saved and stamped on the Hall of Legends and the epitaph.
 
+### Hull fittings
+
+Three refit slots are fixed to the hull itself. They never fire; they work when hulls touch, and every
+era fits its own (`src/game/hullFittings.ts`):
+
+| Slot | What it does |
+| --- | --- |
+| **Ram** | Driving your bow into an enemy at speed does heavy damage, and your own bow takes less of the blow. |
+| **Side fitting** | Any enemy scraping your hull takes damage, plus an era effect: *slows her*, *holes her*, *sets her alight* or *stuns her crews*. |
+| **Fenders** | Up to 60% less damage from collisions, war-canoe bites and fire-ship blasts, less fire time aboard, and enemies get shoved off. |
+
+Some examples: Bronze Rostrum + Corvus Boarding Bridge + Oak Wales (Rome), Iron-Spiked Turtle Roof (Korea),
+Vinegar-Soaked Felt against Greek fire (Byzantium), Cast-Iron Ram Bow + Boiler Scald Hoses (Ironclad),
+Depth-Charge Rails (WW2), Welded Steel Bow Plate + Hooked Boarding Ladders + Truck-Tyre Fenders (Somali).
+
+### Somali Pirates (2009)
+
+Sail the hijacked-trawler mothership *Sahan* out of the Gulf of Aden with RPG-7s and PKMs. Bulk carriers
+and container ships are the prey; a VLCC is the jackpot; rival clan skiffs, navy boarding RHIBs, Puntland
+Maritime Police boats and EU NAVFOR frigates hunt you; USS Bainbridge is the boss. The islands have bare red
+jebels, coral beaches, whitewashed towns, Guardafui's lighthouse and Socotra's dragon's blood trees. Three
+original tapes in the Somali idiom: *Dhaanto Badweyn* (dhaanto dance), *Hees Badmaax* (a sailor's work
+song) and *Xamar Nights* (Mogadishu funk).
+
 ---
 
 ## The eras
@@ -111,7 +135,7 @@ age too.
 | Squadron | Eras |
 | --- | --- |
 | **Age of Sail** (6) | Golden Age of Piracy (1710) · Age of Exploration (1500) · Napoleonic Wars (1805) · Barbary War (1801) · Viking Age (900) · Ironclad Era (1862) |
-| **Steel Navies** (3) | Great War at Sea (1916) · Second World War at Sea (1943) · Tanker War (1988) |
+| **Steel Navies** | Great War at Sea (1916) · Second World War at Sea (1943) · Tanker War (1988) · Somali Pirates (2009) |
 | **Heritage Seas** (17) | First Punic War (260 BC) · Persian Wars (480 BC) · Macedon at Sea (306 BC) · Against the Sea Peoples (1178 BC) · Monsoon Seas (1200) · Chola Across the Bay (1025) · Bạch Đằng River (1288) · Siege of Constantinople (717) · Ming Treasure Voyages (1405) · Sengoku Period (1575) · Lepanto (1571) · Imjin War (1597) · Māori Musket Wars (1820) · Hawaiian Unification (1795) · Maya First Contact (1517) · Fall of Tenochtitlan (1521) · Inca Pacific Voyages (1465) |
 
 Picking an era picks the whole world: flagship, enemy roster, island art, water colour, weather feel,

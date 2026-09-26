@@ -67,6 +67,7 @@ export const HARBOUR_FLEETS: Record<EraId, HarbourFleet> = {
   ottoman: { light: ['venetianGalley'], heavy: ['spanishGalley'], sortie: 'League galleys row out from the arsenal!' },
   predread: { light: ['tb1890'], heavy: ['protectedCruiser'], sortie: 'Torpedo boats and cruisers sortie!' },
   falklands: { light: ['argCorvette'], heavy: ['argDestroyer'], sortie: 'Corvettes scramble from the harbour!' },
+  somali: { light: ['rivalSkiff'], heavy: ['pmpfBoat'], sortie: 'Skiffs race out from the beach — the clan wants its cut!' },
 };
 
 /** At most this many of a harbour's boats out at once. */
@@ -175,6 +176,7 @@ export const HARBOUR_STYLES: Record<EraId, HarbourStyle> = {
   ottoman: { quay: 'stone', roof: 'tile', roofs: TILE, wall: '#efe4c8', ground: '#cdbb92', boats: 'galley', features: ['mosque', 'shipsheds', 'warehouse'], houses: 13 },
   predread: { quay: 'concrete', roof: 'slate', roofs: [...SLATE, ['#9a4a3a', '#763628']], wall: '#d8d0c0', ground: '#9e9a90', boats: 'steam', features: ['crane', 'coal', 'lighthouse', 'warehouse'], houses: 13 },
   falklands: { quay: 'concrete', roof: 'quonset', roofs: [['#8a9278', '#6c745c'], ['#9aa08a', '#7a806a']], wall: '#b8b4a4', ground: '#a8a088', boats: 'launch', features: ['crane', 'radar', 'tanks'], houses: 8 },
+  somali: { quay: 'stone', roof: 'flat', roofs: WHITE, wall: '#ece4d2', ground: '#d8c49a', boats: 'launch', features: ['mosque', 'lighthouse', 'warehouse'], houses: 12 },
 };
 
 export function harbourStyleFor(era: EraId | undefined): HarbourStyle {
