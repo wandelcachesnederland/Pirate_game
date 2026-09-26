@@ -76,8 +76,9 @@ sail past doing nothing.
 Putting to sea is one screen per decision: a title marquee, sign-on, then the **Peril** screen —
 five degrees of danger, each sailing under its own colours — then the **era** and its waters, and
 finally the **hero ship** you take into them. The era chart and the shipyard are separate screens:
-the chart shows the age, its sea and its music; the hull's portrait, numbers and scouting report get
-the screen after it. Both drive the same choice (every age sails exactly one flagship), so stepping
+the chart wears the age's name and year on a plate across the picture — the two things you are really
+choosing — and then its sea, its trait and its music; the hull's portrait, numbers and scouting report
+get the screen after it. Both drive the same choice (every age sails exactly one flagship), so stepping
 back and forth never desynchronises them.
 
 | Peril | Skulls | The gist |
@@ -202,13 +203,19 @@ Leave people alone and tempers cool — unless they were never friendly to begin
 
 ## Music and sound
 
-**Start-up sting.** The game opens on the **Bit Squirrel** studio card: an 8-bit red squirrel under the
-studio name, drawn pixel by pixel from `src/game/splash/pixels.ts`, with a short "wall of sound" sting
-(`src/game/splash/fanfare.ts`). That means stacked, detuned chip voices across three octaves, pulse
-stabs, glockenspiel, tambourine and a "boom, boom-boom, crack" beat in a big generated reverb. After
-about 4½ seconds the logo and the music fade out together onto the title screen. Any key or tap skips
-it. Browsers that block autoplay hold the logo on "Press any key or tap" until the first gesture. If
-music is switched off, the card plays without sound.
+**Start-up sting.** The game opens on the **Bit Squirrel** studio card. The mascot is animated: it trots
+onto an empty plate in four hops on the sting's eighth notes — one per note, dust at every landing —
+skids, flicks its plume and blinks, and then the studio name stamps down a letter per beat and lands on
+the big final chord. From there the card *is* the still logo, with the squirrel still breathing, blinking
+and flicking its tail until it fades. Every frame is drawn from `src/game/splash/pixels.ts` (the sprite,
+and a 5×7 bitmap font) on the timeline in `src/game/splash/anim.ts` — no image assets, and no easing
+between sprite pixels: motion snaps to the pixel grid like real 8-bit art. The sting
+(`src/game/splash/fanfare.ts`) is a short "wall of sound": stacked, detuned chip voices across three
+octaves, pulse stabs, glockenspiel, tambourine and a "boom, boom-boom, crack" beat in a big generated
+reverb. After about 5 seconds the logo and the music fade out together onto the title screen. Any key or
+tap skips it. Browsers that block autoplay hold the card on the squirrel alone — "Press any key or tap" —
+and that press starts the sting and the whole card with it. If music is switched off, the card plays
+without sound; `prefers-reduced-motion` skips straight to the still logo.
 
 **Attract theme.** The screen the sting hands over to — the title marquee, the attract-mode page the
 player sees next — has a tune of its own: **"The Broadside March"**
@@ -257,6 +264,7 @@ Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
 | `src/game/eraArt/` | The era picker's title cards: per-era action scenes, coasts, weather, emblems and logo plates |
 | `src/game/settlements.ts` | Peoples, pacts, patience, grievance and cooling rules |
 | `src/game/boarding.ts` | Surrender chances and boarding outcomes (pure tables) |
+| `src/game/splash/` | The studio card: the squirrel sprite and bitmap font (`pixels.ts`), its animation timeline and painter (`anim.ts`), the sting (`fanfare.ts`) |
 | `src/game/audio.ts` · `music/` | Synthesised SFX, the cassette player, ABC notation, all songs |
 | `src/game/difficulty.ts` | The five perils: every modifier that scales foes, forts, spawns and plunder |
 | `src/game/storage.ts` · `input.ts` | `localStorage` scores/settings/era/difficulty, keyboard + touch input |

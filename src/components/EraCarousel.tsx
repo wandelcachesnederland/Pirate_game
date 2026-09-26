@@ -227,8 +227,9 @@ function Slot({
 
 /**
  * The era selector, arcade style: scroll the chart to an age and see exactly
- * what waits there — the fight on its own waters, the tapes that play there and
- * the numbered plates of every age in the squadron. The hero hull is not shown
+ * what waits there — the age's own name and year on a plate across the
+ * picture, the fight on its waters, the tapes that play there and the numbered
+ * plates of every age in the squadron. The hero hull is not shown
  * here any more: she has a screen of her own straight after this one (see
  * `HeroShipPicker`). The whole screen fits the cabinet: the card takes whatever
  * height is left, and on a phone the step scrolls.
@@ -272,6 +273,8 @@ export function EraCarousel({ era, onEra }: Props) {
 
   const shown = ERA_SHIPS[idx];
   const sea = regionById(shown.region);
+  // a photographic still is a bare picture: it needs the plate laid over it
+  const stillShown = !!ERA_STILLS[`../assets/era-stills/${shown.id}.jpg`];
   const step = (d: number) =>
     onEra(ERA_SHIPS[(idx + d + ERA_SHIPS.length) % ERA_SHIPS.length].id);
 
@@ -335,6 +338,26 @@ export function EraCarousel({ era, onEra }: Props) {
         <span className="sr-only" aria-live="polite">
           {shown.era}, {shown.year}. {sea.name}. {shown.blurb}
         </span>
+
+        {/* the age's own name plate: what it is and when it was, large. Eras
+            painted by the fallback scene carry their banner inside the picture,
+            so the plate is only laid over a photographic still. */}
+        {stillShown && (
+          <div
+            key={shown.id}
+            className="anim-swap-in pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-1.5 p-1.5 sm:p-2.5"
+          >
+            <div className="era-plate min-w-0">
+              <span className="era-plate-tag">
+                Era {String(idx + 1).padStart(2, '0')} / {String(ERA_SHIPS.length).padStart(2, '0')} · {sea.name}
+              </span>
+              <span className="era-plate-name text-[1.25rem] leading-tight sm:text-3xl lg:text-4xl xl:text-[2.75rem]">
+                {shown.era}
+              </span>
+            </div>
+            <span className="era-plate-year shrink-0 text-2xl sm:text-4xl lg:text-[2.9rem]">{shown.year}</span>
+          </div>
+        )}
       </div>
 
       {/* ---- one line of briefing: the age, its waters, and what plays there ---- */}
