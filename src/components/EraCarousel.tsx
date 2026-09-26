@@ -7,23 +7,20 @@ import { armamentFor, usesGunpowder } from '../game/weapons';
 import { regionById } from '../game/worlds';
 import { bossCassette, cassettesForEra } from '../game/music';
 import { makeCanvas } from '../game/canvas';
-import { drawPortraitShip, paintWater, paintWatersPostcard } from '../game/portrait';
+import { drawPortraitShip, paintWater } from '../game/portrait';
+import { paintEraScene } from '../game/eraArt';
 
 interface Props {
   era: EraId;
   onEra: (id: EraId) => void;
 }
 
-// backing-store sizes: the canvases are drawn fixed-size and scaled down by CSS,
-// so they stay sharp on high-DPI phones without a resize observer
-const SEA_W = 1040;
-const SEA_H = 468;
-const HULL_W = 420;
-const HULL_H = 560;
+// backing-store sizes: the portrait is drawn fixed-size and scaled down by CSS,
+// so it stays sharp on high-DPI phones without a resize observer
+const HULL_W = 372;
+const HULL_H = 468;
 
-const PIRATA = '"Pirata One", Georgia, serif';
-
-/** Stable per-era seed so each chart always shows the same islands. */
+/** Stable per-era seed so each card always shows the same sea. */
 function seedOf(id: string, salt: number): number {
   let h = salt;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
@@ -65,17 +62,62 @@ function useCanvasPaint(
   return ref;
 }
 
-/** The postcard of one era's waters: its own islands on its own sea. */
-function WatersArt({ e }: { e: EraShip }) {
-  const ref = useCanvasPaint(
-    (ctx, cv) => {
-      cv.width = SEA_W;
-      cv.height = SEA_H;
-      paintWatersPostcard(ctx, regionById(e.region), SEA_W, SEA_H, seedOf(e.id, 17));
-    },
-    [e],
+/**
+ * The era card: a live picture of the age — its hulls mid-fight, its weather,
+ * its shore, and its name on a logo plate. Painted at whatever size the frame
+ * has (a resize observer keeps it crisp and filling), at ~30fps, and it stops
+ * drawing while the tab is hidden.
+ */
+function EraSceneArt({ e }: { e: EraShip }) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const cvRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const cv = cvRef.current;
+    if (!wrap || !cv) return;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    const region = regionById(e.region);
+    const seed = seedOf(e.id, 17);
+    let w = 0;
+    let h = 0;
+    let dpr = 1;
+
+    const resize = () => {
+      const box = wrap.getBoundingClientRect();
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = Math.max(200, Math.round(box.width));
+      h = Math.max(140, Math.round(box.height));
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(wrap);
+
+    let raf = 0;
+    let last = -1;
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      if (document.hidden || w < 2) return;
+      if (now - last < 33) return; // ~30 fps is plenty for a menu card
+      last = now;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      paintEraScene(ctx, w, h, e, region, now / 1000, seed, dpr);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [e]);
+
+  return (
+    <div ref={wrapRef} className="absolute inset-0">
+      <canvas ref={cvRef} className="block h-full w-full" aria-hidden />
+    </div>
   );
-  return <canvas ref={ref} className="block w-full" aria-hidden />;
 }
 
 /** The era's hero hull, alive on the water: portrait art from the game itself. */
@@ -122,8 +164,8 @@ function Slot({
   const ref = useCanvasPaint(
     (ctx, cv) => {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
-      const w = 74;
-      const h = 56;
+      const w = 66;
+      const h = 48;
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -142,26 +184,26 @@ function Slot({
       ctx.fillStyle = g;
       ctx.fill();
       const sw = regionById(e.region).swatch;
-      const bw = 13;
+      const bw = 11;
       let sx = (w - sw.length * bw) / 2;
       for (const c of sw) {
         ctx.fillStyle = c;
-        ctx.fillRect(sx, h - 10, bw - 1.5, 4.5);
+        ctx.fillRect(sx, h - 9, bw - 1.5, 4);
         sx += bw;
       }
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = `32px ${PIRATA}`;
+      ctx.font = '27px "Pirata One", Georgia, serif';
       ctx.fillStyle = on ? '#fff5dc' : '#ffd15e';
       if (on) {
         ctx.shadowColor = 'rgba(255,140,70,0.95)';
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 10;
       }
       ctx.fillText(String(i + 1).padStart(2, '0'), w / 2, h / 2 - 6);
       ctx.shadowBlur = 0;
-      ctx.font = `12px ${PIRATA}`;
+      ctx.font = '10px "Pirata One", Georgia, serif';
       ctx.fillStyle = on ? 'rgba(255,242,212,0.95)' : 'rgba(238,222,180,0.72)';
-      ctx.fillText(e.year, w / 2, h / 2 + 14);
+      ctx.fillText(e.year, w / 2, h / 2 + 12);
       rr(ctx, 1.5, 1.5, w - 3, h - 3, 8);
       ctx.strokeStyle = on ? '#ffd863' : 'rgba(169,126,51,0.7)';
       ctx.lineWidth = on ? 2.5 : 1.5;
@@ -179,7 +221,7 @@ function Slot({
       onClick={() => onPick(e.id)}
       className="arcade-slot shrink-0 rounded-lg"
     >
-      <canvas ref={ref} className="block h-14 w-[4.625rem]" />
+      <canvas ref={ref} className="block h-12 w-[4.125rem]" />
     </button>
   );
 }
@@ -187,8 +229,8 @@ function Slot({
 function StatBar({ label, v, tint }: { label: string; v: number; tint: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="w-9 shrink-0 text-[0.6rem] uppercase tracking-wider opacity-65">{label}</span>
-      <span className="h-2 flex-1 overflow-hidden rounded-full border border-black/50 bg-black/45">
+      <span className="w-9 shrink-0 text-[0.58rem] uppercase tracking-wider opacity-65">{label}</span>
+      <span className="h-1.5 flex-1 overflow-hidden rounded-full border border-black/50 bg-black/45">
         <span
           className="block h-full rounded-full transition-[width] duration-500"
           style={{ width: `${Math.max(6, Math.min(100, v * 100))}%`, background: tint }}
@@ -205,14 +247,14 @@ function HullCard({ e }: { e: EraShip }) {
   const arm = armamentFor(e.id);
   const gunpowder = usesGunpowder(e.id);
   return (
-    <div className="rounded-xl border-2 border-gold/45 bg-black/35 p-2 sm:p-3">
-      <div className="flex items-baseline justify-between gap-2">
+    <div className="flex min-h-0 flex-col rounded-xl border-2 border-gold/45 bg-black/35 p-2 sm:p-2.5">
+      <div className="flex shrink-0 items-baseline justify-between gap-2">
         <span className="arcade-tag text-[0.58rem] sm:text-[0.65rem]">Hero Ship</span>
-        <span className="text-[0.58rem] italic opacity-60">her numbers against the whole fleet</span>
+        <span className="hidden text-[0.56rem] italic opacity-60 sm:inline">her numbers against the whole fleet</span>
       </div>
-      <div className="mt-1.5 grid gap-2.5 sm:grid-cols-[10.5rem_1fr] lg:grid-cols-1 xl:grid-cols-[10.5rem_1fr]">
+      <div className="scroll-thin mt-1.5 grid min-h-0 gap-2 overflow-y-auto sm:grid-cols-[9.5rem_1fr] lg:grid-cols-[8.5rem_1fr] xl:grid-cols-[9.5rem_1fr]">
         <div>
-          <div className="arcade-frame mx-auto w-[62%] max-w-[13rem] sm:w-full sm:max-w-none">
+          <div className="arcade-frame mx-auto w-[68%] max-w-[11rem] sm:w-full sm:max-w-none">
             <HeroPortrait e={e} />
           </div>
           <div className="mt-1.5 space-y-1">
@@ -222,38 +264,38 @@ function HullCard({ e }: { e: EraShip }) {
             <StatBar label="Helm" v={sc.helm} tint="linear-gradient(90deg,#b9c7f0,#3d55a8)" />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <div>
-            <div className="font-pirate text-2xl leading-none sm:text-3xl">{e.def.name}</div>
-            <div className="mt-1 text-xs text-gold">
+            <div className="font-pirate text-xl leading-none sm:text-2xl">{e.def.name}</div>
+            <div className="mt-0.5 text-[0.7rem] text-gold">
               {gunpowder ? 'Gunpowder broadsides' : arm.summary}
             </div>
             {!gunpowder && (
-              <div className="text-[0.62rem] italic opacity-70">
+              <div className="text-[0.6rem] italic opacity-70">
                 No powder in these waters: hulls burn and go down by fire — nothing explodes.
               </div>
             )}
-            <div className="text-[0.62rem] uppercase tracking-[0.16em] opacity-65">
+            <div className="text-[0.6rem] uppercase tracking-[0.16em] opacity-65">
               {e.era} · {e.year}
             </div>
           </div>
           <div>
-            <div className="arcade-tag mb-1 text-[0.58rem] opacity-90">Strengths</div>
+            <div className="arcade-tag mb-1 text-[0.56rem] opacity-90">Strengths</div>
             <div className="flex flex-col gap-1">
               {strengths.map((s) => (
                 <span key={s} className="trait-chip trait-good">
-                  <Plus className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <Plus className="mt-0.5 h-3 w-3 shrink-0" />
                   <span>{s}</span>
                 </span>
               ))}
             </div>
           </div>
           <div>
-            <div className="arcade-tag mb-1 text-[0.58rem] opacity-90">Weaknesses</div>
+            <div className="arcade-tag mb-1 text-[0.56rem] opacity-90">Weaknesses</div>
             <div className="flex flex-col gap-1">
               {weaknesses.map((s) => (
                 <span key={s} className="trait-chip trait-bad">
-                  <Minus className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <Minus className="mt-0.5 h-3 w-3 shrink-0" />
                   <span>{s}</span>
                 </span>
               ))}
@@ -266,10 +308,11 @@ function HullCard({ e }: { e: EraShip }) {
 }
 
 /**
- * Step two of putting to sea, arcade style: scroll the charts to a stretch of
- * water and see exactly what waits there — the era's own islands, its hero
- * hull, and that hull's strengths and weaknesses. The era decides both the
- * flagship and the sea she fights in.
+ * Step two of putting to sea, arcade style: scroll the cards to an age and see
+ * exactly what waits there — the era's own fight on its own waters, its hero
+ * hull, and that hull's strengths and weaknesses. The whole screen fits the
+ * cabinet: the card takes whatever height is left, and on a phone (where the
+ * portrait card and the hull report cannot both fit) the step scrolls.
  */
 export function EraCarousel({ era, onEra }: Props) {
   const eraIdx = Math.max(
@@ -277,7 +320,7 @@ export function EraCarousel({ era, onEra }: Props) {
     ERA_SHIPS.findIndex((s) => s.id === era),
   );
   const [idx, setIdx] = useState(eraIdx);
-  // the screen swaps on a beat: slide the old chart out, then the new one in
+  // the screen swaps on a beat: slide the old card out, then the new one in
   const [stage, setStage] = useState<'in' | 'out'>('in');
   const stripRef = useRef<HTMLDivElement | null>(null);
   const firstRun = useRef(true);
@@ -304,7 +347,7 @@ export function EraCarousel({ era, onEra }: Props) {
     firstRun.current = false;
   }, [idx]);
 
-  // dragging the chart sideways scrolls to the next era, arcade-style
+  // dragging the card sideways scrolls to the next era, arcade-style
   const drag = useRef<{ x: number; id: number } | null>(null);
   const [dragX, setDragX] = useState(0);
 
@@ -314,112 +357,101 @@ export function EraCarousel({ era, onEra }: Props) {
     onEra(ERA_SHIPS[(idx + d + ERA_SHIPS.length) % ERA_SHIPS.length].id);
 
   return (
-    // NOTE: ← → for the chart are handled globally by the start screen so the
+    // NOTE: ← → for the card are handled globally by the start screen so the
     // arrows work without focus; nothing here binds keys anymore.
-    <section
-      className="arcade-panel select-none p-2.5 sm:p-4"
-    >
-      <div className="grid gap-3 lg:grid-cols-[1.32fr_1fr]">
-      {/* ---- the chart screen ---- */}
-      <div>
-      <div
-        className="arcade-frame cursor-grab active:cursor-grabbing"
-        style={{ touchAction: 'pan-y' }}
-        onPointerDown={(ev) => {
-          if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-          // never let the drag steal the arrow buttons' click
-          if ((ev.target as HTMLElement).closest('button')) return;
-          drag.current = { x: ev.clientX, id: ev.pointerId };
-          ev.currentTarget.setPointerCapture(ev.pointerId);
-        }}
-        onPointerMove={(ev) => {
-          const d = drag.current;
-          if (!d || d.id !== ev.pointerId) return;
-          setDragX(Math.max(-70, Math.min(70, ev.clientX - d.x)));
-        }}
-        onPointerUp={(ev) => {
-          const d = drag.current;
-          drag.current = null;
-          setDragX(0);
-          if (!d || d.id !== ev.pointerId) return;
-          const dx = ev.clientX - d.x;
-          if (Math.abs(dx) > 38) step(dx < 0 ? 1 : -1);
-        }}
-        onPointerCancel={() => {
-          drag.current = null;
-          setDragX(0);
-        }}
-      >
-        <div
-          className={dragX !== 0 ? '' : stage === 'out' ? 'anim-swap-out' : 'anim-swap-in'}
-          style={dragX !== 0 ? { transform: `translateX(${dragX}px)` } : undefined}
-        >
-          <WatersArt e={shown} />
-        </div>
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-between p-1.5 sm:p-2.5">
-          <button
-            type="button"
-            onClick={() => step(-1)}
-            aria-label="Previous era"
-            className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
+    <section className="arcade-panel select-none p-2 sm:p-2.5 lg:min-h-0 lg:flex-1">
+      <div className="grid gap-2 lg:grid-cols-[minmax(0,1.38fr)_minmax(0,1fr)] lg:gap-2.5 lg:min-h-0 lg:h-full">
+        {/* ---- the era card ---- */}
+        <div className="flex min-w-0 flex-col gap-1.5 lg:min-h-0">
+          <div
+            className="arcade-frame relative aspect-[16/10] w-full cursor-grab active:cursor-grabbing sm:aspect-[16/9] lg:aspect-auto lg:min-h-[7.5rem] lg:flex-1"
+            style={{ touchAction: 'pan-y' }}
+            onPointerDown={(ev) => {
+              if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+              // never let the drag steal the arrow buttons' click
+              if ((ev.target as HTMLElement).closest('button')) return;
+              drag.current = { x: ev.clientX, id: ev.pointerId };
+              ev.currentTarget.setPointerCapture(ev.pointerId);
+            }}
+            onPointerMove={(ev) => {
+              const d = drag.current;
+              if (!d || d.id !== ev.pointerId) return;
+              setDragX(Math.max(-70, Math.min(70, ev.clientX - d.x)));
+            }}
+            onPointerUp={(ev) => {
+              const d = drag.current;
+              drag.current = null;
+              setDragX(0);
+              if (!d || d.id !== ev.pointerId) return;
+              const dx = ev.clientX - d.x;
+              if (Math.abs(dx) > 38) step(dx < 0 ? 1 : -1);
+            }}
+            onPointerCancel={() => {
+              drag.current = null;
+              setDragX(0);
+            }}
           >
-            <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
-          </button>
-          <button
-            type="button"
-            onClick={() => step(1)}
-            aria-label="Next era"
-            className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
+            <div
+              className={`absolute inset-0 ${dragX !== 0 ? '' : stage === 'out' ? 'anim-swap-out' : 'anim-swap-in'}`}
+              style={dragX !== 0 ? { transform: `translateX(${dragX}px)` } : undefined}
+            >
+              <EraSceneArt e={shown} />
+            </div>
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-between p-1.5 sm:p-2.5">
+              <button
+                type="button"
+                onClick={() => step(-1)}
+                aria-label="Previous era"
+                className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
+              >
+                <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
+              </button>
+              <button
+                type="button"
+                onClick={() => step(1)}
+                aria-label="Next era"
+                className="arcade-arrow pointer-events-auto grid h-11 w-8 place-items-center sm:h-14 sm:w-11"
+              >
+                <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
+              </button>
+            </div>
+            <span className="sr-only" aria-live="polite">
+              {shown.era}, {shown.year}. {sea.name}. {shown.blurb}
+            </span>
+          </div>
+
+          {/* ---- one line of briefing: what she is, where, and what plays ---- */}
+          <div className="shrink-0 truncate rounded-md border border-gold/30 bg-black/30 px-2 py-1 text-[0.68rem] leading-snug">
+            <span className="italic opacity-85">
+              {shown.blurb}
+              {shown.homeWaters ? ` — the ${shown.homeWaters}.` : ''}
+            </span>
+            <span className="opacity-40"> · </span>
+            <span className="text-gold/90">{sea.name}</span>
+            <span className="hidden opacity-40 md:inline"> · </span>
+            <span className="hidden opacity-70 md:inline">
+              {cassettesForEra(shown.id)
+                .map((c) => c.title)
+                .join(' · ')}
+              {' — warship: '}
+              {bossCassette(shown.id).title}
+            </span>
+          </div>
+
+          {/* ---- transport strip: every era as a numbered plate ---- */}
+          <div
+            ref={stripRef}
+            className="scroll-thin relative flex shrink-0 gap-1.5 overflow-x-auto pb-1"
+            role="tablist"
+            aria-label="Era"
           >
-            <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
-          </button>
-        </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-2 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-2 sm:p-3">
-          <div>
-            <div className="font-pirate text-lg leading-none text-parch drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)] sm:text-3xl">
-              {shown.era}
-            </div>
-            <div className="font-pirate text-xs text-gold sm:text-base">{shown.year}</div>
-          </div>
-          <div className="rounded-md border border-gold/60 bg-black/55 px-1.5 py-0.5 text-right sm:px-2 sm:py-1">
-            <div className="arcade-tag text-[0.45rem] sm:text-[0.55rem]">Your waters</div>
-            <div className="font-pirate text-sm leading-tight sm:text-lg">{sea.name}</div>
-            <div className="hidden text-[0.55rem] uppercase tracking-wider opacity-70 sm:block">
-              {sea.subtitle}
-            </div>
+            {ERA_SHIPS.map((e, i) => (
+              <Slot key={e.id} e={e} i={i} on={e.id === era} onPick={onEra} />
+            ))}
           </div>
         </div>
-      </div>
-      <p className="mt-1.5 text-[0.78rem] italic leading-snug opacity-85">
-        {shown.blurb}
-        {shown.homeWaters ? ` — the ${shown.homeWaters}.` : ''}
-      </p>
-      <div className="mt-1.5 rounded-md border border-gold/35 bg-black/30 px-2 py-1">
-        <span className="arcade-tag text-[0.5rem] opacity-90">Songs of this sea</span>
-        <div className="text-[0.72rem] leading-snug opacity-90">
-          {cassettesForEra(shown.id)
-            .map((c) => c.title)
-            .join(' · ')}
-        </div>
-        <div className="text-[0.6rem] italic opacity-60">
-          When a warship closes: {bossCassette(shown.id).title}
-        </div>
-      </div>
 
-      {/* ---- transport strip: every era as a numbered plate ---- */}
-      <div
-        ref={stripRef}
-        className="scroll-thin relative mt-2 flex gap-1.5 overflow-x-auto pb-1.5"
-        role="tablist"
-        aria-label="Era"
-      >
-        {ERA_SHIPS.map((e, i) => (
-          <Slot key={e.id} e={e} i={i} on={e.id === era} onPick={onEra} />
-        ))}
-      </div>
-      </div>
-
-      <HullCard e={shown} />
+        <HullCard e={shown} />
       </div>
     </section>
   );

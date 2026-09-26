@@ -93,7 +93,11 @@ choice is saved and stamped on the Hall of Legends and the epitaph.
 
 ## The eras
 
-Every era is a hero hull, a home sea and its own music. The picker shows three squadrons.
+Every era is a hero hull, a home sea and its own music. The picker shows three squadrons, and each
+era gets its own **title card**: her hulls mid-fight with the weapons of the age (broadside smoke,
+bolt volleys, a jet of Greek fire, a missile run), the weather and the shore those waters are known
+for, and a logo plate with the era's name, year, emblem and sea — all painted in code
+(`src/game/eraArt/`), live at 30fps. The screen fits the cabinet: on a desktop nothing scrolls.
 
 | Squadron | Eras |
 | --- | --- |
@@ -203,6 +207,7 @@ Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
 | `src/game/worlds.ts` | 23 regions: water palettes, island themes, peoples, village names |
 | `src/game/terrain.ts` · `render.ts` | Island and water painting, forts, ruins, pickups, vignettes |
 | `src/game/sprites/` | Hull, deck, rigging and flag art, **baked once per hull and cached** |
+| `src/game/eraArt/` | The era picker's title cards: per-era action scenes, coasts, weather, emblems and logo plates |
 | `src/game/settlements.ts` | Peoples, pacts, patience, grievance and cooling rules |
 | `src/game/boarding.ts` | Surrender chances and boarding outcomes (pure tables) |
 | `src/game/audio.ts` · `music/` | Synthesised SFX, the cassette player, ABC notation, all songs |
