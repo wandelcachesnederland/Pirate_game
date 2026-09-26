@@ -724,3 +724,60 @@ canvas {
     animation: none;
   }
 }
+
+/* The first port of call after the studio card. */
+.language-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at top, #163b50, #071421 80%);
+  color: var(--color-parch);
+}
+.language-panel {
+  width: min(100%, 760px);
+  margin: auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  text-align: center;
+}
+.language-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+.language-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 8px;
+  border: 1px solid #f3e2b344;
+  border-radius: 10px;
+  background: #ffffff06;
+  font-size: 18px;
+  cursor: pointer;
+}
+.language-card img {
+  object-fit: cover;
+  border-radius: 3px;
+  box-shadow: 0 3px 12px #0006;
+}
+.language-card[aria-pressed='true'] {
+  border-color: var(--color-gold);
+  background: #f5c54212;
+}
+.language-card:hover {
+  background: #f5c54225;
+  border-color: var(--color-gold);
+}
+.language-card:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 3px;
+}

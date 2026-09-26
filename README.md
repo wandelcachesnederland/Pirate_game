@@ -388,3 +388,9 @@ Built with React 19, Vite, Tailwind CSS and TypeScript. Type comes from *Pirata 
 The music is period-*inspired*, not documentary: some tapes are arrangements of traditional tunes, others
 are newly composed in the idioms of their sea, and the boss dirges are cut from the era's own tapes.
 Historical framing is arcade interpretation throughout — the trappings are real, the numbers are a game.
+
+**Startup language selection.** After the Bit Squirrel card, choose one of the 11 supported
+languages using its flag and native name. Selecting a language saves the preference and
+opens the title screen; the menu language picker remains available for later changes.
+The responsive selector supports touch and Tab/Enter keyboard navigation. Flag SVGs are
+bundled for offline use from `flag-icons` (MIT; see `src/assets/flags/LICENSE`).

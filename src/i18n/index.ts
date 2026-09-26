@@ -80,13 +80,20 @@ export function loadLocale(): LocaleId {
   return 'en';
 }
 
+// Node tests can use translations without a browser document.
+function updateDocumentLanguage(lng: string) {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = LOCALE_BCP47[lng as LocaleId] ?? 'en-US';
+  }
+}
+
 export function saveLocale(lng: LocaleId) {
   try {
     window.localStorage.setItem(LANG_KEY, lng);
   } catch {
     /* ignore */
   }
-  document.documentElement.lang = LOCALE_BCP47[lng];
+  updateDocumentLanguage(lng);
 }
 
 void i18n.use(initReactI18next).init({
@@ -98,7 +105,7 @@ void i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
-document.documentElement.lang = LOCALE_BCP47[i18n.language as LocaleId] ?? 'en-US';
+updateDocumentLanguage(i18n.language);
 
 export function setLocale(lng: LocaleId) {
   saveLocale(lng);

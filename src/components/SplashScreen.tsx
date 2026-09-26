@@ -35,7 +35,7 @@ const prefersReducedMotion = () =>
  * The studio card shown at start-up: the Bit Squirrel mascot trots onto an
  * empty plate, flicks its tail and blinks, and the studio name stamps down one
  * letter per beat of the sting — ending on the still logo. Then logo and music
- * fade out together onto the title screen. Any key or tap skips it.
+ * fade out together onto the language selection screen. Any key or tap skips it.
  *
  * Browsers only let sound start after a gesture. If autoplay is blocked the
  * mascot waits on its own plate with a blinking "press any key" — that press
