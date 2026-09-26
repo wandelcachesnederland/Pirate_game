@@ -21,7 +21,7 @@ import { EraCarousel } from './EraCarousel';
 import { HeroShipPicker } from './HeroShipPicker';
 import { TitleStep } from './TitleStep';
 import { PerilStep } from './PerilStep';
-import { ModeSelectScreen } from './ModeSelectScreen';
+import { ModeSelectScreen, type GameModeId } from './ModeSelectScreen';
 import { ArcadeSelectScreen, type ArcadeModeId } from './ArcadeSelectScreen';
 import { CampaignIntroScreen } from './CampaignIntroScreen';
 import { ERA_FLAGSHIPS, ERA_SHIPS, eraShip } from '../game/ships/era';
@@ -42,6 +42,8 @@ interface Props {
   onDifficulty: (id: DifficultyId) => void;
   arcadeMode: ArcadeModeId;
   onArcadeMode: (id: ArcadeModeId) => void;
+  /** Sent when the player picks a mode that leaves the arcade flow (Trade). */
+  onMode?: (mode: GameModeId) => void;
   /** What the menu's deck is playing — named on the attract screen. */
   nowPlaying?: string;
 }
@@ -519,6 +521,7 @@ export function StartScreen({
   onDifficulty,
   arcadeMode,
   onArcadeMode,
+  onMode,
   nowPlaying,
 }: Props) {
   const [step, setStep] = useState<Step>(0);
@@ -682,7 +685,13 @@ export function StartScreen({
             {step === 0 ? (
               <TitleStep hiScore={hiScore} scores={scores} isTouch={isTouch} onStart={() => go(1)} />
             ) : step === 1 ? (
-              <ModeSelectScreen isTouch={isTouch} onSelect={() => go(2)} />
+              <ModeSelectScreen
+                isTouch={isTouch}
+                onSelect={(m) => {
+                  if (m === 'trade') onMode?.(m);
+                  else go(2);
+                }}
+              />
             ) : step === 2 ? (
               <ArcadeSelectScreen isTouch={isTouch} onSelect={selectArcadeMode} />
             ) : step === 3 ? (
