@@ -424,6 +424,12 @@ export function drawEmblem(ctx: CanvasRenderingContext2D, f: Faction, mx: number
       ctx.lineTo(cx + 1.6, 2.6);
       ctx.stroke();
       break;
+    case 'somalia':
+      // the white star of the Somali flag
+      ctx.fillStyle = '#f7f7f2';
+      star5(ctx, cx, 0, 3.6);
+      ctx.fill();
+      break;
     case 'tripoli':
       // crescent and star, the corsair mark
       ctx.fillStyle = '#f2f0e8';
@@ -914,6 +920,15 @@ export function drawFlagArt(ctx: CanvasRenderingContext2D, f: Faction, w: number
         ctx.arc(cx, cy, r, 0, TAU);
         ctx.fill();
       }
+      break;
+    }
+    case 'somalia': {
+      // sky blue with the white five-pointed star of 1954
+      ctx.fillStyle = '#4189dd';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#ffffff';
+      star5(ctx, w * 0.5, h * 0.52, Math.min(w, h) * 0.34);
+      ctx.fill();
       break;
     }
     case 'iran': {

@@ -7,6 +7,9 @@ import {
   Flame,
   Grape,
   Hammer,
+  Swords,
+  Triangle,
+  LifeBuoy,
   Link,
   Music,
   Sailboat,
@@ -38,6 +41,9 @@ export const UPGRADE_ICONS: Record<UpgradeId, LucideIcon> = {
   chain: Link,
   grapeshot: Grape,
   chaser: ChevronsUpDown,
+  ram: Triangle,
+  spikes: Swords,
+  fenders: LifeBuoy,
 };
 
 export function KeyCap({ children, className }: { children: ReactNode; className?: string }) {

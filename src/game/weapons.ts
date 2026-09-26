@@ -1,3 +1,4 @@
+import { fittingUpgradeForEra, isFittingSlot } from './hullFittings';
 import type { EraId, ProjectileKind, ShipDef, UpgradeDef, UpgradeId } from './types';
 
 export type { ProjectileKind };
@@ -20,7 +21,7 @@ export const ERA_WEAPONS: Record<EraId, WeaponTechnology> = {
   barbary: 'gunpowder', ww1: 'gunpowder', ww2: 'gunpowder', hormuz: 'gunpowder',
   phoenicia: 'mechanical', hanse: 'mechanical',
   portugal: 'gunpowder', armada: 'gunpowder', dutch: 'gunpowder', ottoman: 'gunpowder',
-  predread: 'gunpowder', falklands: 'gunpowder',
+  predread: 'gunpowder', falklands: 'gunpowder', somali: 'gunpowder',
 };
 
 export function usesGunpowder(era: EraId): boolean {
@@ -94,6 +95,18 @@ export const ERA_ARMAMENTS: Record<EraId, Armament> = {
   barbary: CANNON, ww1: CANNON, ww2: CANNON, hormuz: CANNON,
   portugal: CANNON, armada: CANNON, dutch: CANNON, ottoman: CANNON,
   predread: CANNON, falklands: CANNON,
+  // RPG-7 rockets from the mothership, AK and PKM fire from the skiffs
+  somali: {
+    // the navies' deck guns and the skiffs' DShKs fly as shot; the RPG-7 is
+    // carried per hull (`ShipDef.projectile`) by the mothership and the skiffs
+    heavy: 'cannonball',
+    light: 'cannonball',
+    heavyName: 'RPG-7s & DShK heavy machine guns',
+    lightName: 'AK-47s & PKM machine guns',
+    summary: 'RPG-7 rockets, AK-47s and belt-fed PKMs from skiffs and mothership',
+    volleyName: 'FULL AUTO!',
+    weaponWord: 'RPGs & rifles',
+  },
 
   // ---- pre-gunpowder seas
   viking: archery('bolt', 'arrow', 'Winch-drawn bolt launchers', 'Bow crews',
@@ -236,7 +249,29 @@ const INCENDIARY_UPGRADES: Partial<Record<UpgradeId, [string, string]>> = {
   chaser: ['Bow Siphons', 'Bow & stern siphons fire automatically at pursuers'],
 };
 
+/** The refit cards aboard a Somali pirate mothership. */
+const SOMALI_UPGRADES: Partial<Record<UpgradeId, [string, string]>> = {
+  cannons: ['More RPG Gunners', '+1 rocket launcher on each side'],
+  reload: ['Veteran Gunmen', 'Reload 15% faster'],
+  damage: ['Tandem Warheads', '+25% rocket damage'],
+  range: ['Extra Propellant', '+18% weapon range & velocity'],
+  sails: ['Twin Yamaha Outboards', '+10% top speed'],
+  rudder: ['Hydraulic Steering', '+18% turning speed'],
+  hull: ['Welded Scrap Plating', '+30 max hull & full repair'],
+  magnet: ['Satellite Phone', 'Grab loot from much further away'],
+  carpenter: ['Welder from Eyl', 'Repair 1.5 hull every second'],
+  swivel: ['PKM Gunners on Deck', 'Machine guns auto-fire at close foes'],
+  chain: ['Sniper on the Wheelhouse', 'Your hits slow enemy ships'],
+  grapeshot: ['Full Auto', 'R: every rifle aboard empties a magazine all round'],
+  chaser: ['Bow & Stern PKMs', 'Machine guns fore and aft fire on their own'],
+};
+
 export function upgradeForEra(def: UpgradeDef, era: EraId): UpgradeDef {
+  if (isFittingSlot(def.id)) return fittingUpgradeForEra(def, era);
+  if (era === 'somali') {
+    const copy = SOMALI_UPGRADES[def.id];
+    return copy ? { ...def, name: copy[0], desc: copy[1] } : def;
+  }
   if (usesGunpowder(era)) return def;
   const arm = armamentFor(era);
   const table = isIncendiary(arm.heavy) ? INCENDIARY_UPGRADES : MECHANICAL_UPGRADES;

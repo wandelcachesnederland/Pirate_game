@@ -4,6 +4,7 @@ import { drawFlagArt, drawShip, drawShipShadow } from '../sprites';
 import { TAU } from '../math';
 import { WORLD, CHASER, FONT, FELL, P_SMOKE, P_FIRE, P_SPARK, P_SPLINTER, P_DROP, P_RING, P_FOAM, P_PLANK, P_BUBBLE, P_SPARKLE, P_FLASH, P_SAND, P_ARROW, ADDITIVE, clamp } from './constants';
 import { EngineHud } from './hud';
+import { fittingsFor } from '../hullFittings';
 
 /** Frame rendering: water, islands, ships, projectiles, particles, then the HUD on top. */
 export abstract class EngineWorldRender extends EngineHud {
@@ -45,7 +46,10 @@ export abstract class EngineWorldRender extends EngineHud {
     for (const s of this.ships) if (this.shipVisible(s)) drawShipShadow(ctx, s);
     for (const s of this.ships)
       if (s !== p && this.shipVisible(s)) drawShip(ctx, s, this.time, this.windAngle, s.falseFlag ?? s.def.faction);
-    if (p && !p.dead && this.shipVisible(p)) drawShip(ctx, p, this.time, this.windAngle, p.falseFlag ?? p.def.faction);
+    if (p && !p.dead && this.shipVisible(p)) {
+      drawShip(ctx, p, this.time, this.windAngle, p.falseFlag ?? p.def.faction);
+      this.drawHullFittings(ctx);
+    }
     this.drawBurning(ctx);
     if (this.screen !== 'menu') this.drawReloadArcs(ctx);
     this.drawBalls(ctx);
@@ -314,6 +318,79 @@ export abstract class EngineWorldRender extends EngineHud {
         ctx.globalAlpha = 1;
       }
     }
+  }
+
+  /** The player's ram, side spikes and fenders, painted over her hull. */
+  protected drawHullFittings(ctx: CanvasRenderingContext2D) {
+    const p = this.player;
+    const { ram, spikes, fenders } = this.pstats;
+    if (!p || p.sinking >= 0 || ram + spikes + fenders <= 0) return;
+    const kit = fittingsFor(this.eraId);
+    const hl = p.def.length / 2;
+    const hw = p.def.width / 2;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.angle);
+    ctx.lineJoin = 'round';
+    if (fenders > 0) {
+      // fenders hang along both sides: rope, hide, tyres, bundles
+      const n = 2 + fenders;
+      ctx.fillStyle = kit.pad;
+      ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+      ctx.lineWidth = 0.8;
+      for (let i = 0; i < n; i++) {
+        const x = -hl * 0.55 + (hl * 1.05 * i) / Math.max(1, n - 1);
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          ctx.ellipse(x, side * (hw + 1.2), 2.6, 1.7, 0, 0, TAU);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+    }
+    if (spikes > 0) {
+      // spikes, blades, hooks or pots: a row of teeth along each rail
+      const n = 3 + spikes * 2;
+      ctx.fillStyle = kit.metal;
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 0.6;
+      const len = 3 + spikes;
+      for (let i = 0; i < n; i++) {
+        const x = -hl * 0.6 + (hl * 1.15 * i) / Math.max(1, n - 1);
+        for (const side of [-1, 1]) {
+          const y0 = side * (hw - 0.5);
+          ctx.beginPath();
+          ctx.moveTo(x - 1.6, y0);
+          ctx.lineTo(x + 1.2, y0 + side * len);
+          ctx.lineTo(x + 1.6, y0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+    }
+    if (ram > 0) {
+      // the ram: a wedge past the stem, longer and broader with each refit
+      const reach = 6 + ram * 3;
+      const base = hw * (0.45 + ram * 0.08);
+      const x0 = hl - 4;
+      ctx.fillStyle = kit.metal;
+      ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x0, -base);
+      ctx.lineTo(x0 + reach, 0);
+      ctx.lineTo(x0, base);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath();
+      ctx.moveTo(x0 + 1, -base * 0.5);
+      ctx.lineTo(x0 + reach - 1.5, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   protected drawReloadArcs(ctx: CanvasRenderingContext2D) {

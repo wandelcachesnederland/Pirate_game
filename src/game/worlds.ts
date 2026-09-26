@@ -812,6 +812,36 @@ export const REGIONS: RegionDef[] = [
     },
     people(0.7, [0, 70], 0.18, ['Tripoli', 'Derna', 'Benghazi', 'Susa', 'Misrata', 'Zuwarah', 'Jerba']),
   ),
+  seaRegion(
+    'gulfOfAden',
+    'The Gulf of Aden',
+    'Somali Basin · 2009',
+    'Hard blue water, bleached coral sand, bare red jebels and dragon’s blood trees — pirate alley.',
+    {
+      water: ['#12678f', '140,225,240', '2,30,70'],
+      shallows: '130,225,215',
+      sand: ['#d8c49a', '#f4e8c8'],
+      foliage: ['#6f6e3a', ['#7c7a44', '#8e8a50', '#5c5a30', '#a09a5c', '#6f6e3a', '#827e48']],
+      peaks: ['#9a5a3a', '#b8764e', '#d49a72'],
+      palm: ['#3f5a2e', '#6e8a44', '#7a5a38'],
+      terrain: {
+        // coral beaches under bare red jebels, Socotra's umbrella trees and
+        // a few date palms, whitewashed coral-stone towns, Guardafui's light
+        shape: 'craggy',
+        shore: 'sand',
+        ground: 'barren',
+        groundColor: '#b89a6c',
+        trees: [['dragonsBlood', 0.32], ['date', 0.18]],
+        peak: 'jebel',
+        village: 'whitewash',
+        landmarks: ['lighthouse', 'watchtower', 'oasis'],
+        offshore: 'rocks',
+        stone: '#e4dcc8',
+        pool: '#2f8f96',
+      },
+    },
+    people(0.66, [0, 70], 0.14, ['Eyl', 'Hobyo', 'Harardhere', 'Garacad', 'Bosaso', 'Caluula', 'Qandala', 'Hafun', 'Socotra', 'Abd al Kuri']),
+  ),
 ];
 
 export const DEFAULT_REGION: RegionId = 'caribbean';
