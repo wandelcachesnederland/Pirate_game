@@ -20,7 +20,7 @@ import { hud } from './dict/hud';
 import { hero } from './dict/hero';
 
 export type { LocaleId };
-export const LOCALES: LocaleId[] = ['en', 'es', 'fr', 'de', 'nl', 'pt', 'ja', 'zh', 'id', 'th', 'vi'];
+export const LOCALES: LocaleId[] = ['en', 'es', 'fr', 'de', 'nl', 'pt', 'ja', 'zh', 'id', 'th', 'vi', 'ar', 'sw', 'ha', 'yo'];
 
 /** Each language's own name, for the picker. */
 export const LOCALE_NAMES: Record<LocaleId, string> = {
@@ -35,6 +35,10 @@ export const LOCALE_NAMES: Record<LocaleId, string> = {
   id: 'Bahasa Indonesia',
   th: 'ไทย',
   vi: 'Tiếng Việt',
+  ar: 'العربية',
+  sw: 'Kiswahili',
+  ha: 'Hausa',
+  yo: 'Yorùbá',
 };
 
 /** BCP-47 tags for locale-aware number formatting. */
@@ -50,7 +54,18 @@ export const LOCALE_BCP47: Record<LocaleId, string> = {
   id: 'id-ID',
   th: 'th-TH',
   vi: 'vi-VN',
+  ar: 'ar-SA',
+  sw: 'sw-TZ',
+  ha: 'ha-NG',
+  yo: 'yo-NG',
 };
+
+/** Right-to-left locales: the document root gets `dir="rtl"` while one is active. */
+export const RTL_LOCALES: LocaleId[] = ['ar'];
+
+export function isRtl(lng: string): boolean {
+  return (RTL_LOCALES as string[]).includes(lng);
+}
 
 const dicts = {
   meta, common, menu, screens, peril, upgrades, eras, traits,
@@ -84,6 +99,7 @@ export function loadLocale(): LocaleId {
 function updateDocumentLanguage(lng: string) {
   if (typeof document !== 'undefined') {
     document.documentElement.lang = LOCALE_BCP47[lng as LocaleId] ?? 'en-US';
+    document.documentElement.dir = isRtl(lng) ? 'rtl' : 'ltr';
   }
 }
 

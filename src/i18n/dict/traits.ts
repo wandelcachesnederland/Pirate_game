@@ -1961,4 +1961,716 @@ const vi: TraitsDict = {
   },
 };
 
-export const traits: Dict<TraitsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };
+const ar: TraitsDict = {
+  golden: {
+    name: 'أعلام زائفة وجائزة',
+    pitch: 'ارفع أعلامًا زائفة حتى أول طلقة — جائزتك تُسمّن كل غنيمة.',
+    hint: 'احبس النار لتبقى خفيًا؛ أغرق أبدان البحرية لترفع جائزتك.',
+  },
+  exploration: {
+    name: 'مياه مجهولة',
+    pitch: 'الضباب يخفي الخريطة — أبحر إلى كل جزيرة لرسمها مقابل ذهب.',
+    hint: 'ارسم الجزر مقابل ذهب، واحتفظ بالفاكهة في العنابر ضد الإسقربوط.',
+  },
+  napoleonic: {
+    name: 'جهة الريح',
+    pitch: 'السفينة في مهب الريح تضرب أقوى — ناور للجهة ثم أشر.',
+    hint: 'قاتل من مهب الريح لـ+25% قذف؛ إشارة تعزز كل موجة.',
+  },
+  barbary: {
+    name: 'جزية أو حرب',
+    pitch: 'نادِ التجار (F) مطالبًا بالجزية — ذهب دون قتال.',
+    hint: 'اضغط F قرب تاجر لطلب الجزية. من يدفع وتعفو عنه يدفع مجددًا.',
+  },
+  viking: {
+    name: 'الغارة الساحلية',
+    pitch: 'ارشُ على شاطئ برّي لنهبه — وادفع عن الشاطئ قبل فرقة الحرب.',
+    hint: 'انجرف ببطء إلى الشاطئ للنهب؛ اضغط الشراع (W) للدفع.',
+  },
+  ironclad: {
+    name: 'زوايا الحديد',
+    pitch: 'الدروع المائلة تصدّ القذف من الأمام؛ والألغام تنجرف في القنوات.',
+    hint: 'اهجم بالمقدمة: نصف الضرر من الأمام. واحذر الألغام المنجرفة.',
+  },
+  ww1: {
+    name: 'غواصات وسماعات مائية',
+    pitch: 'الغواصات تسير مغمورة — رنين السماعة يجدها؛ اصدمها.',
+    hint: 'راقب الرنين: الزوارق المكشوفة تطفو للهجوم. اصدمها.',
+  },
+  ww2: {
+    name: 'معارك ليلية',
+    pitch: 'كل موجة زوجية تُخاض ليلًا على ضوء القذائف النجمية — مقابل أجر الخطر.',
+    hint: 'ليلًا يطلق العدو نصف المدى. اقترب واكسب المكافأة.',
+  },
+  hormuz: {
+    name: 'قفل الصواريخ',
+    pitch: 'الصواريخ القادمة تصرخ بنغمة قفل — استدر بحدة لكسر القفل.',
+    hint: 'نغمة القفل؟ استدر بحدة عبر الصاروخ. واعفُ عن الناقلات المحايدة.',
+  },
+  roman: {
+    name: 'الغراب',
+    pitch: 'المس عدوًا فيسقط الجسر المشوك — واستولِ عليها فورًا.',
+    hint: 'اصدم جنبًا: الأعداء المقيدون يتباطؤون، والغنائم تستولي على نفسها.',
+  },
+  greek: {
+    name: 'العبور المزدوج',
+    pitch: 'جِدّف مخترقًا خط العدو لتصعق طاقمه.',
+    hint: 'مرّ بسرعة بمحاذاة بدن العدو من جانب لآخر لتصعق تلقيمه.',
+  },
+  arab: {
+    name: 'امتطِ الموسم',
+    pitch: 'الموسم ينعكس حسب التقويم — والأبدان اللاتينية تطير مع الريح.',
+    hint: 'أبحر مع الموسم (+سرعة)؛ واكمن لطرق التجارة في مهب الريح.',
+  },
+  chinese: {
+    name: 'القلعة العائمة',
+    pitch: 'ألقِ المرساة (T أو أشرعة مطوية) لتصبح قلعة — أو نادِ سفن الجزية.',
+    hint: 'T: ألقِ المرساة لـ+ضرر. F قرب تاجر: ميثاق جزية بدل النهب.',
+  },
+  japanese: {
+    name: 'خطاطيف وتيبو',
+    pitch: 'الأعداء يتشبثون بك ويجرّونك — فأجب بوابل تيبو (T).',
+    hint: 'T: وابل تيبو للأمام. اقتل المتشبثين سريعًا وإلا جرّوك للأسفل.',
+  },
+  maori: {
+    name: 'الثأر',
+    pitch: 'كل إغراق يسمّي منتقمين — اقتل المعلَّمين لتكدّس المانا.',
+    hint: 'الأقارب المعلَّمون يطاردونك؛ قتلهم يكدّس المانا (ضرر) — استمر في إطعامه.',
+  },
+  hawaii: {
+    name: 'وحّد الجزر',
+    pitch: 'اهزم زوارق كل جزيرة لتجعلها تابعة بجزية كل موجة.',
+    hint: 'أغرق 3 زوارق لجزيرة واحدة لتتبعك. وحّدها كلها.',
+  },
+  macedon: {
+    name: 'برج حصار عائم',
+    pitch: 'مقاليع الحصار أطول مدى من كل شيء — لكن البعوض يحتشد.',
+    hint: 'مداك شاسع؛ والصغار يموتون على بدنك. استمر في الالتفاف.',
+  },
+  maya: {
+    name: 'حرب الشعاب',
+    pitch: 'العوارض الإسبانية تنزف على الشعاب؛ وزوارقك تمرّ حرّة.',
+    hint: 'قاتل داخل حلقة الشعاب. نادِ أول غريب لهدية.',
+  },
+  inca: {
+    name: 'همبولت والإسبونديلوس',
+    pitch: 'امتطِ ممرات التيار؛ واغُص في مراقد الأصداف لذهب.',
+    hint: 'التيارات تدفع كل الأبدان. تمهّل ببطء فوق المراقد الوردية للغوص.',
+  },
+  lepanto: {
+    name: 'الملحمة الكبرى',
+    pitch: 'لا نهاية للاستيلاء في الملحمة — سلسل غنيمة إلى غنيمة.',
+    hint: 'مدى الاستيلاء طويل؛ وكل غنيمة تجدّف برجال محررين إلى طاقمك.',
+  },
+  korea: {
+    name: 'مدّ ميونغنيانغ',
+    pitch: 'تيار المضيق ينعكس — وسفينة السلحفاة بالكاد تشعر به.',
+    hint: 'أغوِ الأعداء الخفاف إلى المدّ؛ يجرفهم إلى الصخور والمدافع.',
+  },
+  byzantium: {
+    name: 'السلسلة والبحر المحترق',
+    pitch: 'السلسلة توجّه العدو إلى فجوة واحدة؛ والنار الإغريقية تنجرف وتنتشر.',
+    hint: 'امسك فجوة السلسلة؛ بقعك تنجرف مع الريح وتبقى.',
+  },
+  egypt: {
+    name: 'رماة شاطئ فرعون',
+    pitch: 'الشواطئ الصديقة تمطر وابلًا لأجلك؛ والقصب يخفي الكمائن.',
+    hint: 'قاتل قرب الشواطئ الصديقة لدعم الرماة. وامسح القصب.',
+  },
+  chola: {
+    name: 'عبر الخليج',
+    pitch: 'بعيدًا عن الديار: استنزاف مضاعف للمؤن، وذهب معابد مضاعف، وعواصف موسمية.',
+    hint: 'المخازن تحترق بسرعة مضاعفة — لكن الجوائز الكبرى تدفع ضعفًا.',
+  },
+  vietnam: {
+    name: 'أوتاد باك دانغ',
+    pitch: 'عند الجزر تكشّر حواجز الأوتاد عن أنيابها للعوارض العميقة.',
+    hint: 'راقب ساعة المدّ: أغوِ الأبدان العميقة فوق الأوتاد عند الجزر.',
+  },
+  aztec: {
+    name: 'جسور تيسكوكو',
+    pitch: 'متاهة جسور — الزوارق تنسلّ من الفجوات التي لا تسع البريغانتينات.',
+    hint: 'قاتل من الفجوات؛ الأبدان الإسبانية العميقة تعلق وتزحف.',
+  },
+  phoenicia: {
+    name: 'رحلة الأرجوان',
+    pitch: 'انقل البضائع بين المرافئ الصديقة لربح يتصاعد مع الموج.',
+    hint: 'المس حصنًا صديقًا للتحميل، وآخر للبيع. واعفُ عن شركائك.',
+  },
+  hanse: {
+    name: 'ضريبة الرابطة',
+    pitch: 'نادِ تجار القوافل (F) لضريبة الرابطة — أو قاتلهم جميعًا.',
+    hint: 'F قرب تاجر: اطلب الضريبة. الرافضون يستدعون القافلة كلها.',
+  },
+  portugal: {
+    name: 'الموسم والفيتوريا',
+    pitch: 'الريح تنعكس كل 3 أمواج؛ وحصون الفيتوريا تصلحك وتطعمك.',
+    hint: 'انتبه لتقويم الموسم؛ وتمهّل قرب الحصون الصديقة للتعافي.',
+  },
+  armada: {
+    name: 'عواصف وسفن نار',
+    pitch: 'العواصف تبعثر كل تشكيل؛ والهلال يحرس كنزه.',
+    hint: 'العواصف تدفع كل الأبدان مع الريح. اكسر الهلال للجائزة الكبرى.',
+  },
+  dutch: {
+    name: 'رمال متحركة',
+    pitch: 'الضحالة الرملية تنجرف عبر التكسل وتُعلِق العوارض الإنجليزية العميقة.',
+    hint: 'بدنك الضحل ينزلق فوق الضحالة — أغوِ الصيادين العميقين إليها.',
+  },
+  ottoman: {
+    name: 'اندفاع المجاديف',
+    pitch: 'اندفع (T) نحو الصدم — والقوادس المستولى عليها تجدّف برجال محررين إليك.',
+    hint: 'T: دفعة اندفاع، ثم مجاديف منهكة. استولِ للأيدي لا للذهب.',
+  },
+  predread: {
+    name: 'اعبر الـT',
+    pitch: 'امسح المقدمات والمؤخرات؛ وثبّت على هدف واحد لتحديد المدى.',
+    hint: 'أطلق على المقدمة/المؤخرة لـ+50%. والزم ضحية واحدة لتصويب أدق.',
+  },
+  falklands: {
+    name: 'تحذير غارة جوية',
+    pitch: 'الإكزوسيه تنطلق من خارج الشاشة — امشط الأثر وإلا أُصبت.',
+    hint: 'سهم الغارة؟ استدر نحوه واستمر في الحركة. تجهيزات التشويش تساعد.',
+  },
+  somali: {
+    name: 'خطف وفدية',
+    pitch: 'التجار المستولى عليهم يصبحون رهائن — والفدية تتصاعد ما دمت ممسكًا.',
+    hint: 'استولِ على التجار ثم انجُ: الفدية تنمو كل ثانية.',
+  },
+};
+
+const sw: TraitsDict = {
+  golden: {
+    name: 'Bendera za Uongo na Zawadi',
+    pitch: 'Paa bendera za uongo hadi risasi ya kwanza — zawadi yako hunenepesha kila teka.',
+    hint: 'Zuia moto ubaki usionekane; zamisha meli za jeshi kuinua zawadi yako.',
+  },
+  exploration: {
+    name: 'Maji Yasiyojulikana',
+    pitch: 'Ukungu huficha ramani — safiri hadi kila kisiwa ukichore kwa dhahabu.',
+    hint: 'Chora visiwa kwa dhahabu, na uweke matunda galani dhidi ya kiseyeye.',
+  },
+  napoleonic: {
+    name: 'Upande wa Upepo',
+    pitch: 'Meli ya juu ya upepo hupiga kwa nguvu — pindua kwa upande, kisha ashiria.',
+    hint: 'Pigana kutoka juu ya upepo kwa +25% risasi; ishara huimarisha kila wimbi.',
+  },
+  barbary: {
+    name: 'Kodi au Vita',
+    pitch: 'Waita wafanyabiashara (F) kudai kodi — dhahabu bila pigano.',
+    hint: 'Bonyeza F karibu na mfanyabiashara kudai kodi. Wanaolipa ukiwaacha watalipa tena.',
+  },
+  viking: {
+    name: 'Uvamizi wa Ufukwe',
+    pitch: 'Panda ufukwe wa pori kuuvamia — sukuma kuondoka kabla ya kikosi cha vita.',
+    hint: 'Elea polepole ufukwoni kuvamia; bonyeza tanga (W) kusukuma kuondoka.',
+  },
+  ironclad: {
+    name: 'Pembe za Chuma',
+    pitch: 'Silaha zilizoinama huzuia risasi kutoka mbele; mabomu huelea kwenye mifereji.',
+    hint: 'Shambulia kwa pua: nusu uharibifu kutoka mbele. Jihadhari na mabomu yanayoelea.',
+  },
+  ww1: {
+    name: 'Manowari na Haidrofoni',
+    pitch: 'Manowari hukimbia chini ya maji — mlio wa haidrofoni huzipata; zigonge.',
+    hint: 'Tazama mlio: boti zilizofichuliwa zinaibuka kushambulia. Zigonge.',
+  },
+  ww2: {
+    name: 'Mapigano ya Usiku',
+    pitch: 'Kila wimbi la pili hupiganwa usiku kwa makombora ya nyota — kwa malipo ya hatari.',
+    hint: 'Usiku adui hupiga nusu masafa. Karibia na upate bonasi.',
+  },
+  hormuz: {
+    name: 'Kufungwa kwa Roketi',
+    pitch: 'Roketi zinazoingia hupiga sauti ya kufungwa — geuka vikali kuvunja kufungwa.',
+    hint: 'Sauti ya KUFUNGWA? Geuka vikali kuvuka roketi. Waache meli za mafuta zisizoegemea upande.',
+  },
+  roman: {
+    name: 'Korvus',
+    pitch: 'Mguse adui na daraja lenye miiba linaanguka — mteke papo hapo.',
+    hint: 'Gonga ubavu: maadui walioshikwa hupungua kasi, na mateka hujiteka.',
+  },
+  greek: {
+    name: 'Diekplous',
+    pitch: 'Vuta moja kwa moja kupitia mstari wa adui kumshitua mabaharia wake.',
+    hint: 'Pita kwa kasi kando ya mwili wa adui kutoka ubavu hadi ubavu kumshitua upakiaji wake.',
+  },
+  arab: {
+    name: 'Panda Musimu',
+    pitch: 'Musimu hubadilika kwa kalenda — meli za tanga za lateen huruka na upepo.',
+    hint: 'Safiri na musimu (+kasi); wavizie njia za biashara za chini ya upepo.',
+  },
+  chinese: {
+    name: 'Ngome Inayoelea',
+    pitch: 'Tia nanga (T au nguzo tupu) uwe ngome — au waita meli za kodi.',
+    hint: 'T: tia nanga kwa +uharibifu. F karibu na mfanyabiashara: mkataba wa kodi badala ya nyara.',
+  },
+  japanese: {
+    name: 'Ndoano na Teppo',
+    pitch: 'Maadui hukushika na kukuvuta — jibu na mvua ya teppo (T).',
+    hint: 'T: mvua ya teppo mbele. Waua wanaokushika haraka au utavutwa chini.',
+  },
+  maori: {
+    name: 'Utu',
+    pitch: 'Kila kuzamisha hutaja walipiza kisasi — waua waliowekwa alama kujaza Mana.',
+    hint: 'Jamaa waliowekwa alama wanakuwinda; kuwaua hujaza Mana (uharibifu) — endelea kuilisha.',
+  },
+  hawaii: {
+    name: 'Unganisha Visiwa',
+    pitch: 'Yashinde mitumbwi ya kila kisiwa ukiyafanya kibaraka kwa kodi ya kila wimbi.',
+    hint: 'Zamisha boti 3 za kisiwa kimoja kukifanya kibaraka. Viunganishe vyote.',
+  },
+  macedon: {
+    name: 'Mnara wa Kuzingira Unaowelea',
+    pitch: 'Manati ya kuzingira yana masafa kuliko vyote — lakini mbu huzagaa.',
+    hint: 'Masafa yako ni makubwa; wadogo hufa kwenye mwili wako. Endelea kugeuka.',
+  },
+  maya: {
+    name: 'Ugaidi wa Miamba',
+    pitch: 'Meli za Kihispania hutokwa damu kwenye miamba; mitumbwi yako hupita huru.',
+    hint: 'Pigana ndani ya pete ya miamba. Mwaita mgeni wa kwanza kwa zawadi.',
+  },
+  inca: {
+    name: 'Humboldt na Spondylus',
+    pitch: 'Panda njia za mikondo; zamia kwenye matanda ya makome kwa dhahabu.',
+    hint: 'Mikondo husukuma meli zote. Kaa polepole juu ya matanda ya waridi kuzamia.',
+  },
+  lepanto: {
+    name: 'Mapigano Makuu',
+    pitch: 'Hakuna mwisho wa kuteka kwenye mapigano — unganisha teka hadi teka.',
+    hint: 'Ufikiaji wa kuteka ni mrefu; kila teka huwavuta watu walioachiliwa kwa mabaharia wako.',
+  },
+  korea: {
+    name: 'Wimbi la Myeongnyang',
+    pitch: 'Mkondo wa mlango hubadilika — meli yako ya kobe hauskii.',
+    hint: 'Vutia maadui wepesi kwenye wimbi; huwasomba kwenye miamba na mizinga.',
+  },
+  byzantium: {
+    name: 'Mnyororo na Bahari Inayowaka',
+    pitch: 'Mnyororo huingiza adui kwenye pengo moja; moto wa Kigiriki huelea na kuenea.',
+    hint: 'Shika pengo la mnyororo; mafuta yako huelea na upepo na hudumu.',
+  },
+  egypt: {
+    name: 'Wapiga Mishale wa Ufukwe wa Farao',
+    pitch: 'Fukwe za kirafiki hupiga mvua kwa ajili yako; matete huficha wanaovizia.',
+    hint: 'Pigana karibu na fukwe za kirafiki kwa msaada wa wapiga mishale. Fagia matete.',
+  },
+  chola: {
+    name: 'Kuvuka Ghuba',
+    pitch: 'Mbali na nyumbani: matumizi mara mbili ya akiba, dhahabu mara mbili ya hekalu, dhoruba za musimu.',
+    hint: 'Akiba huungua mara mbili haraka — lakini zawadi kubwa hulipa mara mbili.',
+  },
+  vietnam: {
+    name: 'Vigingi vya Bạch Đằng',
+    pitch: 'Maji yakishuka vizuizi vya vigingi hufunua meno yake kwa meli za kina kirefu.',
+    hint: 'Tazama saa ya wimbi: vutia meli za kina kirefu juu ya vigingi maji YAKISHUKA.',
+  },
+  aztec: {
+    name: 'Madaraja ya Texcoco',
+    pitch: 'Mtego wa madaraja — mitumbwi hupenya mapengo ambayo brigantini haziwezi.',
+    hint: 'Pigana kutoka mapengo; meli za kina kirefu za Kihispania hukwama na kutambaa.',
+  },
+  phoenicia: {
+    name: 'Mbio za Zambarau',
+    pitch: 'Beba mizigo kati ya bandari za kirafiki kwa faida inayoongezeka na wimbi.',
+    hint: 'Gusa ngome ya kirafiki kupakia, nyingine kuuza. Waache washirika wako.',
+  },
+  hanse: {
+    name: 'Pfundgeld',
+    pitch: 'Waita wafanyabiashara wa msafara (F) kwa ushuru wa Ligi — au wapigane wote.',
+    hint: 'F karibu na mfanyabiashara: dai ushuru. Wanaokataa huita msafara mzima.',
+  },
+  portugal: {
+    name: 'Musimu na Feitoria',
+    pitch: 'Upepo hubadilika kila mawimbi 3; ngome za feitoria hukutengeneza na kukulisha.',
+    hint: 'Jihadhari na kalenda ya musimu; kaa karibu na ngome za kirafiki kupona.',
+  },
+  armada: {
+    name: 'Dhoruba na Meli za Moto',
+    pitch: 'Dhoruba hutawanya kila mpangilio; mwezi mpevu hulinda hazina yake.',
+    hint: 'Dhoruba husukuma meli zote chini ya upepo. Vunja mwezi mpevu kwa zawadi kubwa.',
+  },
+  dutch: {
+    name: 'Mchanga Unaoelea',
+    pitch: 'Matuta ya mchanga huelea kuvuka Texel na kukwamisha meli za kina kirefu za Kiingereza.',
+    hint: 'Mwili wako wa kina kifupi huteleza juu ya matuta — wavutie wawindaji wa kina kirefu humo.',
+  },
+  ottoman: {
+    name: 'Mbio za Makasia',
+    pitch: 'Kimbia (T) kwenye kugonga — meli zilizotekwa huwavuta watu walioachiliwa kwako.',
+    hint: 'T: mlipuko wa mbio, kisha makasia yaliyochoka. Teka kwa watu, si dhahabu.',
+  },
+  predread: {
+    name: 'Vuka T',
+    pitch: 'Piga pua na nyuma; shika shabaha moja kufunga masafa.',
+    hint: 'Piga kwenye pua/nyuma kwa +50%. Kaa kwa mwathirika mmoja kulenga vizuri.',
+  },
+  falklands: {
+    name: 'Onyo la Shambulizi la Anga',
+    pitch: 'Exocet huingia kutoka nje ya skrini — chanua amka au upigwe.',
+    hint: 'Mshale wa shambulizi? Geukia humo na uendelee kusonga. Vifaa vya chaff husaidia.',
+  },
+  somali: {
+    name: 'Tekwa Nyara na Ukombozi',
+    pitch: 'Wafanyabiashara waliotekwa huwa mateka — ukombozi huongezeka unapowashika.',
+    hint: 'Teka wafanyabiashara, kisha nusurika: ukombozi hukua kila sekunde.',
+  },
+};
+
+const ha: TraitsDict = {
+  golden: {
+    name: 'Tuta ta Ƙarya & Lada',
+    pitch: 'Ɗaga tutar ƙarya har sai harbi na farko — ladanka tana ƙiba kowace ganima.',
+    hint: 'Riƙe harbi don zama ba a gani; nutsar da jiragen runduna don ɗaga ladanka.',
+  },
+  exploration: {
+    name: 'Ruwan da Ba a Sani ba',
+    pitch: 'Hazo yana ɓoye taswira — tafi kowane tsibiri don zanawa da zinariya.',
+    hint: 'Zana tsibiri da zinariya, ka riƙe ’ya’yan itace a ramuka don scurvy.',
+  },
+  napoleonic: {
+    name: 'Iska ta Sama',
+    pitch: 'Jirgin da ke sama da iska yana harbi da ƙarfi — juya don iska, sannan yi alama.',
+    hint: 'Yi faɗa daga sama da iska don +25% harbi; alama tana ƙarfafa kowane igiya.',
+  },
+  barbary: {
+    name: 'Haraji ko Yaƙi',
+    pitch: 'Kira ’yan kasuwa (F) don neman haraji — zinariya ba tare da faɗa ba.',
+    hint: 'Danna F kusa da ɗan kasuwa don neman haraji. Masu biya da ka bar su za su sake biya.',
+  },
+  viking: {
+    name: 'Kai Hari Gaɓa',
+    pitch: 'Sauka a gaɓar daji don kai hari — tura kafin rundunar yaƙi.',
+    hint: 'Yi tafiya a hankali zuwa gaɓa don kai hari; danna vela (W) don turawa.',
+  },
+  ironclad: {
+    name: 'Kusurwoyin Ƙarfe',
+    pitch: 'Sulken da suka karkata suna kawar da harbi daga gaba; nakiyoyi suna yawo a magudana.',
+    hint: 'Kai hari da gaba: rabin barna daga gaba. Ka kiyayi nakiyoyin da ke yawo.',
+  },
+  ww1: {
+    name: 'Jiragen Ƙarƙashin Ruwa & Hydrophones',
+    pitch: 'Jiragen ƙarƙashin ruwa suna gudu a ƙasa — ƙarar hydrophone tana samun su; ka buge su.',
+    hint: 'Kula da ƙara: kwalekwalen da aka bayyana suna fitowa don kai hari. Ka buge su.',
+  },
+  ww2: {
+    name: 'Faɗace-faɗacen Dare',
+    pitch: 'Kowane igiya mai lamba biyu ana faɗarta da dare da hasken taurari — don albashin haɗari.',
+    hint: 'Da dare maƙiyi yana harbi rabin nisa. Ka matso ka sami kyauta.',
+  },
+  hormuz: {
+    name: 'Kulle na Roka',
+    pitch: 'Rokoki masu zuwa suna ihun sautin kullewa — juya sosai don karya kullewa.',
+    hint: 'Sautin KULLE? Juya sosai ta roka. Ka bar tankokin tsaka.',
+  },
+  roman: {
+    name: 'Corvus',
+    pitch: 'Taɓa maƙiyi sai gadar da ke da ƙaya ta faɗi — kama ta nan take.',
+    hint: 'Bugi gefe: maƙiyan da aka kama suna rage gudu, ganimomi suna kama kansu.',
+  },
+  greek: {
+    name: 'Diekplous',
+    pitch: 'Yi tunkara kai tsaye ta layin maƙiyi don firgita ma’aikatansa.',
+    hint: 'Wuce da sauri tare da gefen jirgin maƙiyi daga gefe zuwa gefe don firgita lodawarsa.',
+  },
+  arab: {
+    name: 'Hawan Damina',
+    pitch: 'Damina tana juyawa bisa kalanda — jiragen lateen suna tashi da iska.',
+    hint: 'Tafi da damina (+gudu); yi kwanton ɓauna ga hanyoyin kasuwanci na ƙasa da iska.',
+  },
+  chinese: {
+    name: 'Ganuwa Mai Tafiya',
+    pitch: 'Sauke anga (T ko sandunan tsirara) don zama ganuwa — ko kira jiragen haraji.',
+    hint: 'T: sauke anga don +barna. F kusa da ɗan kasuwa: yarjejeniyar haraji maimakon ganima.',
+  },
+  japanese: {
+    name: 'Ƙugiyoyi & Teppo',
+    pitch: 'Maƙiya suna kama ka suna jan ka — amsa da ruwan teppo (T).',
+    hint: 'T: ruwan teppo gaba. Kashe masu kama da sauri ko a jan ka ƙasa.',
+  },
+  maori: {
+    name: 'Utu',
+    pitch: 'Kowane nutsarwa tana ambaton masu rama — kashe waɗanda aka yi wa alama don tara Mana.',
+    hint: 'Dangin da aka yi wa alama suna farautarka; kashe su yana tara Mana (barna) — ci gaba da ciyar da shi.',
+  },
+  hawaii: {
+    name: 'Haɗa Tsibiri',
+    pitch: 'Ci nasara a kan kwalekwalen kowane tsibiri don sanya shi ƙarƙashin ka don harajin kowane igiya.',
+    hint: 'Nutsar da kwalekwale 3 na tsibiri ɗaya don sanya shi ƙarƙashin ka. Haɗa su duka.',
+  },
+  macedon: {
+    name: 'Hasumiyar Kewaye Mai Tafiya',
+    pitch: 'Catapults na kewaye sun fi komai nisa — amma sauro suna taruwa.',
+    hint: 'Nisanka yana da fadi sosai; ƙananan kifaye suna mutuwa a jikinka. Ci gaba da juyawa.',
+  },
+  maya: {
+    name: 'Yaƙin Murjani',
+    pitch: 'Jiragen Sipaniya suna zubar da jini a murjani; kwalekwalenka suna wucewa kyauta.',
+    hint: 'Yi faɗa a cikin zobe na murjani. Kira baƙon farko don kyauta.',
+  },
+  inca: {
+    name: 'Humboldt & Spondylus',
+    pitch: 'Hau hanyoyin igiya; nutsa gadajen harsashi don zinariya.',
+    hint: 'Igiyoyi suna tura dukan jiragen. Tsaya a hankali a kan gadaje masu ruwan hoda don nutsewa.',
+  },
+  lepanto: {
+    name: 'Babban Faɗa',
+    pitch: 'Babu ƙarshen kamawa a faɗa — haɗa ganima zuwa ganima.',
+    hint: 'Nisan kamawa yana da tsawo; kowane ganima tana tunkarar mutanen da aka ’yanta zuwa ma’aikatanka.',
+  },
+  korea: {
+    name: 'Igiyar Myeongnyang',
+    pitch: 'Igiyar mashigi tana juyawa — jirginka na kunkuru da kyar yake jin ta.',
+    hint: 'Jan maƙiya masu sauƙi cikin igiya; tana share su zuwa duwatsu da bindigogi.',
+  },
+  byzantium: {
+    name: 'Sarƙa & Teku Mai Ƙonewa',
+    pitch: 'Sarƙa tana tura maƙiyi zuwa rata ɗaya; wutar Girka tana yawo tana yaɗuwa.',
+    hint: 'Riƙe ratar sarƙa; manka yana yawo da iska yana daɗewa.',
+  },
+  egypt: {
+    name: 'Masu Kibiyar Gaɓar Fir’auna',
+    pitch: 'Gaɓoɓin abokantaka suna harba ruwan kibiyoyi dominka; ciyawa tana ɓoye masu kwanto.',
+    hint: 'Yi faɗa kusa da gaɓoɓin abokantaka don tallafin masu kibiya. Share ciyawa.',
+  },
+  chola: {
+    name: 'Tsallake Kogi',
+    pitch: 'Nesa da gida: cin ajiya sau biyu, zinariyan haikali sau biyu, guguwar damina.',
+    hint: 'Ajiya suna ƙonewa sau biyu da sauri — amma manyan kyaututtuka suna biya sau biyu.',
+  },
+  vietnam: {
+    name: 'Sandunan Bạch Đằng',
+    pitch: 'A lokacin ƙarancin ruwa shingen sanduna suna bayyana haƙoransu ga jiragen zurfi.',
+    hint: 'Kula da agogon igiya: jan jiragen zurfi a kan sanduna a lokacin ƘARANCIN ruwa.',
+  },
+  aztec: {
+    name: 'Gadodden Texcoco',
+    pitch: 'Rikicin gada — kwalekwale suna zamewa ramukan da brigantines ba za su iya ba.',
+    hint: 'Yi faɗa daga ramuka; zurfafan jiragen Sipaniya suna makalewa suna rarrafe.',
+  },
+  phoenicia: {
+    name: 'Gudun Shuni',
+    pitch: 'Ɗauki kaya tsakanin tashoshin abokantaka don riba mai ƙaruwa da igiya.',
+    hint: 'Taɓa ganuwar aboki don lodawa, wata don sayarwa. Ka bar abokan hulɗarka.',
+  },
+  hanse: {
+    name: 'Pfundgeld',
+    pitch: 'Kira ’yan kasuwar ayari (F) don harajin Ƙungiya — ko ka yi faɗa da su duka.',
+    hint: 'F kusa da ɗan kasuwa: nemi haraji. Masu ƙi suna kiran ayarin gaba ɗaya.',
+  },
+  portugal: {
+    name: 'Damina & Feitoria',
+    pitch: 'Iska tana juyawa kowane igiyoyi 3; ganuwar feitoria suna gyara ka suna ciyar da kai.',
+    hint: 'Kula da kalandar damina; tsaya kusa da ganuwar abokantaka don murmurewa.',
+  },
+  armada: {
+    name: 'Guguwa & Jiragen Wuta',
+    pitch: 'Guguwa tana watse kowane tsari; jinjirin wata yana gadin taskarsa.',
+    hint: 'Guguwa tana tura dukan jiragen ƙasa da iska. Karya jinjirin wata don babbar kyauta.',
+  },
+  dutch: {
+    name: 'Yashi Mai Matsi',
+    pitch: 'Tulun yashi suna yawo ta Texel suna makale zurfafan jiragen Ingila.',
+    hint: 'Jirginka mai zurfi kaɗan yana zamewa a kan tuluna — jan mafarauta masu zurfi a kansu.',
+  },
+  ottoman: {
+    name: 'Gudun Filafilai',
+    pitch: 'Yi gudu (T) cikin karo — jiragen da aka kama suna tunkarar mutanen da aka ’yanta gare ka.',
+    hint: 'T: fashewar gudu, sannan filafilai masu gajiya. Kama don hannaye, ba zinariya ba.',
+  },
+  predread: {
+    name: 'Kewaye T',
+    pitch: 'Share gaba da baya; riƙe manufa ɗaya don daidaita nisa.',
+    hint: 'Harba cikin gaba/baya don +50%. Tsaya a kan wanda aka azabtar ɗaya don nufi sosai.',
+  },
+  falklands: {
+    name: 'Gargaɗin Kai Harin Sama',
+    pitch: 'Exocets suna shigowa daga wajen allo — share hanya ko a buge ka.',
+    hint: 'Kibiyar kai hari? Juya cikinta ka ci gaba da motsawa. Kayan chaff suna taimakawa.',
+  },
+  somali: {
+    name: 'Sace & Fansha',
+    pitch: '’Yan kasuwar da aka kama sun zama mutanen fansha — fansha tana ƙaruwa yayin da ka riƙe.',
+    hint: 'Kama ’yan kasuwa, sannan ka tsira: fansha tana girma a kowane daƙiƙa.',
+  },
+};
+
+const yo: TraitsDict = {
+  golden: {
+    name: 'Àsíá Èké & Ẹ̀san',
+    pitch: 'Gbé àsíá èké títí di ìbọn àkọ́kọ́ — ẹ̀san rẹ máa ń sọ ìkógun kọ̀ọ̀kan di ọ̀rá.',
+    hint: 'Dá ìbọn dúró láti wà ní ìkọ̀kọ̀; rì àwọn ara ọkọ̀ ọmọ-ogun láti gbe ẹ̀san rẹ sókè.',
+  },
+  exploration: {
+    name: 'Omi Àìmọ̀',
+    pitch: 'Ìkùukùu bo mànrántí mọ́lẹ̀ — kọ ọkọ̀ sí erékùṣù kọ̀ọ̀kan láti ṣe àwòrán rẹ̀ fún wúrà.',
+    hint: 'Ṣe àwòrán àwọn erékùṣù fún wúrà, kí o sì pa èso mọ́ nínú ibi ẹrù lòdì sí scurvy.',
+  },
+  napoleonic: {
+    name: 'Apá Afẹ́fẹ́',
+    pitch: 'Ọkọ̀ tó wà lókè afẹ́fẹ́ máa ń yín le — yí sí apá afẹ́fẹ́, lẹ́yìn náà fààmì.',
+    hint: 'Jà láti òkè afẹ́fẹ́ fún +25% ìbọn; àmì kan máa ń fún ìgbì kọ̀ọ̀kan ní agbára.',
+  },
+  barbary: {
+    name: 'Owo-orí tàbí Ogun',
+    pitch: 'Pè àwọn òṣìṣẹ́ (F) láti bèèrè owo-orí — wúrà láìsí ìjà.',
+    hint: 'Tẹ F nítòsí òṣìṣẹ́ láti bèèrè owo-orí. Àwọn tó san tí o bá dá wọ́n sílẹ̀ yóò tún san.',
+  },
+  viking: {
+    name: 'Ìkọlù Etí-òkun',
+    pitch: 'Gbé ọkọ̀ sórí etí òkun igbẹ́ láti kó ọ jà — tì í padà ṣáájú ẹgbẹ́ ogun.',
+    hint: 'Fẹ́ẹ́rẹ́ lọ sí etí òkun láti kó ọ jà; tẹ aṣọ-ọkọ̀ (W) láti tì í padà.',
+  },
+  ironclad: {
+    name: 'Igun Irin',
+    pitch: 'Ihámọ́ra tí ó tẹ̀ máa ń yọ ìbọn kúrò láti iwájú; àwọn maini ń fò lójú ọ̀nà-omi.',
+    hint: 'Kọlu pẹ̀lú iwájú: àbọ̀ ìparun láti iwájú. Ṣọ́ra fún àwọn maini tí ń fò.',
+  },
+  ww1: {
+    name: 'Àwọn Ọkọ̀ Abẹ́-omi & Hydrophone',
+    pitch: 'Àwọn ọkọ̀ abẹ́-omi ń sáré lábẹ́ omi — ìró hydrophone máa ń rí wọn; kọlu wọ́n.',
+    hint: 'Ṣọ́ ìró: àwọn ọkọ̀ tí a ṣípayá máa ń dìde láti kọlu. Kọlu wọ́n.',
+  },
+  ww2: {
+    name: 'Ìjà Alẹ́',
+    pitch: 'Gbogbo ìgbì kejì ni a ń jà lálẹ́ pẹ̀lú ìmọ́lẹ̀ ìràwọ̀ — fún owó ewu.',
+    hint: 'Lálẹ́ ọ̀tá máa ń yín ní àbọ̀ ìjìnnà. Súnmọ́ kí o sì gba ẹ̀bùn.',
+  },
+  hormuz: {
+    name: 'Títì Rocket',
+    pitch: 'Àwọn rocket tí ń bọ̀ máa ń pariwo ohùn títì — yí gidigidi láti ṣí títì náà.',
+    hint: 'Ohùn TÍTÌ? Yí gidigidi ká rocket. Dá àwọn tanker aláìṣojú sílẹ̀.',
+  },
+  roman: {
+    name: 'Corvus',
+    pitch: 'Fọwọ́kan ọ̀tá kan afárá elẹ́gún yóò sì ṣubú — gbà á lẹ́sẹ̀kẹsẹ̀.',
+    hint: 'Kọlu ẹ̀gbẹ́: àwọn ọ̀tá tí a dì máa ń lọ́ra, àwọn ìkógun sì máa ń gbà ara wọn.',
+  },
+  greek: {
+    name: 'Diekplous',
+    pitch: 'Fà tààrà ká ìlà ọ̀tá láti dá àwọn atukọ̀ rẹ̀ láàmú.',
+    hint: 'Kọjá kíákíá lẹ́bàá ara ọkọ̀ ọ̀tá láti ẹ̀gbẹ́ dé ẹ̀gbẹ́ láti dá títúnṣe rẹ̀ láàmú.',
+  },
+  arab: {
+    name: 'Gùn Ìgbà Ẹ̀rùn',
+    pitch: 'Ìgbà ẹ̀rùn máa ń yípadà lórí kàlẹ́ńdà — àwọn ara ọkọ̀ lateen máa ń fò pẹ̀lú afẹ́fẹ́.',
+    hint: 'Kọ ọkọ̀ pẹ̀lú ìgbà ẹ̀rùn (+iyára); dẹ́ àwọn ọ̀nà ìṣòwò ìsàlẹ̀ afẹ́fẹ́.',
+  },
+  chinese: {
+    name: 'Odi Òfífó',
+    pitch: 'Dubúlẹ̀ (T tàbí òpó ìhòhò) láti di odi — tàbí pè àwọn ọkọ̀ owo-orí.',
+    hint: 'T: dubúlẹ̀ fún +ìparun. F nítòsí òṣìṣẹ́: àdéhùn owo-orí dípò ìkógun.',
+  },
+  japanese: {
+    name: 'Ìkọ̀ & Teppo',
+    pitch: 'Àwọn ọ̀tá máa ń dì ọ́ wọ́n sì máa ń fà ọ́ — dáhùn pẹ̀lú ìrọ̀ teppo (T).',
+    hint: 'T: ìrọ̀ teppo síwájú. Pa àwọn tó dì ọ́ kíákíá tàbí kí wọ́n fà ọ́ sọkalẹ̀.',
+  },
+  maori: {
+    name: 'Utu',
+    pitch: 'Gbogbo rírì máa ń dárúkọ àwọn agbẹ̀san — pa àwọn tí a samì láti kó Mana jọ.',
+    hint: 'Àwọn ìbátan tí a samì ń ṣọdẹ rẹ; pípà wọ́n máa ń kó Mana jọ (ìparun) — máa fún un.',
+  },
+  hawaii: {
+    name: 'Ṣọ Àwọn Erékùṣù Kan',
+    pitch: 'Ṣẹ́gun àwọn ọkọ̀ erékùṣù kọ̀ọ̀kan láti sọ ọ́ di ọmọlẹ́yìn fún owo-orí ìgbì kọ̀ọ̀kan.',
+    hint: 'Rì ọkọ̀ 3 erékùṣù kan láti sọ ọ́ di ọmọlẹ́yìn. Ṣọ gbogbo wọn kan.',
+  },
+  macedon: {
+    name: 'Ilé Goga Òfífó',
+    pitch: 'Àwọn catapult ìdènà jìn ju gbogbo lọ — ṣùgbọ́n àwọn ẹ̀fọn ń pọ̀.',
+    hint: 'Ìjìnnà rẹ gbòòrò; àwọn kékeré máa ń kú lara rẹ. Máa yí.',
+  },
+  maya: {
+    name: 'Ogun Coral',
+    pitch: 'Àwọn ọkọ̀ Sípánì máa ń ta ẹ̀jẹ̀ lórí coral; àwọn ọkọ̀ rẹ máa ń kọjá lọ́fẹ̀ẹ́.',
+    hint: 'Jà nínú òrùka coral. Pè àlejò àkọ́kọ́ fún ẹ̀bùn.',
+  },
+  inca: {
+    name: 'Humboldt & Spondylus',
+    pitch: 'Gùn àwọn ọ̀nà ìṣàn; wọ inú ibù ìkarahun fún wúrà.',
+    hint: 'Àwọn ìṣàn máa ń tì gbogbo ara ọkọ̀. Dúró jẹ́ẹ́jẹ́ lórí àwọn ibù pupa láti wọ inú.',
+  },
+  lepanto: {
+    name: 'Ìjà Ńlá',
+    pitch: 'Kò sí òpin gbígbà nínú ìjà — so ìkógun mọ́ ìkógun.',
+    hint: 'Ìbọ̀wọ́ gbígbà gùn; gbogbo ìkógun máa ń fà àwọn ènìyàn tí a dá sílẹ̀ sí àwọn atukọ̀ rẹ.',
+  },
+  korea: {
+    name: 'Ìgbì Myeongnyang',
+    pitch: 'Ìṣàn ọ̀nà-omi máa ń yípadà — ọkọ̀ ìjàpá rẹ kò ní mọ̀ rárá.',
+    hint: 'Tàn àwọn ọ̀tá fẹ́ẹ́rẹ́ sínú ìgbì; yóò gbá wọn lọ sí òkúta àti ìbọn.',
+  },
+  byzantium: {
+    name: 'Ẹ̀wọ̀n & Òkun Tí Ńjó',
+    pitch: 'Ẹ̀wọ̀n máa ń darí ọ̀tá sí ihò kan; iná Gíríkì máa ń fò ká mà sì ń tàn.',
+    hint: 'Dì ihò ẹ̀wọ̀n mú; epo rẹ máa ń fò pẹ̀lú afẹ́fẹ́ yóò sì pẹ́.',
+  },
+  egypt: {
+    name: 'Àwọn Tafàtafà Etí-òkun Farao',
+    pitch: 'Àwọn etí òkun ọ̀rẹ́ máa ń rọ̀ fún ọ; koríko máa ń pa àwọn adẹ́tẹ̀ mọ́.',
+    hint: 'Jà nítòsí àwọn etí òkun ọ̀rẹ́ fún ìrànlọ́wọ́ àwọn tafàtafà. Gbá koríko kúrò.',
+  },
+  chola: {
+    name: 'Kọjá Kògò',
+    pitch: 'Jìnnà sílé: ìlò ìpèsè lẹ́ẹ̀mejì, wúrà tẹ́ńpìlì lẹ́ẹ̀mejì, ìjì ìgbà ẹ̀rùn.',
+    hint: 'Àwọn ìpèsè máa ń jó ní ìlọ́po méjì kíákíá — ṣùgbọ́n àwọn ẹ̀bùn ńlá máa ń san ní ìlọ́po méjì.',
+  },
+  vietnam: {
+    name: 'Àwọn Ìkọ̀ Bạch Đằng',
+    pitch: 'Nígbà omi bá gbẹ àwọn òdì ìkọ̀ máa ń yọ eyín hàn fún àwọn ọkọ̀ jíjìn.',
+    hint: 'Ṣọ́ aago ìgbì: tàn àwọn ara ọkọ̀ jíjìn sórí àwọn ìkọ̀ nígbà omi bá GBẸ.',
+  },
+  aztec: {
+    name: 'Àwọn Ojú-ọ̀nà Texcoco',
+    pitch: 'Ìkọ́ ojú-ọ̀nà — àwọn ọkọ̀ kékeré máa ń yọ nínú àwọn ihò tí àwọn brigantine kò lè yọ.',
+    hint: 'Jà láti inú àwọn ihò; àwọn ara ọkọ̀ Sípánì jíjìn máa ń dì wọ́n sì máa ń rákò.',
+  },
+  phoenicia: {
+    name: 'Ìsáré Elese',
+    pitch: 'Gbé ẹrù láàrín àwọn èbúté ọ̀rẹ́ fún èrè tó ń pọ̀ pẹ̀lú ìgbì.',
+    hint: 'Fọwọ́kan odi ọ̀rẹ́ láti dì, òmíràn láti tà. Dá àwọn alábàáṣiṣẹ́pọ̀ rẹ sílẹ̀.',
+  },
+  hanse: {
+    name: 'Pfundgeld',
+    pitch: 'Pè àwọn òṣìṣẹ́ ẹgbẹ́ (F) fún owo-orí Ligi — tàbí bá gbogbo wọn jà.',
+    hint: 'F nítòsí òṣìṣẹ́: bèèrè owo-orí. Àwọn tó kọ̀ yóò pè gbogbo ẹgbẹ́.',
+  },
+  portugal: {
+    name: 'Ìgbà Ẹ̀rùn & Feitoria',
+    pitch: 'Afẹ́fẹ́ máa ń yípadà ní gbogbo ìgbì 3; àwọn odi feitoria máa ń ṣe ọ́ wọ́n sì máa ń bọ́ ọ́.',
+    hint: 'Ṣọ́ kàlẹ́ńdà ìgbà ẹ̀rùn; dúró nítòsí àwọn odi ọ̀rẹ́ láti gba ara le.',
+  },
+  armada: {
+    name: 'Ìjì & Àwọn Ọkọ̀ Iná',
+    pitch: 'Ìjì máa ń tú gbogbo ìṣètò ká; òṣùpá máa ń ṣọ́ ìṣúra rẹ̀.',
+    hint: 'Ìjì máa ń tì gbogbo ara ọkọ̀ sí ìsàlẹ̀ afẹ́fẹ́. Fọ́ òṣùpá fún ẹ̀bùn ńlá.',
+  },
+  dutch: {
+    name: 'Yanrìn Tí Ńyí',
+    pitch: 'Àwọn ilẹ̀ yanrìn ń yí ká Texel wọ́n sì máa ń dì àwọn ọkọ̀ Gẹ̀ẹ́sì jíjìn mú.',
+    hint: 'Ara ọkọ̀ rẹ tí kò jìn máa ń yọ lórí ilẹ̀ — tàn àwọn ọdẹ jíjìn sórí wọn.',
+  },
+  ottoman: {
+    name: 'Ìsáré Abẹ̀',
+    pitch: 'Sáré (T) sínú ìkọlù — àwọn ọkọ̀ tí a gbà máa ń fà àwọn ènìyàn tí a dá sí ọ́dọ̀ rẹ.',
+    hint: 'T: ìbú ìsáré, lẹ́yìn náà abẹ̀ tí ó rẹ̀. Gbà fún ọwọ́, kì í ṣe wúrà.',
+  },
+  predread: {
+    name: 'Kọjá T',
+    pitch: 'Gbá iwájú àti ẹ̀yìn; dì àfojúsùn kan mú láti dí ìjìnnà.',
+    hint: 'Yín sí iwájú/ẹ̀yìn fún +50%. Dúró lórí ẹni kan láti fojú déédéé.',
+  },
+  falklands: {
+    name: 'Ìkìlọ̀ Ìkọlù Afẹ́fẹ́',
+    pitch: 'Àwọn Exocet máa ń wọlé láti òde ìbòjú — fẹ́ ìjì tàbí kí wọ́n lù ọ́.',
+    hint: 'Ọfà ìkọlù? Yípadà sí inú rẹ̀ kí o sì máa lọ. Àwọn ohun èlò chaff máa ń rànlọ́wọ́.',
+  },
+  somali: {
+    name: 'Jígbè & Owó Ìràpadà',
+    pitch: 'Àwọn òṣìṣẹ́ tí a gbà di àwọn ìgbè — owó ìràpadà máa ń pọ̀ sí i nígbà tí o bá dì wọ́n mú.',
+    hint: 'Gbà àwọn òṣìṣẹ́, lẹ́yìn náà là á já: owó ìràpadà máa ń dàgbà ní ìṣẹ́jú kọ̀ọ̀kan.',
+  },
+};
+
+export const traits: Dict<TraitsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi, ar, sw, ha, yo };

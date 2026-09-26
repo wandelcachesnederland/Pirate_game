@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-ne" viewBox="0 0 640 480">
+  <!-- Original simplified rendition of the Niger flag for Broadside!'s language picker, MIT. -->
+  <path fill="#e05206" d="M0 0h640v160H0z"/>
+  <path fill="#fff" d="M0 160h640v160H0z"/>
+  <path fill="#0db02b" d="M0 320h640v160H0z"/>
+  <circle cx="320" cy="240" r="68" fill="#e05206"/>
+</svg>

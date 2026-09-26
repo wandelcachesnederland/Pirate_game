@@ -12,9 +12,13 @@ import zh from '../assets/flags/cn.svg';
 import id from '../assets/flags/id.svg';
 import th from '../assets/flags/th.svg';
 import vi from '../assets/flags/vn.svg';
+import ar from '../assets/flags/sa.svg';
+import sw from '../assets/flags/tz.svg';
+import ha from '../assets/flags/ne.svg';
+import yo from '../assets/flags/ng.svg';
 
 // Bundled SVGs keep flags visible offline and on platforms without flag emoji.
-const FLAGS: Record<LocaleId, string> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };
+const FLAGS: Record<LocaleId, string> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi, ar, sw, ha, yo };
 
 export function LanguageSelectScreen({ ready, onDone }: { ready: boolean; onDone: () => void }) {
   const { t, i18n } = useTranslation('meta');

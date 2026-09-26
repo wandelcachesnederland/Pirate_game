@@ -1198,21 +1198,25 @@ export function drawOars(
     const swing = Math.sin(phase) * (0.28 + drive * 0.22);
     for (const sgn of [-1, 1]) {
       const baseY = sgn * hw * 0.85;
-      const ang = -0.55 + swing;
+      // positive: the blade must fall OUTBOARD of the rail on both sides.
+      // A negative base angle mirrors the stroke inboard — oars crossing the
+      // deck instead of reaching the water.
+      const ang = 0.55 + swing;
       const len = hl * 0.62;
       const ex = px + Math.cos(ang) * len * 0.55;
       const ey = baseY + Math.sin(ang) * len * 0.55 * sgn;
+      const pivY = baseY * 0.6;
       ctx.strokeStyle = '#4a3018';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(px, baseY * 0.6);
+      ctx.moveTo(px, pivY);
       ctx.lineTo(ex, ey);
       ctx.stroke();
-      // blade
+      // blade, laid along the shaft itself so both rails feather alike
       ctx.fillStyle = '#5c3d1e';
       ctx.save();
       ctx.translate(ex, ey);
-      ctx.rotate(ang + (sgn > 0 ? 0.5 : -0.5));
+      ctx.rotate(Math.atan2(ey - pivY, ex - px));
       ctx.beginPath();
       ctx.ellipse(0, 0, 3.1, 1.3, 0, 0, TAU);
       ctx.fill();

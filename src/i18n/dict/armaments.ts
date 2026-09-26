@@ -949,4 +949,348 @@ const vi: ArmamentsDict = {
   bar: { guns: 'Pháo', fire: 'Lửa', stones: 'Đá', bows: 'Cung' },
 };
 
-export const armaments: Dict<ArmamentsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi };
+const ar: ArmamentsDict = {
+  cannon: {
+    heavyName: 'قصف البارود',
+    lightName: 'مدافع السطح',
+    summary: 'قصف البارود والقذائف المتفجرة والطلقات',
+    volleyName: 'عنب!',
+    weaponWord: 'مدافع',
+  },
+  somali: {
+    heavyName: 'RPG-7 ورشاشات دوشكا الثقيلة',
+    lightName: 'كلاشنكوف ورشاشات PKM',
+    summary: 'صواريخ RPG-7 وكلاشنكوف وPKM بالحزام من الزوارق والسفينة الأم',
+    volleyName: 'رش كامل!',
+    weaponWord: 'RPG وبنادق',
+  },
+  archeryVolley: 'عاصفة سهام!',
+  archery: {
+    viking: {
+      heavyName: 'قاذفات مسامير بالروافع', lightName: 'أطقم الأقواس',
+      summary: 'رماية ورماح مرمية باليد وقاذفات مسامير بالروافع',
+      weaponWord: 'أقواس وقاذفات',
+    },
+    roman: {
+      heavyName: 'قاذفات حجارة', lightName: 'صفوف الرماة',
+      summary: 'حجارة القاذفات وآلات الفتل والرماية',
+      weaponWord: 'قاذفات ورماية',
+    },
+    greek: {
+      heavyName: 'قاذفات مسامير أوكسيبيليس', lightName: 'صفوف الرماة',
+      summary: 'رماية وقاذفات مسامير أوكسيبيليس — اصدم أولًا ثم استولِ',
+      weaponWord: 'أقواس وقاذفات',
+    },
+    macedon: {
+      heavyName: 'راميات حجارة فتلية', lightName: 'قاذفات مسامير',
+      summary: 'مقاليع حجارة وآلات مسامير من السطوح العظيمة',
+      weaponWord: 'مقاليع وآلات مسامير',
+    },
+    egypt: {
+      heavyName: 'قاذفات مسامير بالروافع', lightName: 'صفوف الرماة',
+      summary: 'رماية ومسامير بالروافع على مصابّ النيل',
+      weaponWord: 'أقواس وقاذفات',
+    },
+    arab: {
+      heavyName: 'سيفونات نار النفط', lightName: 'صفوف الرماة',
+      summary: 'سيفونات نار النفط وقدور النار والرماية',
+      weaponWord: 'سيفونات نار وأقواس',
+    },
+    byzantium: {
+      heavyName: 'سيفونات برونزية', lightName: 'أطقم السهام النارية',
+      summary: 'نار إغريقية من سيفونات المقدمة، مع سهام نارية على السطوح',
+      weaponWord: 'سيفونات النار الإغريقية',
+    },
+    chola: {
+      heavyName: 'قاذفات مسامير بالروافع', lightName: 'صفوف الرماة',
+      summary: 'رماية ومسامير بالروافع من أبدان كوروماندل الكبيرة',
+      weaponWord: 'أقواس وقاذفات',
+    },
+    vietnam: {
+      heavyName: 'قاذفات مسامير بالروافع', lightName: 'أطقم السهام النارية',
+      summary: 'مسامير بالروافع وسهام نارية فوق حواجز الأوتاد',
+      weaponWord: 'مسامير وسهام نارية',
+    },
+    inca: {
+      heavyName: 'حجارة مقاليع', lightName: 'سهام الأتلاتل',
+      summary: 'حجارة مقاليع وسهام أتلاتل من أطواف البالسا',
+      weaponWord: 'حجارة مقاليع وسهام',
+    },
+    phoenicia: {
+      heavyName: 'قاذفات مسامير بالروافع', lightName: 'صفوف الرماة',
+      summary: 'رماية ومسامير من قوادس أرز صور',
+      weaponWord: 'أقواس وقاذفات',
+    },
+    hanse: {
+      heavyName: 'نشاشيب ومنجنيقات صغيرة', lightName: 'أطقم الأقواس',
+      summary: 'نشاشيب ومنجنيقات وحجارة مرمية باليد من قوادس القلاع',
+      weaponWord: 'نشاشيب ومنجنيقات',
+    },
+  },
+  shots: {
+    arrow: 'سهم', bolt: 'مسمار رافعة', fireArrow: 'سهم ناري', greekFire: 'نار إغريقية',
+    stone: 'حجر', cannonball: 'قذيفة', missile: 'صاروخ',
+  },
+  suffix: '— لا بارود: الأبدان تحترق ولا تنفجر',
+  bar: { guns: 'مدافع', fire: 'نار', stones: 'حجارة', bows: 'أقواس' },
+};
+
+const sw: ArmamentsDict = {
+  cannon: {
+    heavyName: 'Mashambulizi ya baruti',
+    lightName: 'Mizinga ya staha',
+    summary: 'Mashambulizi ya baruti, makombora na risasi zinazolipuka',
+    volleyName: 'MZABIBU!',
+    weaponWord: 'mizinga',
+  },
+  somali: {
+    heavyName: 'RPG-7 na mashine-guni mazito za DShK',
+    lightName: 'AK-47 na mashine-guni za PKM',
+    summary: 'Roketi za RPG-7, AK-47 na PKM zenye mikanda kutoka skifu na meli mama',
+    volleyName: 'MOTO KAMILI!',
+    weaponWord: 'RPG na bunduki',
+  },
+  archeryVolley: 'DHORUBA YA MISHALE!',
+  archery: {
+    viking: {
+      heavyName: 'Vizindua boli vinavyovutwa kwa kapi', lightName: 'Vikosi vya pinde',
+      summary: 'Upiga mishale, mikuki ya kutupa kwa mkono na vizindua boli vya kapi',
+      weaponWord: 'pinde na vizindua',
+    },
+    roman: {
+      heavyName: 'Balista zitupazo mawe', lightName: 'Safu za wapiga mishale',
+      summary: 'Mawe ya balista, injini za msokoto na upiga mishale',
+      weaponWord: 'balista na mishale',
+    },
+    greek: {
+      heavyName: 'Vizindua boli vya Oxybeles', lightName: 'Safu za wapiga mishale',
+      summary: 'Upiga mishale na vizindua boli vya oxybeles — gonga kwanza, teka baadaye',
+      weaponWord: 'pinde na vizindua',
+    },
+    macedon: {
+      heavyName: 'Vitupa mawe vya msokoto', lightName: 'Vizindua boli',
+      summary: 'Manati yanayotupa mawe na injini za boli kutoka staha kubwa',
+      weaponWord: 'manati na injini za boli',
+    },
+    egypt: {
+      heavyName: 'Vizindua boli vinavyovutwa kwa kapi', lightName: 'Safu za wapiga mishale',
+      summary: 'Upiga mishale na boli za kapi kando ya midomo ya Nile',
+      weaponWord: 'pinde na vizindua',
+    },
+    arab: {
+      heavyName: 'Mirija ya moto ya mafuta', lightName: 'Safu za wapiga mishale',
+      summary: 'Mirija ya moto ya mafuta, chungu za moto na upiga mishale',
+      weaponWord: 'mirija ya moto na pinde',
+    },
+    byzantium: {
+      heavyName: 'Mirija ya shaba ya moto', lightName: 'Vikosi vya mishale ya moto',
+      summary: 'Moto wa Kigiriki kutoka mirija ya mbele, na mishale ya moto stahani',
+      weaponWord: 'mirija ya moto wa Kigiriki',
+    },
+    chola: {
+      heavyName: 'Vizindua boli vinavyovutwa kwa kapi', lightName: 'Safu za wapiga mishale',
+      summary: 'Upiga mishale na boli za kapi kutoka meli kubwa za Coromandel',
+      weaponWord: 'pinde na vizindua',
+    },
+    vietnam: {
+      heavyName: 'Vizindua boli vinavyovutwa kwa kapi', lightName: 'Vikosi vya mishale ya moto',
+      summary: 'Boli za kapi na mishale ya moto juu ya vizuizi vya vigingi',
+      weaponWord: 'boli na mishale ya moto',
+    },
+    inca: {
+      heavyName: 'Mawe ya kombeo', lightName: 'Mishale ya atlatl',
+      summary: 'Mawe ya kombeo na mishale ya atlatl kutoka matenga ya balsa',
+      weaponWord: 'mawe ya kombeo na mishale',
+    },
+    phoenicia: {
+      heavyName: 'Vizindua boli vinavyovutwa kwa kapi', lightName: 'Safu za wapiga mishale',
+      summary: 'Upiga mishale na boli kutoka meli za mwerezi za Tiro',
+      weaponWord: 'pinde na vizindua',
+    },
+    hanse: {
+      heavyName: 'Pinde za msalaba na springaldi', lightName: 'Vikosi vya pinde',
+      summary: 'Pinde za msalaba, springaldi na mawe ya kutupa kwa mkono kutoka meli za ngome',
+      weaponWord: 'pinde za msalaba na springaldi',
+    },
+  },
+  shots: {
+    arrow: 'Mshale', bolt: 'Boli ya kapi', fireArrow: 'Mshale wa moto', greekFire: 'Moto wa Kigiriki',
+    stone: 'Jiwe', cannonball: 'Risasi', missile: 'Roketi',
+  },
+  suffix: '— hakuna baruti: miili huwaka, hailipuki',
+  bar: { guns: 'Mizinga', fire: 'Moto', stones: 'Mawe', bows: 'Pinde' },
+};
+
+const ha: ArmamentsDict = {
+  cannon: {
+    heavyName: 'Harbin bindiga',
+    lightName: 'Bindigogin bene',
+    summary: 'Harbin bindiga, harsashin da ke fashewa da harbi',
+    volleyName: 'INABI!',
+    weaponWord: 'bindigogi',
+  },
+  somali: {
+    heavyName: 'RPG-7 & manyan bindigogin DShK',
+    lightName: 'AK-47 & bindigogin PKM',
+    summary: 'Rokokin RPG-7, AK-47 da PKMs masu bel daga skiffs da jirgin uwa',
+    volleyName: 'CIKAKKEN AUTO!',
+    weaponWord: 'RPGs & bindigogi',
+  },
+  archeryVolley: 'GUGUWAR KIBIYOYI!',
+  archery: {
+    viking: {
+      heavyName: 'Masu harba bolts da igiya', lightName: 'Rundunar baka',
+      summary: 'Kibiyoyi, mashi da hannu da masu harba bolts da igiya',
+      weaponWord: 'baka & masu ja',
+    },
+    roman: {
+      heavyName: 'Ballistae masu jifar duwatsu', lightName: 'Sahunan masu kibiya',
+      summary: 'Duwatsun ballista, injin torsion da kibiyoyi',
+      weaponWord: 'ballistae & kibiyoyi',
+    },
+    greek: {
+      heavyName: 'Masu harba bolts na Oxybeles', lightName: 'Sahunan masu kibiya',
+      summary: 'Kibiyoyi da masu harba bolts na oxybeles — karo da farko, kama daga baya',
+      weaponWord: 'baka & masu ja',
+    },
+    macedon: {
+      heavyName: 'Masu jifar duwatsu na torsion', lightName: 'Masu harba bolts',
+      summary: 'Catapults masu jifar duwatsu da injin bolts daga manyan benaye',
+      weaponWord: 'catapults & injin bolts',
+    },
+    egypt: {
+      heavyName: 'Masu harba bolts da igiya', lightName: 'Sahunan masu kibiya',
+      summary: 'Kibiyoyi da bolts da igiya a bakunan Nile',
+      weaponWord: 'baka & masu ja',
+    },
+    arab: {
+      heavyName: 'Siphons na wutar man', lightName: 'Sahunan masu kibiya',
+      summary: 'Siphons na wutar man, tukunyar wuta da kibiyoyi',
+      weaponWord: 'siphons na wuta & baka',
+    },
+    byzantium: {
+      heavyName: 'Siphons na tagulla', lightName: 'Rundunar kibiyoyin wuta',
+      summary: 'Wutar Girka daga siphons na gaba, da kibiyoyin wuta a benaye',
+      weaponWord: 'siphons na wutar Girka',
+    },
+    chola: {
+      heavyName: 'Masu harba bolts da igiya', lightName: 'Sahunan masu kibiya',
+      summary: 'Kibiyoyi da bolts da igiya daga manyan jiragen Coromandel',
+      weaponWord: 'baka & masu ja',
+    },
+    vietnam: {
+      heavyName: 'Masu harba bolts da igiya', lightName: 'Rundunar kibiyoyin wuta',
+      summary: 'Bolts da igiya da kibiyoyin wuta a kan shingen sanduna',
+      weaponWord: 'bolts & kibiyoyin wuta',
+    },
+    inca: {
+      heavyName: 'Duwatsun majajjawa', lightName: 'Kibiyoyin atlatl',
+      summary: 'Duwatsun majajjawa da kibiyoyin atlatl daga kwalekwalen balsa',
+      weaponWord: 'duwatsun majajjawa & kibiyoyi',
+    },
+    phoenicia: {
+      heavyName: 'Masu harba bolts da igiya', lightName: 'Sahunan masu kibiya',
+      summary: 'Kibiyoyi da bolts daga jiragen itacen alarz na Taya',
+      weaponWord: 'baka & masu ja',
+    },
+    hanse: {
+      heavyName: 'Crossbows da springalds', lightName: 'Rundunar baka',
+      summary: 'Crossbows, springalds da duwatsu da hannu daga jiragen ganuwa',
+      weaponWord: 'crossbows & springalds',
+    },
+  },
+  shots: {
+    arrow: 'Kibiya', bolt: 'Bolt na igiya', fireArrow: 'Kibiyar wuta', greekFire: 'Wutar Girka',
+    stone: 'Dutse', cannonball: 'Harbi', missile: 'Roka',
+  },
+  suffix: '— babu bindiga: jiragen suna ƙonewa, ba sa fashewa',
+  bar: { guns: 'Bindigogi', fire: 'Wuta', stones: 'Duwatsu', bows: 'Baka' },
+};
+
+const yo: ArmamentsDict = {
+  cannon: {
+    heavyName: 'Ìbọn etu ìbọn',
+    lightName: 'Ìbọn pẹpẹ',
+    summary: 'Ìbọn etu ìbọn, ọta ìbú àti ìbọn',
+    volleyName: 'ÈSO ÀJÀRÀ!',
+    weaponWord: 'ìbọn',
+  },
+  somali: {
+    heavyName: 'RPG-7 & ìbọn ẹ̀rọ líle DShK',
+    lightName: 'AK-47 & ìbọn ẹ̀rọ PKM',
+    summary: 'Roketi RPG-7, AK-47 àti PKM abẹ́gàn láti inú skiffs àti ọkọ̀ ìyá',
+    volleyName: 'AUTO KÍKÚN!',
+    weaponWord: 'RPG & ìbọn',
+  },
+  archeryVolley: 'ÌJÌ ỌFÀ!',
+  archery: {
+    viking: {
+      heavyName: 'Àwọn ẹ̀rọ ìbọn bolts kẹ̀kẹ́', lightName: 'Àwọn ẹgbẹ́ ọrun',
+      summary: 'Títàfàtà, ọ̀kọ̀ ọwọ́ àti àwọn ẹ̀rọ ìbọn bolts kẹ̀kẹ́',
+      weaponWord: 'ọrun & ẹ̀rọ kẹ̀kẹ́',
+    },
+    roman: {
+      heavyName: 'Balistae ajù òkúta', lightName: 'Ẹ̀sẹ̀ àwọn tafàtafà',
+      summary: 'Òkúta balista, ẹ̀rọ ìyípo àti títàfàtà',
+      weaponWord: 'balistae & ọfà',
+    },
+    greek: {
+      heavyName: 'Àwọn ẹ̀rọ ìbọn bolts Oxybeles', lightName: 'Ẹ̀sẹ̀ àwọn tafàtafà',
+      summary: 'Títàfàtà àti àwọn ẹ̀rọ ìbọn bolts oxybeles — kọlu niṣáájú, gbà lẹ́yìn',
+      weaponWord: 'ọrun & ẹ̀rọ kẹ̀kẹ́',
+    },
+    macedon: {
+      heavyName: 'Àwọn ajù òkúta ìyípo', lightName: 'Àwọn ẹ̀rọ ìbọn bolts',
+      summary: 'Àwọn catapult ajù òkúta àti ẹ̀rọ bolts láti orí pẹpẹ ńlá',
+      weaponWord: 'catapult & ẹ̀rọ bolts',
+    },
+    egypt: {
+      heavyName: 'Àwọn ẹ̀rọ ìbọn bolts kẹ̀kẹ́', lightName: 'Ẹ̀sẹ̀ àwọn tafàtafà',
+      summary: 'Títàfàtà àti bolts kẹ̀kẹ́ lẹ́bàá ẹnu Nile',
+      weaponWord: 'ọrun & ẹ̀rọ kẹ̀kẹ́',
+    },
+    arab: {
+      heavyName: 'Àwọn fèrè iná epo', lightName: 'Ẹ̀sẹ̀ àwọn tafàtafà',
+      summary: 'Àwọn fèrè iná epo, ìkòkò iná àti títàfàtà',
+      weaponWord: 'fèrè iná & ọrun',
+    },
+    byzantium: {
+      heavyName: 'Àwọn fèrè ìdẹ', lightName: 'Àwọn ẹgbẹ́ ọfà iná',
+      summary: 'Iná Gíríkì láti inú àwọn fèrè iwájú, pẹ̀lú ọfà iná lórí pẹpẹ',
+      weaponWord: 'àwọn fèrè iná Gíríkì',
+    },
+    chola: {
+      heavyName: 'Àwọn ẹ̀rọ ìbọn bolts kẹ̀kẹ́', lightName: 'Ẹ̀sẹ̀ àwọn tafàtafà',
+      summary: 'Títàfàtà àti bolts kẹ̀kẹ́ láti inú àwọn ara ọkọ̀ ńlá Coromandel',
+      weaponWord: 'ọrun & ẹ̀rọ kẹ̀kẹ́',
+    },
+    vietnam: {
+      heavyName: 'Àwọn ẹ̀rọ ìbọn bolts kẹ̀kẹ́', lightName: 'Àwọn ẹgbẹ́ ọfà iná',
+      summary: 'Bolts kẹ̀kẹ́ àti ọfà iná lórí àwọn òdì ìkọ̀',
+      weaponWord: 'bolts & ọfà iná',
+    },
+    inca: {
+      heavyName: 'Òkúta àkàtì', lightName: 'Ọfà atlatl',
+      summary: 'Òkúta àkàtì àti ọfà atlatl láti inú àwọn ọkọ̀ balsa',
+      weaponWord: 'òkúta àkàtì & ọfà',
+    },
+    phoenicia: {
+      heavyName: 'Àwọn ẹ̀rọ ìbọn bolts kẹ̀kẹ́', lightName: 'Ẹ̀sẹ̀ àwọn tafàtafà',
+      summary: 'Títàfàtà àti bolts láti inú àwọn ọkọ̀ kedari Taya',
+      weaponWord: 'ọrun & ẹ̀rọ kẹ̀kẹ́',
+    },
+    hanse: {
+      heavyName: 'Crossbows àti springalds', lightName: 'Àwọn ẹgbẹ́ ọrun',
+      summary: 'Crossbows, springalds àti òkúta ọwọ́ láti inú àwọn ọkọ̀ odi',
+      weaponWord: 'crossbows & springalds',
+    },
+  },
+  shots: {
+    arrow: 'Ọfà', bolt: 'Bolt kẹ̀kẹ́', fireArrow: 'Ọfà iná', greekFire: 'Iná Gíríkì',
+    stone: 'Òkúta', cannonball: 'Ìbọn', missile: 'Rocket',
+  },
+  suffix: '— kò sí etu ìbọn: àwọn ara ọkọ̀ ń jó, wọn kì í bú',
+  bar: { guns: 'Ìbọn', fire: 'Iná', stones: 'Òkúta', bows: 'Ọrun' },
+};
+
+export const armaments: Dict<ArmamentsDict> = { en, es, fr, de, nl, pt, ja, zh, id, th, vi, ar, sw, ha, yo };
