@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { skullsOf } from '../game/difficulty';
 import type { ScoreEntry, Settings } from '../game/storage';
 import type { UpgradeId } from '../game/types';
 
@@ -134,6 +135,7 @@ export function HighScoreTable({
               <span className="truncate font-pirate text-lg leading-tight">{s.name}</span>
               <span className="text-xs italic opacity-70">
                 W{s.wave} · {s.sunk}⚓
+                {skullsOf(s.difficulty) > 0 && ` · ${'☠'.repeat(skullsOf(s.difficulty))}`}
               </span>
               <span className="min-w-[4.5rem] text-right font-pirate text-xl tabular-nums leading-tight">
                 {s.score.toLocaleString('en-US')}

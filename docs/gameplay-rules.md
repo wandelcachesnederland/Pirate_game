@@ -132,8 +132,29 @@ assign a temperament to any real-world ethnicity. Wild islands have no politics.
 - On-island labels show village, people, alliance and current hostility. A
   notification announces when other islands join the fight.
 
+## Difficulty
+
+The start screen offers five perils, declared once in `src/game/difficulty.ts`
+as a table of multipliers. **Buccaneer is the baseline — every modifier is
+exactly 1 — so the game's long-standing balance is unchanged at the middle of
+the ladder.** The other four scale off it.
+
+The peril scales everything an enemy is — hull, shot, reload, speed, crews and
+aim — and multiplies on top of the existing per-wave scaling, so a wave-10 foe
+on King of the Seas is a wave-10 foe with sharper teeth, not a different
+roster. It also sets the wave's spawn budget and pace, the cap of foes on the
+water, how readily a mauled foe strikes her colours, fortress walls and guns,
+the drip of water and bread, and the flagship's hull at sailing.
+
+Deeper peril pays richer plunder: **all score and loot pay out by the same
+`plunder` hand** — sinkings, boarded prizes, fort chests, wave bounties and the
+board-side offer — so a hard run is worth more coin, not less. The choice is
+persisted to `localStorage`, shown as skull pips in the HUD and the Hall of
+Legends, and stamped on the game-over epitaph.
+
 ## Verification
 
 Run `npm test` for rules and headless engine regressions (including all eras,
-weapon upgrades, island solidarity, independent defenders, forts, and prisoners).
-Run `npm run build` for TypeScript checking and the production bundle.
+weapon upgrades, island solidarity, independent defenders, forts, prisoners and
+the difficulty ladder). Run `npm run build` for TypeScript checking and the
+production bundle.

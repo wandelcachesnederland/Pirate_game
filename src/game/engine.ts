@@ -14,7 +14,8 @@ import type {
   UpgradeOffer,
 } from './types';
 import { SHIP_DEFS, UPGRADES, waveCompositionFor, waveTitleFor } from './data';
-import { isSteelHull } from './types';
+import { DEFAULT_DIFFICULTY, difficultyById, type DifficultyDef } from './difficulty';
+import { isSteelHull, type DifficultyId } from './types';
 import { DEFAULT_ERA, ERA_FLAGSHIPS } from './ships/era';
 import { DEFAULT_REGION, regionById } from './worlds';
 import { BOARD_MIN_CREW, BOARD_RANGE, rollBoardingOutcome, SURRENDER_HP, SURRENDER_HP_DESPERATE, surrenderChance } from './boarding';
@@ -356,6 +357,9 @@ export class Engine {
   private coinChain = 0;
   private coinChainTimer = 0;
   private levels: Partial<Record<UpgradeId, number>> = {};
+  /** The peril the voyage is sailed under — every foe and fortune reads it. */
+  private difficulty: DifficultyId = DEFAULT_DIFFICULTY;
+  private diff: DifficultyDef = difficultyById(DEFAULT_DIFFICULTY);
   /** Era flagship the player sails; swapped from the hull picker. */
   private eraId: EraId = DEFAULT_ERA;
   private playerDef: ShipDef = ERA_FLAGSHIPS[DEFAULT_ERA];
@@ -469,6 +473,28 @@ export class Engine {
     }
   }
 
+  /** Which peril the voyage is being sailed under. */
+  getDifficulty(): DifficultyId {
+    return this.difficulty;
+  }
+
+  /**
+   * Pick the voyage's peril. Takes effect on the next `startGame()` — the
+   * menu ship is rebuilt so the chosen hull's worth shows at once.
+   */
+  setDifficulty(id: DifficultyId) {
+    this.difficulty = id;
+    this.diff = difficultyById(id);
+    if (this.screen === 'menu' && this.player) {
+      const old = this.player;
+      const fresh = this.makeShip('player', old.x, old.y, old.angle);
+      const i = this.ships.indexOf(old);
+      if (i >= 0) this.ships[i] = fresh;
+      else this.ships.push(fresh);
+      this.player = fresh;
+    }
+  }
+
   /**
    * Let the player hear the sea they are choosing. Picking an era on the menu
    * is a click — a gesture — so this is also where the audio unlocks: the
@@ -568,6 +594,8 @@ export class Engine {
     this.stats = { shots: 0, hits: 0, sunk: 0, gold: 0, maxStreak: 1, time: 0, boarded: 0 };
     this.levels = {};
     this.pstats = defaultStats(this.playerDef);
+    // the flagship's hull is set by the voyage's peril
+    this.pstats.maxHp = Math.round(this.pstats.maxHp * this.diff.playerHp);
     this.swivelTimer = 0;
     this.grapeCd = 0;
     this.bowTimer = 0;
@@ -815,7 +843,13 @@ export class Engine {
       if (!ok) continue;
       // who lives here, if anyone: friendliness, patience and the odd fortress
       const settlement = rollSettlement(region.people, forts, this.wave);
-      if (settlement.fortress) forts++;
+      if (settlement.fortress) {
+        forts++;
+        const f = settlement.fortress;
+        f.maxHp = Math.max(1, Math.round(f.maxHp * this.diff.fortHp));
+        f.hp = f.maxHp;
+        f.damage = f.damage * this.diff.fortDamage;
+      }
       this.islands.push(
         buildIsland(x, y, r, seedBase + tries * 7919, res, theme, { settlement, flag: flagOf(settlement), mechanical: !usesGunpowder(this.eraId) }),
       );
@@ -827,8 +861,9 @@ export class Engine {
     const def = armShipForEra(kind === 'player' ? this.playerDef : SHIP_DEFS[kind], this.eraId);
     const w = Math.max(1, this.wave);
     const enemy = kind !== 'player';
-    const hp = Math.round(def.hp * (enemy ? 1 + 0.085 * (w - 1) : 1));
-    const crew = Math.round((def.crew ?? 20) * (enemy ? 1 + Math.min(0.3, 0.02 * (w - 1)) : 1));
+    const df = this.diff;
+    const hp = Math.round(def.hp * (enemy ? (1 + 0.085 * (w - 1)) * df.enemyHp : df.playerHp));
+    const crew = Math.round((def.crew ?? 20) * (enemy ? (1 + Math.min(0.3, 0.02 * (w - 1))) * df.enemyCrew : 1));
     const v0 = def.speed * 0.45;
     return {
       id: this.nextId++,
@@ -854,12 +889,12 @@ export class Engine {
       captured: false,
       reloadL: enemy ? rand(0.8, 2.2) : 0,
       reloadR: enemy ? rand(0.8, 2.2) : 0,
-      reloadTime: enemy ? def.reload * Math.max(0.62, 1 - 0.035 * (w - 1)) : def.reload,
+      reloadTime: enemy ? def.reload * Math.max(0.62, 1 - 0.035 * (w - 1)) * df.enemyReload : def.reload,
       cannons: def.cannons,
-      damage: enemy ? def.damage * (1 + 0.06 * (w - 1)) : def.damage,
+      damage: enemy ? def.damage * (1 + 0.06 * (w - 1)) * df.enemyDamage : def.damage,
       range: def.range,
       ballSpeed: def.ballSpeed,
-      maxSpeed: def.speed * (enemy ? 1 + Math.min(0.15, 0.012 * (w - 1)) : 1),
+      maxSpeed: def.speed * (enemy ? (1 + Math.min(0.15, 0.012 * (w - 1))) * df.enemySpeed : 1),
       turnRate: def.turn,
       flash: 0,
       recoilL: 0,
@@ -870,8 +905,8 @@ export class Engine {
       aiSide: Math.random() < 0.5 ? -1 : 1,
       aiTimer: rand(0, 1.5),
       aiWander: angle,
-      aiJitter: enemy ? Math.max(0.035, 0.13 - 0.009 * (w - 1)) : 0,
-      aiLead: enemy ? Math.min(1, 0.25 + 0.11 * (w - 1)) : 0,
+      aiJitter: enemy ? Math.max(0.035, 0.13 - 0.009 * (w - 1)) * df.aimJitter : 0,
+      aiLead: enemy ? Math.min(1, (0.25 + 0.11 * (w - 1)) * df.aimLead) : 0,
       slowTimer: 0,
       burn: 0,
       burnRate: 0,
@@ -911,8 +946,8 @@ export class Engine {
   // ================================================================ waves
   private startWave(n: number) {
     this.wave = n;
-    this.waveQueue = waveCompositionFor(this.eraId, n);
-    this.spawnTimer = n === 1 ? 2.4 : 1.0;
+    this.waveQueue = waveCompositionFor(this.eraId, n, this.diff.waveBudget);
+    this.spawnTimer = (n === 1 ? 2.4 : 1.0) * this.diff.spawnPace;
     this.waveClearing = false;
     this.magnetAll = false;
     this.waveDamage = 0;
@@ -1000,18 +1035,18 @@ export class Engine {
     const alive = this.countEnemies();
     if (this.waveQueue.length > 0) {
       this.spawnTimer -= dt;
-      const cap = Math.min(10, 3 + Math.floor(this.wave * 0.7));
+      const cap = Math.max(1, Math.min(10, 3 + Math.floor(this.wave * 0.7)) + this.diff.spawnCap);
       if ((this.spawnTimer <= 0 && alive < cap) || alive === 0) {
         const kind = this.waveQueue.shift()!;
         const mode = this.wave === 1 ? (SHIP_DEFS[kind].trader ? 'near' : 'ring') : alive === 0 ? 'near' : 'ring';
         this.spawnEnemy(kind, mode);
-        this.spawnTimer = this.wave === 1 ? 2.8 : rand(1.5, 2.8);
+        this.spawnTimer = (this.wave === 1 ? 2.8 : rand(1.5, 2.8)) * this.diff.spawnPace;
       }
     } else if (alive === 0 && !this.waveClearing) {
       this.waveClearing = true;
       this.clearTimer = 0;
       const flawless = this.waveDamage <= 0.5;
-      const bonus = Math.round(250 * this.wave * (flawless ? 1.5 : 1));
+      const bonus = Math.round(250 * this.wave * (flawless ? 1.5 : 1) * this.diff.plunder);
       this.score += bonus;
       this.scorePulse = 1;
       this.banner = {
@@ -1088,6 +1123,7 @@ export class Engine {
       flagsTaken: this.flags.length,
       region: this.regionId,
       regionName: regionById(this.regionId).name,
+      difficulty: this.difficulty,
     };
     this.cb.onScreen('gameover');
     this.cb.onGameOver(st);
@@ -1822,7 +1858,7 @@ export class Engine {
           if (dd < lim * 0.72 && canoe.biteTimer <= 0 &&
                 (!canoe.homeIsland || canoe.homeIsland.settlement.hostile)) {
             canoe.biteTimer = 0.6;
-            const bite = 8 * (1 + 0.05 * (this.wave - 1));
+            const bite = 8 * (1 + 0.05 * (this.wave - 1)) * this.diff.enemyDamage;
             const nx = dx / dd;
             const ny = dy / dd;
             if (victim === this.player) this.hurtPlayer(bite, -nx, -ny, false);
@@ -2405,10 +2441,10 @@ export class Engine {
         Math.cos(a) * rand(60, 170),
         Math.sin(a) * rand(60, 170),
         0,
-        20 + this.wave * 2,
+        Math.round((20 + this.wave * 2) * this.diff.plunder),
       );
     }
-    this.addPickup(fx, fy, rand(-30, 30), rand(-30, 30), 1, 120 + this.wave * 12);
+    this.addPickup(fx, fy, rand(-30, 30), rand(-30, 30), 1, Math.round((120 + this.wave * 12) * this.diff.plunder));
     this.addScore(180 + this.wave * 12);
   }
 
@@ -2800,7 +2836,7 @@ export class Engine {
   private maybeSurrender(s: Ship) {
     // a fisherman has no flag to strike: he just rows harder
     if (s.peaceful) return;
-    const base = surrenderChance(s.def.kind);
+    const base = Math.min(1, surrenderChance(s.def.kind) * this.diff.surrender);
     if (base <= 0 || s.surrenderRolls >= 2) return;
     const ratio = s.hp / s.maxHp;
     if (s.crew >= 1) {
@@ -2959,7 +2995,7 @@ export class Engine {
     }
     this.emit(P_RING, fs.x, fs.y, 0, 0, 0.55, 10, R + 40, '#ffb347', 1, 0, 0, 0, 0.9);
     this.addTrauma(0.5);
-    const dmgBase = 30 * (1 + 0.05 * (this.wave - 1));
+    const dmgBase = 30 * (1 + 0.05 * (this.wave - 1)) * this.diff.enemyDamage;
     for (const s of this.ships) {
       if (s === fs || s.sinking >= 0) continue;
       const d = Math.hypot(s.x - fs.x, s.y - fs.y);
@@ -2977,7 +3013,7 @@ export class Engine {
   }
 
   private addScore(base: number): number {
-    const pts = Math.round(base * this.mult);
+    const pts = Math.round(base * this.mult * this.diff.plunder);
     this.score += pts;
     this.scorePulse = 1;
     return pts;
@@ -3006,8 +3042,8 @@ export class Engine {
     if (this.playerDeadTimer >= 0) return;
     const crew = Math.max(1, Math.ceil(this.player.crew));
     // a full store lasts a patient captain most of a long cruise
-    this.water = Math.max(0, this.water - dt * crew * 0.0045);
-    this.food = Math.max(0, this.food - dt * crew * 0.0032);
+    this.water = Math.max(0, this.water - dt * crew * 0.0045 * this.diff.supplyDrain);
+    this.food = Math.max(0, this.food - dt * crew * 0.0032 * this.diff.supplyDrain);
     this.storeWarnTimer -= dt;
     if (this.water <= 0 || this.food <= 0) {
       this.supplyTimer += dt;
@@ -3115,7 +3151,7 @@ export class Engine {
       return;
     }
     const outcome = rollBoardingOutcome(pCrew, Math.ceil(s.crew));
-    const V = s.def.value * (1 + 0.1 * (this.wave - 1));
+    const V = s.def.value * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder;
     const d = Math.hypot(p.x - s.x, p.y - s.y) || 1;
     const nx = (p.x - s.x) / d;
     const ny = (p.y - s.y) / d;
@@ -3127,7 +3163,7 @@ export class Engine {
       s.surrendered = false;
       this.addText(s.x, s.y - 32, 'AMBUSH!', '#ff4b3a', 32);
       this.addText(s.x, s.y - 10, `Treachery! -${lost} of your crew`, '#ff9a8a', 16);
-      this.hurtPlayer(8 + this.wave * 1.5, nx, ny, false);
+      this.hurtPlayer((8 + this.wave * 1.5) * this.diff.enemyDamage, nx, ny, false);
       this.boardCandidate = null;
       return;
     }
@@ -3138,7 +3174,7 @@ export class Engine {
       p.crew -= lost;
       this.addText(p.x, p.y - 44, `Boarding party caught! -${lost} crew`, '#ff9a8a', 15);
       this.sinkShip(s, true);
-      this.hurtPlayer(12 + this.wave, nx, ny, false);
+      this.hurtPlayer((12 + this.wave) * this.diff.enemyDamage, nx, ny, false);
       this.boardCandidate = null;
       return;
     }
@@ -3212,7 +3248,7 @@ export class Engine {
 
   private dropLoot(s: Ship) {
     const n = s.def.coins;
-    const total = s.def.value * 0.55 * (1 + 0.1 * (this.wave - 1));
+    const total = s.def.value * 0.55 * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder;
     const per = Math.max(1, Math.round(total / n));
     for (let i = 0; i < n; i++) {
       const a = rand(0, TAU);
@@ -4603,20 +4639,30 @@ export class Engine {
     const remaining = this.countEnemies() + this.waveQueue.length;
     const waveStr = `Wave ${this.wave}`;
     const remStr = this.waveClearing ? 'Victory!' : `${remaining} ship${remaining === 1 ? '' : 's'} remain`;
+    const boss = this.findBoss();
+    // the voyage's peril, piped under the wave: skull pips and the rank
+    const pipStr = `${'☠'.repeat(this.diff.skulls)} ${this.diff.name}`;
     if (narrow) {
       ctx.textAlign = 'right';
       ctx.font = `${Math.round(17 * u)}px ${FONT}`;
       this.outlined(ctx, `${waveStr} · ${remStr}`, rx, my, '#f3e2b3', 3);
+      if (!boss) {
+        ctx.font = `${Math.round(13 * u)}px ${FONT}`;
+        this.outlined(ctx, pipStr, rx, my + 19 * u, '#c9a86a', 3);
+      }
     } else {
       ctx.textAlign = 'center';
       ctx.font = `${Math.round(26 * u)}px ${FONT}`;
       this.outlined(ctx, waveStr, W / 2, y0 + 16 * u, '#f3e2b3', 4);
       ctx.font = `italic ${Math.round(15 * u)}px ${FELL}`;
       this.outlined(ctx, remStr, W / 2, y0 + 39 * u, '#e6d3a3', 3);
+      if (!boss) {
+        ctx.font = `${Math.round(13 * u)}px ${FONT}`;
+        this.outlined(ctx, pipStr, W / 2, y0 + 57 * u, '#c9a86a', 3);
+      }
     }
 
     // ---- boss bar
-    const boss = this.findBoss();
     if (boss) {
       const bw = Math.min(W * 0.5, 320 * u);
       const bh = 10 * u;
@@ -4756,7 +4802,7 @@ export class Engine {
       ctx.fill();
     }
     // the offer, bottom-center: her full manifest against the risks
-    const V = s.def.value * (1 + 0.1 * (this.wave - 1));
+    const V = s.def.value * (1 + 0.1 * (this.wave - 1)) * this.diff.plunder;
     const prize = Math.round(V * 1.25) + 100;
     const touch = this.isTouch || this.input.usedTouch;
     const l1 = `Prize alongside: ${s.def.name} — ${Math.max(0, Math.ceil(s.crew))} men`;

@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Engine } from '../src/game/engine';
+import { DIFFICULTIES, DEFAULT_DIFFICULTY, difficultyById } from '../src/game/difficulty';
+import { waveCompositionFor } from '../src/game/data';
 import { ERA_FLAGSHIPS, ERA_SHIPS } from '../src/game/ships/era';
 import { armamentFor, blastKindFor, isIncendiary, projectileFor, usesGunpowder } from '../src/game/weapons';
 import { wildIsland } from '../src/game/settlements';
@@ -15,6 +17,7 @@ function harness(era: EraId = 'roman') {
   const messages: string[] = [];
   Object.assign(e, {
     eraId: era, playerDef: ERA_FLAGSHIPS[era], wave: 1, nextId: 1,
+    difficulty: DEFAULT_DIFFICULTY, diff: difficultyById(DEFAULT_DIFFICULTY),
     balls: [], volleys: [], ships: [], islands: [], flags: [], slicks: [],
     pstats: { chain: false, swivel: 1, chase: 1, grapeshot: 1, damageMul: 1 },
     stats: { shots: 0, hits: 0, boarded: 0, gold: 0 },
@@ -280,4 +283,60 @@ test('the era armament decides every shot a fort, a chaser and a deck station th
     assert.equal(projectileFor(era.id), armamentFor(era.id).heavy);
     assert.equal(projectileFor(era.id, true), armamentFor(era.id).light);
   }
+});
+
+// ------------------------------------------------------------------ difficulty
+test('the five perils are laid down in order, and Buccaneer sails the true line', () => {
+  assert.equal(DIFFICULTIES.length, 5);
+  assert.deepEqual(
+    DIFFICULTIES.map((d) => d.id),
+    ['landlubber', 'swashbuckler', 'buccaneer', 'dreadCaptain', 'kingOfTheSeas'],
+  );
+  assert.deepEqual(DIFFICULTIES.map((d) => d.skulls), [1, 2, 3, 4, 5]);
+  // the middle of the road is untouched: every modifier at exactly one
+  const base = difficultyById('buccaneer');
+  for (const k of [
+    'enemyHp', 'enemyDamage', 'enemyReload', 'enemySpeed', 'enemyCrew',
+    'aimJitter', 'aimLead', 'spawnPace', 'waveBudget', 'surrender',
+    'fortHp', 'fortDamage', 'supplyDrain', 'playerHp', 'plunder',
+  ] as const) {
+    assert.equal(base[k], 1, `buccaneer.${k} must be 1`);
+  }
+  assert.equal(base.spawnCap, 0);
+});
+
+test('a heavier peril raises tougher foes and a frailer flagship', () => {
+  const { e } = harness();
+  const base = difficultyById('buccaneer');
+  e.difficulty = 'buccaneer'; e.diff = base;
+  const plain = e.makeShip('frigate', 0, 200, 0);
+
+  e.difficulty = 'kingOfTheSeas'; e.diff = difficultyById('kingOfTheSeas');
+  const hard = e.makeShip('frigate', 0, 200, 0);
+  assert.ok(hard.hp > plain.hp, 'King of the Seas foes carry thicker hulls');
+  assert.ok(hard.damage > plain.damage, 'and heavier shot');
+  assert.ok(hard.reloadTime < plain.reloadTime, 'and run their guns faster');
+
+  // the flagship follows the same hand: braced on an easy sea, thin on a hard one
+  e.difficulty = 'landlubber'; e.diff = difficultyById('landlubber');
+  const softPlayer = e.makeShip('player', 0, 0, 0);
+  e.difficulty = 'kingOfTheSeas'; e.diff = difficultyById('kingOfTheSeas');
+  const hardPlayer = e.makeShip('player', 0, 0, 0);
+  assert.ok(softPlayer.hp > hardPlayer.hp, 'a Landlubber flagship is stouter');
+});
+
+test('the wave roster thickens or thins with the voyage budget', () => {
+  // the roster is drawn at random, so compare averages over many deals
+  const avg = (mul: number) => {
+    let total = 0;
+    for (let i = 0; i < 40; i++) total += waveCompositionFor('golden', 8, mul).length;
+    return total / 40;
+  };
+  const sparse = avg(0.6);
+  const full = avg(1);
+  const thick = avg(1.6);
+  assert.ok(sparse < full, `a lean budget fields fewer sails (${sparse} vs ${full})`);
+  assert.ok(thick > full, `a rich budget fields more sails (${thick} vs ${full})`);
+  // early waves are scripted and ignore the budget entirely
+  assert.deepEqual(waveCompositionFor('golden', 2, 0.6), waveCompositionFor('golden', 2, 1.6));
 });

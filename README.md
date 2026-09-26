@@ -19,7 +19,7 @@ from a USB stick or drop on any static host.
 ```bash
 npm install
 npm run dev      # dev server on http://localhost:5173
-npm test         # rules + headless engine regression tests (72 tests)
+npm test         # rules + headless engine regression tests (75 tests)
 npm run build    # tsc --noEmit + vite build -> dist/index.html (single file)
 npm run preview  # serve the production build
 ```
@@ -35,6 +35,9 @@ fonts from Google Fonts.
 You are always one ship — the era's hero hull — against a growing fleet. Waves arrive with a title,
 every fifth wave sends a boss, and clearing a wave opens a refit screen with three upgrades to choose
 between. Between waves the ship is repaired and the crew brought back up to strength.
+
+On the start screen you also pick the **difficulty** of the voyage — five degrees of peril that scale
+every foe, fort and fortune. See [Difficulty](#difficulty) below.
 
 ### Controls
 
@@ -65,7 +68,26 @@ sail past doing nothing.
   and the crew starts dying.
 - **Refits** — thirteen upgrades, renamed for each era (Long Nines become Stronger Bows & Pulleys, Grape
   & Canister becomes Arrow Storm or a Fire Pot Volley).
-- **Scores** are local: captain's name, era, settings and a top-ten table live in `localStorage`.
+- **Scores** are local: captain's name, era, difficulty, settings and a top-ten table live in `localStorage`.
+
+### Difficulty
+
+Step two of the start screen carries the **Danger Money** panel: five perils, from a calm cruise to a
+sea of hunters.
+
+| Peril | Skulls | The gist |
+| --- | --- | --- |
+| Landlubber | ☠ | Few, frail and slow-shooting foes; quick to strike their colours; a stouter flagship. |
+| Swashbuckler | ☠☠ | A fair fight, only slightly crooked. |
+| Buccaneer | ☠☠☠ | The voyage as it was sailed — the game's baseline, every modifier at 1. |
+| Dread Captain | ☠☠☠☠ | Hardened foes, faster broadsides, colours struck only at the last gasp. |
+| King of the Seas | ☠☠☠☠☠ | Every sail a hunter, every fort a grave. |
+
+The peril touches everything an enemy is — hull, shot, reload, speed, crews, aim — plus how many sails
+a wave fields, how fast they arrive, how willing they are to surrender, fortress walls and guns, the
+drip of the stores, and your own flagship's hull at sailing. Deeper peril pays richer plunder: all score
+and loot pay out by the same hand, so a King of the Seas run is worth half again a Landlubber's. The
+choice is saved and stamped on the Hall of Legends and the epitaph.
 
 ---
 
@@ -164,7 +186,8 @@ Two worlds, cleanly split: **React owns the menus, the engine owns the game.**
 | `src/game/settlements.ts` | Peoples, pacts, patience, grievance and cooling rules |
 | `src/game/boarding.ts` | Surrender chances and boarding outcomes (pure tables) |
 | `src/game/audio.ts` · `music/` | Synthesised SFX, the cassette player, ABC notation, all songs |
-| `src/game/storage.ts` · `input.ts` | `localStorage` scores/settings/era, keyboard + touch input |
+| `src/game/difficulty.ts` | The five perils: every modifier that scales foes, forts, spawns and plunder |
+| `src/game/storage.ts` · `input.ts` | `localStorage` scores/settings/era/difficulty, keyboard + touch input |
 | `src/game/ships/` | Hero hulls: `era/` (flagships) and `heritage/` (one per culture) |
 | `src/components/` | React overlays: start, era carousel, pause, refit, game over, touch UI |
 

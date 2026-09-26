@@ -1,5 +1,6 @@
 /** Local high-score table + settings persisted in localStorage. */
-import type { EraId } from './types';
+import type { DifficultyId, EraId } from './types';
+import { DIFFICULTIES } from './difficulty';
 import { ERA_REGION } from './ships/era';
 
 export interface ScoreEntry {
@@ -8,6 +9,8 @@ export interface ScoreEntry {
   wave: number;
   sunk: number;
   date: number;
+  /** The peril this legend was sailed under (older entries have none). */
+  difficulty?: DifficultyId;
 }
 
 export interface Settings {
@@ -104,4 +107,16 @@ export function loadEra(): EraId | null {
 
 export function saveEra(id: EraId) {
   safeSet(ERA_KEY, id);
+}
+
+const DIFFICULTY_KEY = 'broadside.difficulty.v1';
+
+/** Remember the peril a captain last chose for the voyage. */
+export function loadDifficulty(): DifficultyId | null {
+  const raw = safeGet(DIFFICULTY_KEY);
+  return raw && DIFFICULTIES.some((d) => d.id === raw) ? (raw as DifficultyId) : null;
+}
+
+export function saveDifficulty(id: DifficultyId) {
+  safeSet(DIFFICULTY_KEY, id);
 }

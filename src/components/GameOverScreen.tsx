@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { GameStats } from '../game/types';
 import type { ScoreEntry } from '../game/storage';
+import { difficultyById } from '../game/difficulty';
 import { HighScoreTable, KeyCap } from './ui';
 
 interface Props {
@@ -117,9 +118,18 @@ export function GameOverScreen({ stats, scores, rank, name, onRestart, onMenu, i
                 <Stat icon={<Star className="h-5 w-5" />} label="Colours taken" value={`${stats.flagsTaken}`} />
               )}
             </div>
-            {stats.regionName && (
-              <p className="mt-2 text-sm italic opacity-70">Sailed the {stats.regionName}</p>
-            )}
+            <p className="mt-2 text-sm italic opacity-70">
+              {stats.regionName ? `Sailed the ${stats.regionName}` : 'Sailed unknown waters'}
+              {stats.difficulty && (
+                <>
+                  {' · '}
+                  <span className="whitespace-nowrap">
+                    {'☠'.repeat(difficultyById(stats.difficulty).skulls)}{' '}
+                    {difficultyById(stats.difficulty).name}
+                  </span>
+                </>
+              )}
+            </p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
